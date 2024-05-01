@@ -34,7 +34,7 @@ class driveCircle(Node):
         
        
         def calculate_waypoint_world():
-            deltaT = (self.clock.now()-self.start_time)
+            deltaT = self.clock.now()-self.start_time
             x = self.radius * np.cos(self.angular * deltaT) + self.center_x
             y = self.radius * np.sin(self.angular * deltaT) + self.center_y
             waypoint = [x,  y, self.height]
