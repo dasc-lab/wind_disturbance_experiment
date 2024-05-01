@@ -9,11 +9,11 @@ class driveCircle(Node):
         super().__init__('driveCircle')
 
         ###### set up circle parameters ######
-        self.radius = 0.1
-        self.height = -0.5
+        self.radius = 0.2
+        self.height = -0.4
         self.center_x = 0.0
         self.center_y = 0.0
-        self.angular_vel = 1
+        self.angular_vel = 1.0
 
 
         ###### set up node parameters ######
@@ -22,7 +22,7 @@ class driveCircle(Node):
         self.quat = None
         self.world_coordinate = None
         self.clock  = self.get_clock()
-        self.start_time = self.clock.now()
+        self.start_time = self.get_clock().now().nanoseconds
         #self.dt = 0.05
 
         ################## set up Subscription ##################
@@ -33,17 +33,12 @@ class driveCircle(Node):
     def calculate_waypoint(self):
         
        
-        def calculate_waypoint_world():
-            deltaT = self.clock.now()-self.start_time
-            x = self.radius * np.cos(self.angular * deltaT) + self.center_x
-            y = self.radius * np.sin(self.angular * deltaT) + self.center_y
-            waypoint = [x,  y, self.height]
-            return waypoint
+        deltaT = (self.get_clock().now().nanoseconds-self.start_time)/10**9
+        x = self.radius * np.cos(self.angular_vel * deltaT) + self.center_x
+        y = self.radius * np.sin(self.angular_vel * deltaT) + self.center_y
+        waypoint = [x,  y, self.height]
+        return waypoint
         
-        robot_waypoint = calculate_waypoint_world()
-        
-        
-        return robot_waypoint
     
     def create_TrajectorySetpoint_msg(self):
         msg = TrajectorySetpoint()
