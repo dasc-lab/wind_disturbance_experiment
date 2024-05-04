@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
 def generate_trajectory(num_points, radius, height):
     waypoints = []
     for i in range(num_points):
@@ -8,7 +9,6 @@ def generate_trajectory(num_points, radius, height):
         x = radius * np.cos(theta)
         y = radius * np.sin(theta)
         waypoints.append((x, y, height))
-
     return waypoints
 
 
@@ -23,10 +23,9 @@ def main(args=None):
     second_waypoint[:,2] = second_waypoint[:,2] - 0.2
     print(waypoints)
     x = np.arange(1,len(waypoints)+1)
-    print(x)
+    
     waypoints = np.array(waypoints)
-    print(x.shape)
-    print(waypoints.shape)
+    
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     #ax = fig.add_subplot(211, projection='3d')
