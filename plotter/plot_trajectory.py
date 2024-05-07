@@ -14,9 +14,9 @@ save = True
 #bag = rosbag.Bag('drone_trajectory.bag')
 
 # Define the topics you want to extract data from
-topic_name = '/vicon/manual/manual' # Add more topics as needed
+topic_name = '/vicon/px4_1/px4_1' # Add more topics as needed
 bag_path = '/rosbag'
-bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/plotter/rosbag'
+bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/trajectories/trajectory_circular'
 typestore = get_typestore(Stores.LATEST)
 
 

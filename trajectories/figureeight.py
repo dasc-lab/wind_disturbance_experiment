@@ -36,7 +36,7 @@ class driveCircle(Node):
         deltaT = (self.get_clock().now().nanoseconds-self.start_time)/10**9
         x = self.radius * np.sin(self.angular_vel * deltaT) + self.center_x
         y = self.radius * np.sin(self.angular_vel * deltaT)*np.cos(self.angular_vel * deltaT) + self.center_y
-        waypoint = [x,  y, self.height]
+        waypoint = [y,  x, self.height]
         return waypoint
         
     

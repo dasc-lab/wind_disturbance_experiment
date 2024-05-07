@@ -10,13 +10,21 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 def draw_circle_3d(radius, height):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    
 
     # Parameters for the circle
     theta = np.linspace(0, 2*np.pi, 10000)
     x = radius * np.cos(theta)
     y = radius * np.sin(theta)
+    z = np.full_like(theta, height)
+    return x,y,z
+def draw_figureeight_3d(radius, height):
+    
+
+    # Parameters for the circle
+    theta = np.linspace(0, 2*np.pi, 10000)
+    y = radius * np.sin(theta)
+    x = radius * np.sin(theta) * np.cos(theta)
     z = np.full_like(theta, height)
     return x,y,z
 save = True
@@ -29,7 +37,7 @@ center_x = 0
 center_y = 0
 # Define the topics you want to extract data from
 topic_name = '/vicon/px4_1/px4_1' # Add more topics as needed
-bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/trajectories/trajectory_circular'
+bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/trajectories/trajectory_figureeight'
 typestore = get_typestore(Stores.LATEST)
 
 
@@ -50,9 +58,9 @@ with Reader(bag_path) as reader:
             msg = typestore.deserialize_cdr(rawdata, item.msgtype)
             timestamp = msg.header.stamp.nanosec/10**9
             timestamps.append(timestamp)
-            x_ideal.append(radius * np.cos(angular_vel*(timestamp - timestamps[0])) + center_x)
-            y_ideal.append(radius * np.sin(angular_vel*(timestamp - timestamps[0])) + center_y)
-            z_ideal.append(height)
+            # x_ideal.append(radius * np.cos(angular_vel*(timestamp - timestamps[0])) + center_x)
+            # y_ideal.append(radius * np.sin(angular_vel*(timestamp - timestamps[0]))*np.cos(angular_vel*(timestamp - timestamps[0])) + center_y)
+            # z_ideal.append(height)
             trans = msg.transform.translation
             x_data.append(trans.x)
             y_data.append(trans.y)
@@ -82,10 +90,10 @@ x = np.array(x_data)
 y = np.array(y_data)
 z = np.array(z_data)
 
-x_ideal,y_ideal, z_ideal = draw_circle_3d(radius, height)
+x_ideal,y_ideal, z_ideal = draw_figureeight_3d(radius, height)
 
 # Scatter plot
-ax.set_zlim(0,0.5)
+ax.set_zlim(0,0.6)
 ax.scatter(x, y, z, c= 'r')
 ax.scatter(x_ideal, y_ideal, z_ideal, c = 'b')
 plt.savefig("trajectory.png")
