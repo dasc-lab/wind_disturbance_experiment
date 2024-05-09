@@ -119,7 +119,7 @@ x_t, y_t, z_t = generate_coordinates(timestamps, offset, radius, angular_vel, he
 ax.set_zlim(0,0.6)
 ax.scatter(x, y, z, c= 'r')
 ax.scatter(x_ideal, y_ideal, z_ideal, c = 'b')
-plt.savefig("trajectory_figureeight.png")
+plt.savefig("/Users/albusfang/Coding Projects/gp_ws/trajectory_graphs/trajectory_figureeight.png")
 plt.show()
  
 
@@ -140,7 +140,7 @@ ax1.plot(range(z.size), z,'r')
 ax1.plot(range(z_t.size), z_t.T, 'b')
 ax1.set_ylabel("meters")
 ax1.set_title("z")
-plt.savefig("trajectory_individual_figureeight.png")
+plt.savefig("/Users/albusfang/Coding Projects/gp_ws/trajectory_graphs/trajectory_individual_figureeight.png")
 plt.show()
 
 input = input("save trajectory to csv? y/n")

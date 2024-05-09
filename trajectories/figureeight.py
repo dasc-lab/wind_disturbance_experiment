@@ -31,16 +31,16 @@ class driveCircle(Node):
     #def get_ground_truth_coord(self):
     
     def calculate_waypoint(self):
-        
-       
         deltaT = (self.get_clock().now().nanoseconds-self.start_time)/10**9
         x = self.radius * np.sin(self.angular_vel * deltaT) + self.center_x
         y = self.radius * np.sin(self.angular_vel * deltaT)*np.cos(self.angular_vel * deltaT) + self.center_y
         waypoint = [y,  x, self.height]
         return waypoint
-        
     
-    def create_TrajectorySetpoint_msg(self):
+
+    
+    def create_TrajectorySetpoint_msg_default(self):
+        ''' Only publishing waypoint'''
         msg = TrajectorySetpoint()
         waypoint = self.calculate_waypoint()
         msg.position[0] = waypoint[0] #world_coordinates[0]
