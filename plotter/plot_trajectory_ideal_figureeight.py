@@ -8,10 +8,9 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import datetime
+
 def draw_circle_3d(radius, height):
     
-
     # Parameters for the circle
     theta = np.linspace(0, 2*np.pi, 10000)
     x = radius * np.cos(theta)
@@ -27,14 +26,14 @@ def draw_figureeight_3d(radius, height, length=10000):
     x = radius * np.sin(theta) * np.cos(theta)
     z = np.full_like(theta, height)
     return x,y,z
-def generate_coordinates(timestamps, radius = 0.2 , angular=1, height=0.4):
+def generate_coordinates(timestamps, offset, radius = 0.2 , angular=1, height=0.4):
     timestamps = np.array([timestamps])
-    current_time = timestamps[0]
-    print(timestamps)
+    #current_time = timestamps[0]
+    #print(timestamps)
 
     indices = timestamps
-    
-    theta = angular*(indices)
+    print("offset: ",offset)
+    theta = angular*(indices) + offset
     x = radius * np.sin(theta) * np.cos(theta)
     y = radius * np.sin(theta)
     z = np.full_like(theta, height)
@@ -63,6 +62,7 @@ x_ideal = []
 y_ideal = []
 z_ideal = []
 first_second = None
+offset = None
 with Reader(bag_path) as reader:
     for item in reader.connections:
         print(item.topic, item.msgtype)
@@ -72,9 +72,9 @@ with Reader(bag_path) as reader:
             
             # print("nano: ",  msg.header.stamp.nanosec/1e9)
             if first_second is not None: 
-                print("seconds: ",msg.header.stamp.sec)
-                print("first second: ", first_second)
-                timestamp = msg.header.stamp.sec-first_second + msg.header.stamp.nanosec/10**9
+                # print("seconds: ",msg.header.stamp.sec)
+                # print("first second: ", first_second)
+                timestamp = msg.header.stamp.sec - first_second + msg.header.stamp.nanosec/10**9
             else:
                 first_second = msg.header.stamp.sec
                 timestamp = 0
@@ -83,10 +83,12 @@ with Reader(bag_path) as reader:
             # y_ideal.append(radius * np.sin(angular_vel*(timestamp - timestamps[0]))*np.cos(angular_vel*(timestamp - timestamps[0])) + center_y)
             # z_ideal.append(height)
             trans = msg.transform.translation
+            
             x_data.append(trans.x)
             y_data.append(trans.y)
             z_data.append(trans.z)
-    
+            if offset is None:
+                offset = np.arctan2(trans.y-center_y, trans.x-center_x)
             print(msg.header.frame_id)
 # Iterate through the messages in the bag file for the current topic
 # for topic, msg, t in bag.read_messages(topics=[topic_name]):
@@ -112,7 +114,7 @@ y = np.array(y_data)
 z = np.array(z_data)
 
 x_ideal,y_ideal, z_ideal = draw_figureeight_3d(radius, height)
-x_t, y_t, z_t = generate_coordinates(timestamps, radius, angular_vel, height)
+x_t, y_t, z_t = generate_coordinates(timestamps, offset, radius, angular_vel, height)
 # Scatter plot
 ax.set_zlim(0,0.6)
 ax.scatter(x, y, z, c= 'r')
