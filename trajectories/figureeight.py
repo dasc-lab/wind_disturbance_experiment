@@ -40,7 +40,7 @@ class driveCircle(Node):
 
     
     def create_TrajectorySetpoint_msg_default(self):
-        ''' Only publishing waypoint'''
+        ''' Only publishing waypoint '''
         msg = TrajectorySetpoint()
         waypoint = self.calculate_waypoint()
         msg.position[0] = waypoint[0] #world_coordinates[0]

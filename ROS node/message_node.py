@@ -2,45 +2,73 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import *
 import numpy as np
-from px4_msgs.msg import TrajectorySetpoint
+from px4_msgs.msg import TrajectorySetpoint, CombinedData
+from geometry_msgs.msg import TransformStamped
 from rclpy.clock import Clock
 
 class message(Node):
     def __init__(self):
         super().__init__('message')
+        
+        ###### set up parameters ######
+        self.radius = 0.2
+        self.height = -0.4
+        self.center_x = 0.0
+        self.center_y = 0.0
+        self.angular_vel = 1.0
+        self.ned_pos = None
+        self.ned_vel = None
+        self.ned_acc = None
+        self.pos_ref = None
+        self.vel_ref = None
+        self.acc_ref = None
 
-        ###### set up publisher ######
-        self.publisher_ = self.create_publisher(TrajectorySetpoint, '/drone/combined_data', 10)
+        ############ set up publisher ############
+        self.publisher_ = self.create_publisher(CombinedData, '/drone/combined_data', 10)
         
     
 
         ################## set up Subscription ##################
 
-        self.timer = self.create_timer(1./80., self.timer_callback)
-    
+        #self.timer = self.create_timer(1./80., self.timer_callback)
+        self.actual = self.create_subscription(
+		    TransformStamped,
+		    '/px4_1/fmu/out/vehicle_local_position',
+		    self.coordinate_callback,
+		    10)
+        self.ref = self.create_subscription(
+		    TrajectorySetpoint,
+		    '/px4_1/fmu/in/TrajectorySetpoint',
+		    self.reference_callback,
+		    10)
+        
+        def create_CombinedData_msg(self):
+            msg = CombinedData()
+            msg.pos = self.ned_pos
+            msg.vel = self.ned_vel
+            msg.acc = self.ned_acc
+            msg.pos_ref = self.pos_ref
+            msg.vel_ref = self.vel_ref
+            msg.acc_ref = self.acc_ref
+            return msg
+        ################## set up call backs ##################
+        
+        def coordinate_callback(self, msg):
+            self.ned_pos = [msg.x,msg.y,msg.z]
+            self.ned_vel = [msg.vx,msg.vy,msg.vz]
+            self.ned_acc = [msg.ax, msg.ay, msg.az]
+            message = create_CombinedData_msg()
+            self.publisher.publish(message)
+             
+        def reference_callback(self, msg):
+            self.pos_ref = msg.position
+            self.vel_ref = msg.velocity
+            self.acc_ref = msg.acceleration
+
     #def get_ground_truth_coord(self):
     
     
-    def create_TrajectorySetpoint_msg(self):
-        msg = TrajectorySetpoint()
-        waypoint = self.calculate_waypoint()
-        msg.position[0] = waypoint[0] #world_coordinates[0]
-        msg.position[1] = waypoint[1]#world_coordinates[1]
-        msg.position[2] = self.height #world_coordinates[2]
-        #msg.yaw = (3.1415926 / 180.) * (float)(setpoint_yaw->value())
-        msg.yaw = 290 * 3.14/180.0 #0.0
-        for i in range(3):
-            msg.velocity[i] = 0.0
-            msg.acceleration[i] = 0.0
-            msg.jerk[i] = 0.0
-        #msg.velocity = [0.2, 0.2, 0.2]
-        msg.yawspeed = 0.0
-        return msg
     
-    def timer_callback(self):
-        msg = self.create_TrajectorySetpoint_msg()
-        self.publisher_.publish(msg)
-        
 def main(args=None):
     rclpy.init(args=args)
 
