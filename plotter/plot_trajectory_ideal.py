@@ -1,7 +1,7 @@
 #ros2 bag record -o drone_trajectory /px4_1/fmu/out/
 #ros2 bag info drone_trajectory.bag
 from rosbags.rosbag2 import Reader
-from rosbags.typesys import Stores, get_typestore
+from rosbags.typesys import Stores, get_typestore, get_types_from_msg
 #from geometry_msgs.msg import TransformStamped
 from pathlib import Path
 import numpy as np
@@ -31,6 +31,15 @@ center_y = 0
 topic_name = '/vicon/px4_1/px4_1' # Add more topics as needed
 bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/trajectories/trajectory_circular'
 typestore = get_typestore(Stores.LATEST)
+
+msg_text = Path('px4_msgs/msg/CombinedData.msg').read_text()
+
+# Plain dictionary to hold message definitions.
+add_types = {}
+
+# Add definitions from one msg file to the dict.
+add_types.update(get_types_from_msg(msg_text, 'px4_msgs/msg/CombinedData'))
+typestore.register(add_types)
 
 
 # Initialize empty lists to store concatenated x, y, and z data

@@ -22,12 +22,11 @@ class message(Node):
         self.pos_ref = None
         self.vel_ref = None
         self.acc_ref = None
-
+        self.acc_com = None
         ############ set up publisher ############
         self.publisher_ = self.create_publisher(CombinedData, '/drone/combined_data', 10)
         
     
-
         ################## set up Subscription ##################
 
         #self.timer = self.create_timer(1./80., self.timer_callback)
@@ -36,6 +35,7 @@ class message(Node):
 		    '/px4_1/fmu/out/vehicle_local_position',
 		    self.coordinate_callback,
 		    10)
+        
         self.ref = self.create_subscription(
 		    TrajectorySetpoint,
 		    '/px4_1/fmu/in/TrajectorySetpoint',
