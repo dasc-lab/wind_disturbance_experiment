@@ -2,7 +2,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import *
 import numpy as np
-from px4_msgs.msg import TrajectorySetpoint, CombinedData
+from px4_msgs.msg import TrajectorySetpoint
+from foresee_msgs.msg import DynamicsData as CombinedData
 from geometry_msgs.msg import TransformStamped
 from rclpy.clock import Clock
 from rosbags.rosbag2 import Reader
