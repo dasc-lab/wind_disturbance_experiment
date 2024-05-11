@@ -1,7 +1,7 @@
 from jax import config
 
 config.update("jax_enable_x64", True)
-
+import numpy as np
 import gpjax as gpx
 from jax import grad, jit
 import jax.numpy as jnp
@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 key = jr.key(123)
 
 f = lambda x: 10 * jnp.sin(x)
+wind_disturbance = np.load("wind_disturbance.py")
 
 n = 50
 x = jr.uniform(key=key, minval=-3.0, maxval=3.0, shape=(n,1)).sort()

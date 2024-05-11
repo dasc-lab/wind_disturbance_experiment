@@ -46,7 +46,7 @@ class data(Node):
         self.vel_ref = msg.vel_ref
         self.acc_ref = msg.acc_ref
         self.calculate_thrust()
-        acc_diff = self.ned_acc - self.acc_com 
+        acc_diff = self.ned_acc - self.acc_com
         self.acc_diffs.append(acc_diff)
         if(time.time() - self.start) > 8:
             np.save('acc_diffs',self.acc_diffs)

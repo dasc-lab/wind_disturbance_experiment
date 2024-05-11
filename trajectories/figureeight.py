@@ -33,7 +33,7 @@ class driveCircle(Node):
     def calculate_waypoint(self):
         deltaT = (self.get_clock().now().nanoseconds-self.start_time)/10**9
         x = self.radius * np.sin(self.angular_vel * deltaT) + self.center_x
-        y = self.radius * np.sin(self.angular_vel * deltaT)*np.cos(self.angular_vel * deltaT) + self.center_y
+        y = self.radius * np.sin(self.angular_vel * deltaT) * np.cos(self.angular_vel * deltaT) + self.center_y
         waypoint = [y,  x, self.height]
         return waypoint
     
@@ -60,7 +60,7 @@ class driveCircle(Node):
         acc_ref = self.calculate_acc_ref()
 
         msg.position[0] = waypoint[0] #world_coordinates[0]
-        msg.position[1] = waypoint[1]#world_coordinates[1]
+        msg.position[1] = waypoint[1] #world_coordinates[1]
         msg.position[2] = self.height #world_coordinates[2]
         msg.yaw = 290 * 3.14/180.0 #0.0
         for i in range(3):
