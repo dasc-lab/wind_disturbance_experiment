@@ -7,9 +7,9 @@ from foresee_msgs.msg import DynamicsData as CombinedData
 from geometry_msgs.msg import TransformStamped
 from rclpy.clock import Clock
 
-class message(Node):
+class message_node(Node):
     def __init__(self):
-        super().__init__('message')
+        super().__init__('message_node')
         
         ###### set up parameters ######
         self.radius = 0.2
@@ -43,28 +43,28 @@ class message(Node):
 		    self.reference_callback,
 		    10)
         
-        def create_CombinedData_msg(self):
-            msg = CombinedData()
-            msg.pos = self.ned_pos
-            msg.vel = self.ned_vel
-            msg.acc = self.ned_acc
-            msg.pos_ref = self.pos_ref
-            msg.vel_ref = self.vel_ref
-            msg.acc_ref = self.acc_ref
-            return msg
+    def create_CombinedData_msg(self):
+        msg = CombinedData()
+        msg.pos = self.ned_pos
+        msg.vel = self.ned_vel
+        msg.acc = self.ned_acc
+        msg.pos_ref = self.pos_ref
+        msg.vel_ref = self.vel_ref
+        msg.acc_ref = self.acc_ref
+        return msg
         ################## set up call backs ##################
         
-        def coordinate_callback(self, msg):
-            self.ned_pos = [msg.x,msg.y,msg.z]
-            self.ned_vel = [msg.vx,msg.vy,msg.vz]
-            self.ned_acc = [msg.ax, msg.ay, msg.az]
-            message = create_CombinedData_msg()
-            self.publisher.publish(message)
-             
-        def reference_callback(self, msg):
-            self.pos_ref = msg.position
-            self.vel_ref = msg.velocity
-            self.acc_ref = msg.acceleration
+    def coordinate_callback(self, msg):
+        self.ned_pos = [msg.x,msg.y,msg.z]
+        self.ned_vel = [msg.vx,msg.vy,msg.vz]
+        self.ned_acc = [msg.ax, msg.ay, msg.az]
+        message = self.create_CombinedData_msg()
+        self.publisher_.publish(message)
+            
+    def reference_callback(self, msg):
+        self.pos_ref = msg.position
+        self.vel_ref = msg.velocity
+        self.acc_ref = msg.acceleration
 
     #def get_ground_truth_coord(self):
     
@@ -73,7 +73,7 @@ class message(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = message()
+    node = message_node()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
