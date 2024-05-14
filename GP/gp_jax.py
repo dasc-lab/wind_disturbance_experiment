@@ -11,12 +11,18 @@ from gpjax.kernels import SumKernel, White, RBF
 import matplotlib.pyplot as plt
 key = jr.key(123)
 
-f = lambda x: 10 * jnp.sin(x)
 wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/disturbance.npy")
 input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/input_to_gp.npy")
-
+cutoff = 4000
+print("wind disturbance shape", wind_disturbance.shape)
+print("input shape", input.shape)
+wind_disturbance = wind_disturbance[:cutoff,:]
+input = input[:cutoff,:]
+print("wind disturbance shape", wind_disturbance.shape)
+print("input shape", input.shape)
+n = 200
 wind_disturbance_x = jnp.array(wind_disturbance[:,0]).reshape(-1,1)
-indices = np.random.choice(wind_disturbance_x.size, 100, replace=False)
+indices = np.random.choice(wind_disturbance_x.size, n, replace=False)
 x = input[indices]
 y = wind_disturbance_x[indices]
 print(y.shape)
@@ -29,7 +35,7 @@ print(x.shape)
 # x = jnp.arange(wind_disturbance.size)
 # y = wind_disturbance
 D = gpx.Dataset(X=x, y=y)
-noise_level = 0.1
+noise_level = 0.5
 # Construct the prior
 meanf = gpx.mean_functions.Zero()
 white_kernel = White(variance=noise_level)
@@ -37,7 +43,7 @@ kernel = SumKernel(kernels=[RBF(), white_kernel])
 prior = gpx.gps.Prior(mean_function=meanf, kernel = kernel)
 
 # Define a likelihood
-likelihood = gpx.likelihoods.Gaussian(num_datapoints = D.n)
+likelihood = gpx.likelihoods.Gaussian(num_datapoints = n)
 
 # Construct the posterior
 posterior = prior * likelihood

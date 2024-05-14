@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 def draw_circle_3d(radius, height):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    
 
     # Parameters for the circle
     theta = np.linspace(0, 2*np.pi, 10000)

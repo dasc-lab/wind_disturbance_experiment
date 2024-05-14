@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 topic_name = '/drone/combined_data' # Add more topics as needed
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
+bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data' ## ROS bag
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg").read_text()
