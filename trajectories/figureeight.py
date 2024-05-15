@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import *
@@ -59,11 +61,12 @@ class driveCircle(Node):
         vel_ref = self.calculate_vel_ref()
         acc_ref = self.calculate_acc_ref()
 
-        msg.position[0] = waypoint[0] #world_coordinates[0]
-        msg.position[1] = waypoint[1] #world_coordinates[1]
-        msg.position[2] = self.height #world_coordinates[2]
+        # msg.position[0] = waypoint[0] #world_coordinates[0]
+        # msg.position[1] = waypoint[1] #world_coordinates[1]
+        # msg.position[2] = self.height #world_coordinates[2]
         msg.yaw = 290 * 3.14/180.0 #0.0
         for i in range(3):
+            msg.position[i] = waypoint[i]
             msg.velocity[i] = vel_ref[i]
             msg.acceleration[i] = acc_ref[i]
          

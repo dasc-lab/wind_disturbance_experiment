@@ -4,6 +4,12 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
+            package='trajectory_driver',  # Replace with your actual package name
+            executable='circle_simple',  # This should match the name in your setup.py
+            name='driveCircle',
+            output='screen'
+        ),
+        Node(
             package='trajectory_driver',  
             executable='data_node',  
             name='data',
