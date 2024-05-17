@@ -31,11 +31,12 @@ disturbance_d = {
     2: 'z'
 }
 
+
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 ################################### Data Prep ##########################################
 wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/disturbance.npy")
 input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/input_to_gp.npy")
-cutoff = 4000
+cutoff = 3000
 threshold = 200
 set_size = cutoff - threshold
 wind_disturbance = wind_disturbance[threshold:cutoff,:]
@@ -47,7 +48,7 @@ wind_disturbance_z = jnp.array(wind_disturbance[:,2]).reshape(-1,1)
 print("disturbance shape", wind_disturbance_x.shape)
 assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_z.shape == (set_size,1)
 
-training_size = n = 800
+training_size = n = 500
 indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
 
 
@@ -55,7 +56,7 @@ indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=Fal
 
 
 for j in range(3):
-    if j ==0 :
+    if j == 0:
         wind_disturbance_curr = wind_disturbance_x
     elif j == 1:
         wind_disturbance_curr = wind_disturbance_y
@@ -111,12 +112,8 @@ for j in range(3):
     pred_std = predictive_dist.stddev()
 
 
-################################################# Plotting ##########################################
 
-
-
-
-
+########################################### Plotting ##########################################
 
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))  # Adjust subplot grid as needed
     axes = axes.flatten()
@@ -124,15 +121,16 @@ for j in range(3):
     plot_indices = jr.choice(key, set_size, (plot_n,) , replace=False)
     for i in range(dim):
 
-        
-
         sorted_indices = jnp.argsort(xtest[:, i][plot_indices])
         x_sorted = xtest[:, i][plot_indices][sorted_indices]
         pred_mean_sorted = pred_mean[plot_indices][sorted_indices]
         pred_std_sorted = pred_std[plot_indices][sorted_indices]
 
-        axes[i].plot(x_sorted, pred_mean_sorted, 'b.', markersize=10, label='GP Prediction')
-        axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], 'r.', markersize=10, label='Actual Data')
+        #axes[i].plot(x_sorted, pred_mean_sorted, 'b.', markersize=10, label='GP Prediction')
+        axes[i].plot(x_sorted, pred_mean_sorted, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
+        axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], 'r*', markersize=10, label='Actual Data')
+        #axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], marker = '*',linestyle = '-', color = 'r', markersize=10, label='Actual Data')
+        
         axes[i].fill_between(x_sorted.flatten(), 
                             (pred_mean_sorted - 1.96 * pred_std_sorted).flatten(), 
                             (pred_mean_sorted + 1.96 * pred_std_sorted).flatten(), 

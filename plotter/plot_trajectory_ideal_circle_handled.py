@@ -29,6 +29,7 @@ center_y = 0
 # Define the topics you want to extract data from
 topic_name = '/vicon/px4_1/px4_1' # Add more topics as needed
 bag_path = '/Users/albusfang/Coding Projects/Gaussian Process/trajectories/trajectory_circular'
+bag_path = '/Users/albusfang/Coding Projects/gp_ws/rover_px4_ros2_jumpstart/colcon_ws/circular_trajectory_slow_with_disturbance'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path('px4_msgs/msg/CombinedData.msg').read_text()

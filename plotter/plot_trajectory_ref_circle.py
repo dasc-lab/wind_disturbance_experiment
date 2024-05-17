@@ -27,10 +27,11 @@ height = 0.4
 angular_vel = 1.0 #rad/s
 center_x = 0
 center_y = 0
-cutoff = 4000
+cutoff = 3600
 # Define the topics you want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
 bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
+bag_path = '/Users/albusfang/Coding Projects/gp_ws/rover_px4_ros2_jumpstart/colcon_ws/circular_trajectory_slow_with_disturbance'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg').read_text()
@@ -86,6 +87,7 @@ print("z max: ", max(z_data))
 print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 
+print("size of x data is: ",len(x_data))
 # indices = np.arange(1, len(x_data) + 1)
 # print(len(indices))
 fig = plt.figure()
