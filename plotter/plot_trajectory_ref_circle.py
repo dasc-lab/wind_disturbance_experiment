@@ -27,11 +27,13 @@ height = 0.4
 angular_vel = 1.0 #rad/s
 center_x = 0
 center_y = 0
-cutoff = 3600
+
 # Define the topics you want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/rover_px4_ros2_jumpstart/colcon_ws/circular_trajectory_slow_with_disturbance'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
+#bag_path = 'Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg').read_text()
@@ -79,26 +81,29 @@ with Reader(bag_path) as reader:
 #     y_data.append(msg.y)
 #     z_data.append(msg.z)
 # bag.close()
-print("x max: ", max(x_data))
-print("x min: ", min(x_data))
-print("y max: ", max(y_data))
-print("y min: ", min(y_data))
-print("z max: ", max(z_data))
-print("z min: ", min(z_data))
+# print("x max: ", max(x_data))
+# print("x min: ", min(x_data))
+# print("y max: ", max(y_data))
+# print("y min: ", min(y_data))
+# print("z max: ", max(z_data))
+# print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 
-print("size of x data is: ",len(x_data))
+
+cutoff = len(x_data) - 1000
+threshold = 1500
+print("cutoff, threshold = ", cutoff, threshold)
 # indices = np.arange(1, len(x_data) + 1)
 # print(len(indices))
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-x = np.array(x_data[:cutoff])
-y = np.array(y_data[:cutoff])
-z = np.array(z_data[:cutoff])
-
-x_t = x_ideal = np.array(x_ideal[:cutoff])
-y_t = y_ideal = np.array(y_ideal[:cutoff])
-z_t = z_ideal = np.array(z_ideal[:cutoff])
+x = np.array(x_data[threshold:cutoff])
+y = np.array(y_data[threshold:cutoff])
+z = np.array(z_data[threshold:cutoff])
+#print("size of x data is: ",x.shape)
+x_t = x_ideal = np.array(x_ideal[threshold:cutoff])
+y_t = y_ideal = np.array(y_ideal[threshold:cutoff])
+z_t = z_ideal = np.array(z_ideal[threshold:cutoff])
 
 # Scatter plot
 ax.set_zlim(0,1)

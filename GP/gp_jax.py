@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 key = jr.key(123)
 
 ################################### Data Prep ##########################################
-wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/disturbance.npy")
-input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/input_to_gp.npy")
-cutoff = 4000
+wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/disturbance.npy")
+input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/input_to_gp.npy")
+cutoff = wind_disturbance.shape[0]-4000
+print("cutoff: ", cutoff)
 threshold = 200
 set_size = cutoff - threshold
 wind_disturbance = wind_disturbance[threshold:cutoff,:]

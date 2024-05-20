@@ -1,17 +1,52 @@
 from jax import config
 
 config.update("jax_enable_x64", True)
+import sys
+import os
+plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/')
+sys.path.append(plotter_path)
+from plotter.plot_trajectory_ref_circle import cutoff, threshold
+
+print(cutoff,threshold)
+import tensorflow_probability.substrates.jax.bijectors as tfb
+from simple_pytree import static_field
 import numpy as np
 import gpjax as gpx
 from jax import grad, jit
 import jax.numpy as jnp
 import jax.random as jr
 import optax as ox
-from gpjax.kernels import SumKernel, White, RBF, Matern32
+from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic
 import matplotlib.pyplot as plt
+from gpjax.kernels import AbstractKernel 
+from dataclasses import dataclass
+from typing import Any
+from jaxtyping import Float, Array, install_import_hook
+
+with install_import_hook("gpjax", "beartype.beartype"):
+    import gpjax as gpx
+    from gpjax.base.param import param_field
 
 
+def angular_distance(x, y, c):
+    return jnp.abs((x - y + c) % (c * 2) - c)
 
+
+bij = tfb.SoftClip(low=jnp.array(4.0, dtype=jnp.float64))
+
+
+@dataclass
+class Polar(gpx.kernels.AbstractKernel):
+    period: float = static_field(2 * jnp.pi)
+    tau: float = param_field(jnp.array([5.0]), bijector=bij)
+
+    def __call__(
+        self, x: Float[Array, "1 D"], y: Float[Array, "1 D"]
+    ) -> Float[Array, "1"]:
+        c = self.period / 2.0
+        t = angular_distance(x, y, c)
+        K = (1 + self.tau * t / c) * jnp.clip(1 - t / c, 0, jnp.inf) ** self.tau
+        return K.squeeze()
 ################################### Declare Parameters ##########################################
 
 key = jr.key(123)
@@ -34,21 +69,24 @@ disturbance_d = {
 
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 ################################### Data Prep ##########################################
-wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/disturbance.npy")
-input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/input_to_gp.npy")
-cutoff = 3000
-threshold = 200
+wind_disturbance = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/disturbance.npy")
+input = jnp.load("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/input_to_gp.npy")
+assert wind_disturbance.shape[0] == input.shape[0]
+#cutoff = wind_disturbance.shape[0]-3000
+#threshold = 300
+print("imported cutoff, threshold = ", cutoff, threshold)
 set_size = cutoff - threshold
 wind_disturbance = wind_disturbance[threshold:cutoff,:]
 input = input[threshold:cutoff,:]
-
+#print(wind_disturbance.shape)
+assert wind_disturbance.shape[0] == input.shape[0]
 wind_disturbance_x = jnp.array(wind_disturbance[:,0]).reshape(-1,1)
 wind_disturbance_y = jnp.array(wind_disturbance[:,1]).reshape(-1,1)
 wind_disturbance_z = jnp.array(wind_disturbance[:,2]).reshape(-1,1)
 print("disturbance shape", wind_disturbance_x.shape)
 assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_z.shape == (set_size,1)
 
-training_size = n = 500
+training_size = n = 800
 indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
 
 
@@ -73,8 +111,14 @@ for j in range(3):
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
-    #kernel = SumKernel(kernels=[RBF(), Matern32(), white_kernel])
+    kernel = SumKernel(kernels=[RBF(), Matern32(), white_kernel])
     kernel = SumKernel(kernels=[RBF(), Matern32()])
+    rbf_kernel = RBF()
+    rational_quadratic_kernel = RationalQuadratic()
+    periodic_kernel = Periodic()
+    combined_kernel = rbf_kernel * rational_quadratic_kernel * periodic_kernel
+    kernel = combined_kernel
+    #kernel = Polar()
     #kernel = RBF()
     prior = gpx.gps.Prior(mean_function=meanf, kernel = kernel)
 

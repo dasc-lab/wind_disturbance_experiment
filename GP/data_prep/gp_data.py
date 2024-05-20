@@ -5,11 +5,16 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import os, sys
+plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/')
+sys.path.append(plotter_path)
+from plotter.plot_trajectory_ref_circle import bag_path
+print(bag_path)
 
 
 topic_name = '/drone/combined_data' # Add more topics as needed
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data' ## ROS bag
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data' ## ROS bag
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg").read_text()
@@ -33,7 +38,7 @@ disturbance = []
 
 with Reader(bag_path) as reader:
     for item in reader.connections:
-        print(item.topic, item.msgtype)
+        print("topic, message type:",item.topic, item.msgtype)
     for item, timestamp, rawdata in reader.messages():
         if item.topic == topic_name:
             msg = typestore.deserialize_cdr(rawdata, item.msgtype)
@@ -59,11 +64,11 @@ pos_arr = np.array(pos_arr)
 vel_arr = np.array(vel_arr)
 input = np.hstack((pos_arr, vel_arr))
 disturbance = np.array(disturbance)
-print(pos.shape)
-print(vel.shape)
+print(pos_arr.shape)
+print(vel_arr.shape)
 print(input.shape)
 print(disturbance.shape)
-#np.save("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/input_to_gp", input)
-np.save("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/disturbance", disturbance)
+np.save("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/input_to_gp.npy", input)
+np.save("/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/disturbance.npy", disturbance)
 # np.save("pos",pos)
 # np.save("velocity",vel)
