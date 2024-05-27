@@ -9,7 +9,7 @@ import os, sys
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/')
 sys.path.append(plotter_path)
 from plotter.plot_trajectory_ref_circle import bag_path
-print(bag_path)
+print("bag path = ", bag_path)
 
 
 topic_name = '/drone/combined_data' # Add more topics as needed

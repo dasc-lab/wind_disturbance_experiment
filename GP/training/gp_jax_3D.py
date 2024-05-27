@@ -16,7 +16,7 @@ from jax import grad, jit
 import jax.numpy as jnp
 import jax.random as jr
 import optax as ox
-from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic
+from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic, ProductKernel
 import matplotlib.pyplot as plt
 from gpjax.kernels import AbstractKernel 
 from dataclasses import dataclass
@@ -47,7 +47,45 @@ class Polar(gpx.kernels.AbstractKernel):
         t = angular_distance(x, y, c)
         K = (1 + self.tau * t / c) * jnp.clip(1 - t / c, 0, jnp.inf) ** self.tau
         return K.squeeze()
+    
+def mean_squared_error(y_true, y_pred):
+    y_true = jnp.array(y_true)
+    y_pred = jnp.array(y_pred)
+    return jnp.mean((y_true - y_pred) ** 2)
+
+def read_float_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            value = float(file.read().strip())
+        return value
+    except FileNotFoundError:
+        return None
+
+def write_float_to_file(file_path, value):
+    with open(file_path, 'w') as file:
+        file.write(f'{value}')
+
+def save_gp_params(file_path, params):
+    return
+
+def compare_and_update(file_path, new_value):
+    stored_value = read_float_from_file(file_path)
+
+    if stored_value is None or new_value < stored_value:
+        write_float_to_file(file_path, new_value)
+        print(f'NEW BEST MODEL FOUND: {new_value}')
+
+    else:
+        print(f'Kept the existing value: {stored_value}')
+
+# Path to the file
+file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/min_error.txt'
+
+
+
 ################################### Declare Parameters ##########################################
+
+error_x = error_y = error_z = curr_min_x = curr_min_y = curr_min_z =  0
 
 key = jr.key(123)
 
@@ -87,7 +125,7 @@ print("disturbance shape", wind_disturbance_x.shape)
 assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_z.shape == (set_size,1)
 
 training_size = n = 800
-indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
+training_indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
 
 
 
@@ -102,21 +140,21 @@ for j in range(3):
         wind_disturbance_curr = wind_disturbance_z
     else:
         print("shouldn't reach this statement")
-    x = input[indices]
-    y = wind_disturbance_curr[indices]
+    x = input[training_indices]
+    y = wind_disturbance_curr[training_indices]
 
     ########################################## GP ##########################################
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 0.5
+    noise_level = 0.3
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
-    kernel = SumKernel(kernels=[RBF(), Matern32(), white_kernel])
-    kernel = SumKernel(kernels=[RBF(), Matern32()])
+    # kernel = SumKernel(kernels=[RBF(), Matern32(), white_kernel])
     rbf_kernel = RBF()
     rational_quadratic_kernel = RationalQuadratic()
     periodic_kernel = Periodic()
-    combined_kernel = rbf_kernel * rational_quadratic_kernel * periodic_kernel
+    composite_kernel = ProductKernel(kernels=[rbf_kernel,  rational_quadratic_kernel])
+    combined_kernel = SumKernel(kernels=[composite_kernel, periodic_kernel, white_kernel])
     kernel = combined_kernel
     #kernel = Polar()
     #kernel = RBF()
@@ -144,7 +182,7 @@ for j in range(3):
         safe=True,
         key=key,
     )
-
+    
     print("after training, predicting")
     # Infer the predictive posterior distribution
     xtest = input
@@ -155,17 +193,25 @@ for j in range(3):
     pred_mean = predictive_dist.mean()
     pred_std = predictive_dist.stddev()
 
-
-
+########################################### Compute Mean Squared Error ##########################################
+    error = mean_squared_error(pred_mean,wind_disturbance_curr)
+    if j == 0:
+        error_x = error
+    elif j == 1:
+        error_y = error
+    elif j == 2:
+        error_z = error
+    
 ########################################### Plotting ##########################################
 
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))  # Adjust subplot grid as needed
     axes = axes.flatten()
     plot_size = plot_n = 100
     plot_indices = jr.choice(key, set_size, (plot_n,) , replace=False)
+    
     for i in range(dim):
-
         sorted_indices = jnp.argsort(xtest[:, i][plot_indices])
+        
         x_sorted = xtest[:, i][plot_indices][sorted_indices]
         pred_mean_sorted = pred_mean[plot_indices][sorted_indices]
         pred_std_sorted = pred_std[plot_indices][sorted_indices]
@@ -242,4 +288,6 @@ for j in range(3):
     ax.scatter(X_test[:, 0], X_test[:, 1], X_test[:, 2], c=wind_disturbance_curr, cmap='plasma', alpha=0.1, label='Trajectory')
     plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_3d_heatmap_{disturbance_d[j]}.png")
     plt.show()
-    
+
+# Perform the comparison and update
+compare_and_update(file_path, error_x+error_y+error_z)

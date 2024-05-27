@@ -31,9 +31,12 @@ center_y = 0
 # Define the topics you want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
-#bag_path = 'Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
+
+bag_path = 'Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg').read_text()
@@ -89,9 +92,9 @@ with Reader(bag_path) as reader:
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 
-
+print("length of x data = ", len(x_data))
 cutoff = len(x_data) - 1000
-threshold = 1500
+threshold = 1000
 print("cutoff, threshold = ", cutoff, threshold)
 # indices = np.arange(1, len(x_data) + 1)
 # print(len(indices))
@@ -151,6 +154,6 @@ if save :
         csv_writer.writerows(rows)
         
     print(f"Three lists saved to {filename}.")
-
-
-
+# data_prep_path = os.path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/')
+# sys.path.append(data_prep_path)
+# import data_prep.gp_data
