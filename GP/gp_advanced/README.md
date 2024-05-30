@@ -16,4 +16,4 @@ To train GP on all collected datasets with various speeds and coordinates, one w
 
 ## GP Training and Plotting
 
-Use `gp.py` to train gp model for all 3 dimensions of the filtered disturbance with respect to all six inputs. The script saves its training dataset, test dataset, and whole data set.
+Use `gp.py` to train gp model for all 3 dimensions of the filtered disturbance with respect to all six inputs. The script saves its training dataset, test dataset, and the whole data set.
