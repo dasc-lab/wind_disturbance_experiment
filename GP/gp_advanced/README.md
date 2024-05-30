@@ -15,4 +15,4 @@ To train GP on all collected datasets with various speeds and coordinates, one w
 
 ## GP Training and Plotting
 
-Use `gp.py` to train 
+Use `gp.py` to train on stitched data, 
