@@ -10,6 +10,7 @@ import pickle
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced'
 import tensorflow_probability.substrates.jax.bijectors as tfb
 import numpy as np
+
 import gpjax as gpx
 from jax import grad, jit
 import jax.numpy as jnp
@@ -17,7 +18,6 @@ import jax.random as jr
 import optax as ox
 from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic, ProductKernel
 import matplotlib.pyplot as plt
-
 
 
 key = jr.key(123)
@@ -80,7 +80,10 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
+############## keep one in eight datapoints ##############
 slice = 8
+
+
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 disturbance_file_path = home_path+ 'disturbance.npy'
