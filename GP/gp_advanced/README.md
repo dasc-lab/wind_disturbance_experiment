@@ -11,8 +11,13 @@ Use `plot_acc.py` to plot out filtered `acc_x`, `acc_y`, and `acc_z`. Use `fft.p
 
 # Stitching Dataset and Generate Train and Test Dataset
 
-To train GP on all collected datasets with various speeds and coordinates, one would need to crop off the takeoff and landing data from each data set and stitch the cropped datasets together. Run G
+
+To train GP on all collected datasets with various speeds and coordinates, one would need to crop off the takeoff and landing data from each data set and stitch the cropped datasets together. Run `gp_data_prep.py` to first filter the disturbance and then concatenate the data points together. If the new data set is the same as the existing dataset, the new data won't be concatenated.
 
 ## GP Training and Plotting
 
+<<<<<<< HEAD
 Use `gp.py` to train on stitched data, 
+=======
+Use `gp.py` to train gp model for all 3 dimensions of the filtered disturbance with respect to all six inputs. The script saves its training dataset, test dataset, and the whole data set.
+>>>>>>> refs/remotes/origin/main
