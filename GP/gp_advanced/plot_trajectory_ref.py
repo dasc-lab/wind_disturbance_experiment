@@ -19,26 +19,27 @@ height = 0.4
 angular_vel = 1.0 #rad/s
 center_x = 0
 center_y = 0
-
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
 ############ Used ##################
+
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len-700)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
-#(1600, len-900)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
-#(1800, len-2000)
+#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+#(1600, len-1200)
+#bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+#(1400, len-900)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len -1600)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len-1000)
-bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c10_h0.4_fanhigh'
+#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len-800)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len - 2500)
-
+bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
 # Define the topics you want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
-
+png_name = bag_path.split('/')[-1]+'_trajectory'
 ############ New Bagpaths ##################
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
@@ -100,9 +101,9 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 800
-threshold = 800
-print("length of x data = ", len(x_data))
+cutoff = len(x_data) - 0
+threshold = 100
+
 
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)
@@ -145,9 +146,12 @@ ax1.legend(loc='upper right')
 ax1.set_ylabel("meters")
 ax1.set_title("z")
 plt.subplots_adjust(hspace=0.5) 
-plt.savefig("/Users/albusfang/Coding Projects/gp_ws/trajectory_graphs/trajectory_individual_figureeight.png")
+png_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/trajectory_sinusoid_plots/' + png_name +'.png'
+plt.suptitle(png_name)
+plt.savefig(png_path)
 plt.show()
-input = input("save trajectory to csv? y/n")
+#input = input("save trajectory to csv? y/n")
+input = 'n'
 if input == 'y':
     save = True
 elif input == 'n':

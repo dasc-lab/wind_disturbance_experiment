@@ -5,7 +5,7 @@ import sys
 import os
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
 sys.path.append(plotter_path)
-from plot_trajectory_ref_circle import cutoff, threshold
+from plot_trajectory_ref import cutoff, threshold
 import pickle
 print(cutoff,threshold)
 import tensorflow_probability.substrates.jax.bijectors as tfb
@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Any
 #from jaxtyping import Float, Array, install_import_hook
 
-
+norm_factor = 5
     
 def mean_squared_error(y_true, y_pred):
     y_true = jnp.array(y_true)
@@ -57,7 +57,7 @@ def compare_and_update(file_path, new_value):
         print(f'Kept the existing value: {stored_value}')
 
 # Path to the file
-file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/min_error.txt'
+#file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/training/min_error.txt'
 
 
 
@@ -85,25 +85,24 @@ disturbance_d = {
 
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 ################################### Data Prep ##########################################
-disturbance_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/disturbance.npy'
-input_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/input.npy'
+disturbance_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/disturbance_1.npy'
+input_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/input_1.npy'
 wind_disturbance = jnp.load(disturbance_file_path)
 
 
-wind_disturbance = wind_disturbance
+wind_disturbance = wind_disturbance/norm_factor
 
 
 input = jnp.load(input_file_path)
 
 assert wind_disturbance.shape[0] == input.shape[0]
-#cutoff = wind_disturbance.shape[0]-3000
-#threshold = 300
+
 print("imported cutoff, threshold = ", cutoff, threshold)
 # set_size = cutoff - threshold
-wind_disturbance = wind_disturbance[threshold:cutoff,:]
-input = input[threshold:cutoff,:]
-wind_disturbance = wind_disturbance[::2]
-input = input[::2]
+#wind_disturbance = wind_disturbance[threshold:cutoff,:]
+#input = input[threshold:cutoff,:]
+# wind_disturbance = wind_disturbance[::2]
+# input = input[::2]
 #print(wind_disturbance.shape)
 assert wind_disturbance.shape[0] == input.shape[0]
 wind_disturbance_x = jnp.array(wind_disturbance[:,0]).reshape(-1,1)
@@ -235,43 +234,55 @@ for j in range(3):
     
 
 ########################################### Plotting Trajectory ##########################################
-
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))  # Adjust subplot grid as needed
-    axes = axes.flatten()
-    test_set_size = xtest.shape[0]
-    plot_size = plot_n = 100
-    plot_indices = jr.choice(key, test_set_size, (plot_n,) , replace=False)
-    
-    for i in range(1):
-        sorted_indices = jnp.argsort(xtest[:, i][plot_indices])
-        
-        x_sorted = xtest[:, i][plot_indices][sorted_indices]
-        pred_mean_sorted = pred_mean[plot_indices][sorted_indices]
-        pred_std_sorted = pred_std[plot_indices][sorted_indices]
-        
-        #axes[i].plot(x_sorted, pred_mean_sorted, 'b.', markersize=10, label='GP Prediction')
-        axes[i].plot(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), actual_output, 'r*', markersize=10, label='Actual Data')
-        axes[i].plot(np.linspace(0,xplot.shape[0],xplot.shape[0]), pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
-        
-        #axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], 'r*', markersize=10, label='Actual Data')
-        #axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], marker = '*',linestyle = '-', color = 'r', markersize=10, label='Actual Data')
-        
-        axes[i].fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), 
-                            (pred_mean - 1.96 * pred_std).flatten(), 
-                            (pred_mean + 1.96 * pred_std).flatten(), 
-                            color='orange', alpha=0.2, label='95% Confidence Interval')
-        axes[i].set_title(f'{disturbance_d[j]} axis Disturbance vs {dim_d[i]}')
-        axes[i].set_xlabel(dim_d[i])
-        axes[i].set_ylabel('Disturbance (m/s^2)')
-        axes[i].legend()
-    fig.tight_layout()
-    #plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_{disturbance_d[j]}.png")
+    fig = plt.figure()
+    plt.plot(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), actual_output, 'r*', markersize=10, label='Actual Data')
+    plt.plot(np.linspace(0,xplot.shape[0],xplot.shape[0]), pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
+    plt.fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), 
+                        (pred_mean - 1.96 * pred_std).flatten(), 
+                        (pred_mean + 1.96 * pred_std).flatten(), 
+                        color='orange', alpha=0.2, label='95% Confidence Interval')
+    plt.set_title(f'{disturbance_d[j]} axis Disturbance vs time')
+    plt.set_xlabel(disturbance_d[j])
+    plt.set_ylabel('Disturbance (m/s^2)')
+    plt.legend()
     plt.show()
-print("the means of disturbance are: ", jnp.mean(wind_disturbance,axis=0))
-print("median of disturbance", jnp.median(wind_disturbance, axis=0))
+    # fig, axes = plt.subplots(2, 3, figsize=(15, 10))  # Adjust subplot grid as needed
+    # axes = axes.flatten()
+    # test_set_size = xtest.shape[0]
+    # plot_size = plot_n = 100
+    # plot_indices = jr.choice(key, test_set_size, (plot_n,) , replace=False)
+    
+    # for i in range(1):
+    #     sorted_indices = jnp.argsort(xtest[:, i][plot_indices])
+        
+    #     x_sorted = xtest[:, i][plot_indices][sorted_indices]
+    #     pred_mean_sorted = pred_mean[plot_indices][sorted_indices]
+    #     pred_std_sorted = pred_std[plot_indices][sorted_indices]
+        
+    #     #axes[i].plot(x_sorted, pred_mean_sorted, 'b.', markersize=10, label='GP Prediction')
+    #     axes[i].plot(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), actual_output, 'r*', markersize=10, label='Actual Data')
+    #     axes[i].plot(np.linspace(0,xplot.shape[0],xplot.shape[0]), pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
+        
+    #     #axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], 'r*', markersize=10, label='Actual Data')
+    #     #axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], marker = '*',linestyle = '-', color = 'r', markersize=10, label='Actual Data')
+        
+    #     axes[i].fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), 
+    #                         (pred_mean - 1.96 * pred_std).flatten(), 
+    #                         (pred_mean + 1.96 * pred_std).flatten(), 
+    #                         color='orange', alpha=0.2, label='95% Confidence Interval')
+    #     axes[i].set_title(f'{disturbance_d[j]} axis Disturbance vs {dim_d[i]}')
+    #     axes[i].set_xlabel(dim_d[i])
+    #     axes[i].set_ylabel('Disturbance (m/s^2)')
+    #     axes[i].legend()
+    # fig.tight_layout()
+    # #plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_{disturbance_d[j]}.png")
+    # plt.show()
 
-print("predicted mean array is ", jnp.array([disturbance_x_mean, disturbance_y_mean, disturbance_z_mean]))
-print("predicted median array is ", jnp.array([disturbance_x_median,disturbance_y_median, disturbance_z_median]))
+# print("the means of disturbance are: ", jnp.mean(wind_disturbance,axis=0))
+# print("median of disturbance", jnp.median(wind_disturbance, axis=0))
+
+# print("predicted mean array is ", jnp.array([disturbance_x_mean, disturbance_y_mean, disturbance_z_mean]))
+# print("predicted median array is ", jnp.array([disturbance_x_median,disturbance_y_median, disturbance_z_median]))
 
 ########################################### Plotting ##########################################
 
@@ -347,4 +358,4 @@ print("predicted median array is ", jnp.array([disturbance_x_median,disturbance_
     # plt.show()
 
 # Perform the comparison and update
-compare_and_update(file_path, error_x+error_y+error_z)
+#compare_and_update(file_path, error_x+error_y+error_z)

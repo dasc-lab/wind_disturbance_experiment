@@ -5,7 +5,7 @@ import sys
 import os
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
 sys.path.append(plotter_path)
-from plot_trajectory_ref_circle import cutoff, threshold
+from plot_trajectory_ref import cutoff, threshold
 
 import pickle
 print(cutoff,threshold)
