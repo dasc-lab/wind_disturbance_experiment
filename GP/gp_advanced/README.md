@@ -1,4 +1,14 @@
 # Gaussian Data and Model for Wind Experiements
 
-## Reading recorded data, visualizing the trajectories, and truncating take and landing data
-Use `plot_trejectory_ref.py`
+## Reading recorded data, visualizing the trajectories, and truncating takeoff and landing data
+Use `plot_trejectory_ref.py` to visualize the trajectories and its 3D components. Use `bag_path` variable to select different trajectories to be processed. Adjust variables `cutoff` and `threshold` to remove takeoff and landing data, where `threshold` removes takeoff data towards the beginning of the recording and `cutoff` removes landing data from the recording. Please ensure no takeoff and landing data is included as this can mess up Gaussian Process training. Other files such as `plot_acc.py` may import `cutoff` and `threshold`. 
+
+## Visualize Acceleration and Applying Low-Pass Filter
+Use `fft.py` to analyze the signal in frequency domain and visualize the signal pre and post filtering.
+Use `plot_acc.py` to plot out filtered `acc_x`, `acc_y`, and `acc_z`. Use `fft.py` if you want to analyze the accelerations individually.
+**Note**
+`fft_filter(signal, sampling_rate = 5000)` in `plot_acc.py` and `fft.py` calculates the _cutoff frequency_ by adding a hard-coded value to the peak frequency, which may yield varing results. **A more robust way of calculating the cutoff frequency may be desirable**
+
+## GP Training and Plotting
+
+Use `gp.py` to 
