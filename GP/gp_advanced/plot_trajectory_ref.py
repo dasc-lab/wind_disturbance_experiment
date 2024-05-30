@@ -20,11 +20,15 @@ angular_vel = 1.0 #rad/s
 center_x = 0
 center_y = 0
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
-############ Used ##################
 
+
+######################## Circle Paths ##################
+##### NOTE: The calculated 'threshold' and 'cutoff' for each dataset is calculated and displayed beneath the bag_path of the dataset ######
+##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path #####
+home_path = home_path + 'circle_data'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len-700)
-#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len-1200)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len-900)
@@ -36,16 +40,23 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 #(800, len-800)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len - 2500)
-bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
+
+######################## Figure Eight Paths ##################
+
+home_path = home_path.replace('circle_data', 'eight_data')
+
+#bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
+
+
+
+
+
+
 # Define the topics you want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
 png_name = bag_path.split('/')[-1]+'_trajectory'
-############ New Bagpaths ##################
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/combined_data'
-#bag_path = 'Gaussian Process/plotter/circular_trajectory_slow_with_disturbance'
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+
+
 
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 typestore = get_typestore(Stores.LATEST)
