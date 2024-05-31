@@ -9,10 +9,10 @@ Use `plot_acc.py` to plot out filtered `acc_x`, `acc_y`, and `acc_z`. Use `fft.p
 **Note**
 `fft_filter(signal, sampling_rate = 5000)` in `plot_acc.py` and `fft.py` calculates the _cutoff frequency_ by adding a hard-coded value to the peak frequency, which may yield varing results. **A more robust way of calculating the cutoff frequency may be desirable**.
 
-# Stitching Dataset and Generate Train and Test Dataset
+## Stitching Dataset and Generate Train and Test Dataset
 
 
-To train GP on all collected datasets with various speeds and coordinates, one would need to crop off the takeoff and landing data from each data set and stitch the cropped datasets together. Run `gp_data_prep.py` to first filter the disturbance and then concatenate the data points together. If the new data set is the same as the existing dataset, the new data won't be concatenated.
+To train GP on all collected datasets with various speeds and coordinates, one would need to crop off the takeoff and landing data for each data set and stitch the cropped datasets together. Run `gp_data_prep.py` to first filter the disturbance and then concatenate the data points together. If the new data set is the same as the existing dataset, the new data won't be concatenated.
 
 ## GP Training and Plotting
 
