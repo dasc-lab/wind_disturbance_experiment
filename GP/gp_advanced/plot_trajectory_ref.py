@@ -1,10 +1,16 @@
+##################################################################################################################################################################
+############ Use this file to visualize the trajectory taken and the reference trajecotry.                                  #############################
+############ Adjust the values of 'threshold' (lower bound) and 'cutoff' (upper bound) to crop off takeoff and landing data #############################
+##################################################################################################################################################################
 #ros2 bag record -o drone_trajectory /px4_1/fmu/out/
 #ros2 bag info drone_trajectory.bag
+
 from rosbags.rosbag2 import Reader
 from rosbags.typesys import Stores, get_typestore, get_types_from_msg
 #from geometry_msgs.msg import TransformStamped
 from pathlib import Path
 import numpy as np
+
 import csv
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -19,40 +25,55 @@ height = 0.4
 angular_vel = 1.0 #rad/s
 center_x = 0
 center_y = 0
+
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
 
 
 ######################## Circle Paths ##################
-##### NOTE: The calculated 'threshold' and 'cutoff' for each dataset is calculated and displayed beneath the bag_path of the dataset ######
-##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path #####
-home_path = home_path + 'circle_data'
+##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
+##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
+home_path = home_path + 'circle_data/'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
-#(1200, len-700)
-bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
-#(1600, len-1200)
+#(1200, len(x_data)-700)
+#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+#(1600, len(x_data)-1200)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
-#(1400, len-900)
+#(1400, len(x_data)-900)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
-#(780, len -1600)
+#(780, len(x_data) -1600)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
-#(1000, len-1000)
+#(1000, len(x_data)-1000)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c10_h0.4_fanhigh'
-#(800, len-800)
+#(800, len(x_data)-800)
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
-#(1000, len - 2500)
+#(1000, len(x_data) - 2500)
 
 ######################## Figure Eight Paths ##################
 
 home_path = home_path.replace('circle_data', 'eight_data')
 
+# bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
+#(threshold, cutoff) = (1200, len(x_data)-3500)
+bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
+#(threshold, cutoff) = (200, len(x_data)-800)
+#bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
+#(threshold, cutoff) = (600, len(x_data)-600)
 #bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
+#(threshold, cutoff) = (100, len(x_data)-100)
+#bag_path = home_path + 'eight_traj_r0.4_w1.5_c10_h0.4_fanhigh'
+#(threshold, cutoff) = (600, len(x_data)-800)
+#bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+#(threshold, cutoff) = (1000, len(x_data)-3000)
+#bag_path = home_path + 'eight_traj_r0.4_w2_c10_h0.4_fanhigh'
+#(threshold, cutoff) = (200, len(x_data)-600)
+#bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
+#(threshold, cutoff) = (100, len(x_data)-600)
+#bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
+#(threshold, cutoff) = (100, len(x_data)-100)
 
 
 
-
-
-
-# Define the topics you want to extract data from
+# Define the topics we want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
 png_name = bag_path.split('/')[-1]+'_trajectory'
 
@@ -112,8 +133,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 0
-threshold = 100
+cutoff = len(x_data) - 800
+threshold = 200
 
 
 print("cutoff, threshold = ", cutoff, threshold)
