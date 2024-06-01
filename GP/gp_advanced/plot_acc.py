@@ -8,9 +8,10 @@ from mpl_toolkits.mplot3d import Axes3D
 import os, sys
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
 sys.path.append(plotter_path)
+####### change bag_path in plot_trajectory_ref.py ######
 from plot_trajectory_ref import bag_path, cutoff, threshold
-from scipy.fftpack import fft, fftfreq
 
+from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
@@ -92,11 +93,11 @@ with Reader(bag_path) as reader:
             #disturbance.append(acc_diff)
 
 acc_arr = np.array(acc_arr)
-#np.save("recorded_acc.npy",acc_arr)
+np.save("recorded_acc.npy",acc_arr)
 filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
 acc_cmd_arr = np.array(acc_cmd_arr)
 #np.save("cmd_arr.npy",acc_cmd_arr)
-filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
+# filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 #disturbance = filtered_acc - acc_cmd_arr
 disturbance = filtered_acc - filtered_cmd
