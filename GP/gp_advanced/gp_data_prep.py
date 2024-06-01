@@ -9,6 +9,7 @@ import os, sys
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
 sys.path.append(plotter_path)
 from plot_trajectory_ref import bag_path, cutoff, threshold
+####### change bag_path in plot_trajectory_ref.py ######
 from scipy.fftpack import fft, fftfreq
 
 from scipy.signal import butter, filtfilt
