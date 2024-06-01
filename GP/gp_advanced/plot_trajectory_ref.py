@@ -28,8 +28,9 @@ center_y = 0
 
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
 
-
-######################## Circle Paths ##################
+########################################################################
+######################## Circle Paths ##################################
+########################################################################
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
@@ -48,13 +49,14 @@ home_path = home_path + 'circle_data/'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
 
-######################## Figure Eight Paths ##################
-
+########################################################################
+######################## Figure Eight Paths ############################
+########################################################################
 home_path = home_path.replace('circle_data', 'eight_data')
 
-# bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
+bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
-bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
+#bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
 #bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (600, len(x_data)-600)
@@ -133,8 +135,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 800
-threshold = 200
+cutoff = len(x_data) - 3500
+threshold = 1200
 
 
 print("cutoff, threshold = ", cutoff, threshold)
