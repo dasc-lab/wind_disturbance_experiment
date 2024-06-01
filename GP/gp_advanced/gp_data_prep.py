@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os, sys
 plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 sys.path.append(plotter_path)
 from plot_trajectory_ref import bag_path, cutoff, threshold
+
 ####### change bag_path in plot_trajectory_ref.py ######
 from scipy.fftpack import fft, fftfreq
 
@@ -106,8 +108,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/input.npy'
-disturbance_file_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/disturbance.npy'
+input_file_path = home_path+ 'input_figure8.npy'
+disturbance_file_path = home_path+'disturbance_figure8.npy'
 
 ################## Prepare input ##################
 
