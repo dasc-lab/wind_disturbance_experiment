@@ -93,7 +93,7 @@ with Reader(bag_path) as reader:
             #disturbance.append(acc_diff)
 
 acc_arr = np.array(acc_arr)
-np.save("recorded_acc.npy",acc_arr)
+
 filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
 acc_cmd_arr = np.array(acc_cmd_arr)
 #np.save("cmd_arr.npy",acc_cmd_arr)
@@ -125,6 +125,7 @@ def plot_same_dim(array1, array2, array3, dim, title, figure_number, path = home
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 0, 'acc_x', 1)
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 1, 'acc_y', 2)
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 2, 'acc_z', 3)
+np.save("recorded_acc.npy",acc_arr[threshold:cutoff,:])
 # for i in range(3):
 #     fig = plt.figure(i+1)
 #     ax1 = plt.subplot2grid((3,1), (0,0) , rowspan=1)
