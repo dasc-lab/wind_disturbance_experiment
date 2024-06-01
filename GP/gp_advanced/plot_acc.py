@@ -12,6 +12,7 @@ from plot_trajectory_ref import bag_path, cutoff, threshold
 from scipy.fftpack import fft, fftfreq
 
 from scipy.signal import butter, filtfilt
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
 print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
@@ -102,7 +103,7 @@ disturbance = filtered_acc - filtered_cmd
 assert acc_arr.shape == acc_cmd_arr.shape == disturbance.shape == filtered_acc.shape
 plot_size = acc_arr.shape[0]
 # Create a function to plot the data
-def plot_same_dim(array1, array2, array3, dim, title, figure_number):
+def plot_same_dim(array1, array2, array3, dim, title, figure_number, path = home_path+'acc_plots/'):
     fig, axs = plt.subplots(3, 1, figsize=(15, 10))
     fig.suptitle(title)
 
@@ -116,7 +117,7 @@ def plot_same_dim(array1, array2, array3, dim, title, figure_number):
     
     plt.tight_layout()
     plt.subplots_adjust(top=0.95)  # Adjust the top margin for the suptitle
-    plt.savefig(f'figure_{figure_number}.png')
+    plt.savefig(path+ f'figure_{figure_number}.png')
     plt.show()
 
 # Plot each dimension in a separate figure

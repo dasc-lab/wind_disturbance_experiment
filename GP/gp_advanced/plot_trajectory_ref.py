@@ -155,7 +155,7 @@ z_t = z_ideal = np.array(z_ideal[threshold:cutoff])
 ax.set_zlim(0,1)
 ax.scatter(x, y, z, c= 'r')
 ax.scatter(x_ideal, y_ideal, z_ideal, c = 'b')
-plt.savefig("trajectory.png")
+#plt.savefig("trajectory.png")
 plt.show()
 
 fig = plt.figure()
