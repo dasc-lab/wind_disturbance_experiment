@@ -96,6 +96,7 @@ filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
 acc_cmd_arr = np.array(acc_cmd_arr)
 #np.save("cmd_arr.npy",acc_cmd_arr)
 filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
+filtered_cmd = acc_cmd_arr
 #disturbance = filtered_acc - acc_cmd_arr
 disturbance = filtered_acc - filtered_cmd
 assert acc_arr.shape == acc_cmd_arr.shape == disturbance.shape == filtered_acc.shape

@@ -1,3 +1,9 @@
+#######################################################################################################
+####### Use this file to load any npy file and analyze its frequency domain counterpart           #####
+####### The file also automatically filters out the high-frequency noise                          #####
+####### NOTE: the low pass filter calculates cutoff frequency by adding a hard-coded value to the #####
+####### frequency of the highest peak in frequency domain. Adjust this value if needed            #####
+#######################################################################################################
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft, fftfreq
@@ -6,7 +12,7 @@ from plot_trajectory_ref import bag_path, cutoff, threshold
 
 signal = np.load("recorded_acc.npy")
 #signal = np.load("cmd_arr.npy")
-signal = np.load("disturbance.npy")
+#signal = np.load("disturbance.npy")
 cutoff = signal.shape[0]
 threshold = 0
 signal = signal[:,0][threshold:cutoff]
@@ -86,7 +92,7 @@ def fft_filter(signal, sampling_rate = 5000):
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
-
+    ####### NOTE: Replace 80 if necessary to calculate the cutoff frequency ######
     cutoff_freq = peak_frequency+80 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs)
     return filtered_signal
