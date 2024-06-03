@@ -81,13 +81,14 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 8
+slice = 7
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-disturbance_file_path = home_path+ 'disturbance.npy'
-input_file_path = home_path + 'input.npy'
+dataset_path = home_path + 'datasets/'
+disturbance_file_path = home_path+ 'disturbance_figure8.npy'
+input_file_path = home_path + 'input_figure8.npy'
 wind_disturbance = jnp.load(disturbance_file_path)
 input = jnp.load(input_file_path)
 
@@ -112,14 +113,14 @@ wind_disturbance = wind_disturbance[~rows_to_remove]
 input = input[~rows_to_remove]
 print(f"The remaining length is {wind_disturbance.shape}")
 
-np.save("fullset_input.npy", input)
+np.save(dataset_path+"fullset_input.npy", input)
 assert wind_disturbance.shape[0] == input.shape[0]
 
 
 wind_disturbance_x = jnp.array(wind_disturbance[:,0]).reshape(-1,1)
 wind_disturbance_y = jnp.array(wind_disturbance[:,1]).reshape(-1,1)
 wind_disturbance_z = jnp.array(wind_disturbance[:,2]).reshape(-1,1)
-np.save("wind_disturbance_x.npy", wind_disturbance_x)
+np.save(dataset_path+"wind_disturbance_x.npy", wind_disturbance_x)
 assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_z.shape# == (set_size,1)
 
 
@@ -133,20 +134,20 @@ test_input = input[mask]
 test_disturbance_x = wind_disturbance_x[mask]
 test_disturbance_y = wind_disturbance_y[mask]
 test_disturbance_z = wind_disturbance_z[mask]
-jnp.save('test_input.npy', test_input)
-jnp.save('test_disturbance_x.npy', test_disturbance_x)
-jnp.save('test_disturbance_y.npy', test_disturbance_y)
-jnp.save('test_disturbance_z.npy', test_disturbance_z)
+jnp.save(dataset_path+'test_input.npy', test_input)
+jnp.save(dataset_path+'test_disturbance_x.npy', test_disturbance_x)
+jnp.save(dataset_path+'test_disturbance_y.npy', test_disturbance_y)
+jnp.save(dataset_path+'test_disturbance_z.npy', test_disturbance_z)
 print(f"training on {training_size} datapoints")
 training_input = input[training_indices]
 
-np.save("training_input.npy", training_input)
+np.save(dataset_path+"training_input.npy", training_input)
 training_disturbance_x = wind_disturbance_x[training_indices]
 training_disturbance_y = wind_disturbance_y[training_indices]
 training_disturbance_z = wind_disturbance_z[training_indices]
-np.save("training_disturbance_x.npy", training_disturbance_x)
-np.save("training_disturbance_y.npy", training_disturbance_y)
-np.save("training_disturbance_z.npy", training_disturbance_z)
+np.save(dataset_path+"training_disturbance_x.npy", training_disturbance_x)
+np.save(dataset_path+"training_disturbance_y.npy", training_disturbance_y)
+np.save(dataset_path+"training_disturbance_z.npy", training_disturbance_z)
 disturbance_x_mean = 0.0
 disturbance_y_mean = 0.0
 disturbance_z_mean = 0.0
@@ -176,7 +177,7 @@ for j in range(3):
 
 
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 0.2
+    noise_level = 0.5
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
@@ -230,14 +231,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = 'gp_model_x_norm3_cir2.pkl'
+        gp_model_file_path = 'gp_model_x_norm3_eight.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = 'gp_model_y_norm3_cir2.pkl'
+        gp_model_file_path = 'gp_model_y_norm3_eight.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = 'gp_model_z_norm3_cir2.pkl'
+        gp_model_file_path = 'gp_model_z_norm3_eight.pkl'
     with open(gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################

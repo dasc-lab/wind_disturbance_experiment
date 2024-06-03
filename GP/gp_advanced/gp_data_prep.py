@@ -97,6 +97,7 @@ new_input = np.hstack((new_pos_arr, new_vel_arr))
 acc_arr = np.array(acc_arr)
 acc_cmd_arr = np.array(acc_cmd_arr)
 filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
+#filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 new_disturbance =  filtered_acc - filtered_cmd
 print("new input shape = ", new_input.shape)

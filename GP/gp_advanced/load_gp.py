@@ -11,25 +11,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
-
-with open(home_path+'gpmodels/gp_model_x_norm3_cir2.pkl', 'rb') as f:
+dataset_path = home_path + 'datasets/'
+plot_path = home_path + 'testset_plots/'
+with open(home_path+'gp_model_x_norm3_eight.pkl', 'rb') as f:
     opt_posterior = pickle.load(f)
 
 factor = 3
 
-x = jnp.load(home_path + 'npy_folder/training_input.npy')
-y = jnp.load(home_path + 'npy_folder/training_disturbance_x.npy')
-disturbance_x = jnp.load(home_path + 'npy_folder/test_disturbance_x.npy')
+x = jnp.load(dataset_path + 'training_input.npy')
+y = jnp.load(dataset_path + 'training_disturbance_x.npy')
+disturbance_x = jnp.load(dataset_path + 'test_disturbance_x.npy')
 #wind_disturbance_x = jnp.load(home_path + 'wind_disturbance_x.npy')
-plt.figure()
-plt.plot(disturbance_x)
-plt.show()
+# plt.figure()
+# plt.plot(disturbance_x)
+# plt.show()
 
-plt.figure()
-plt.plot(y)
-plt.show()
+# plt.figure()
+# plt.plot(y)
+# plt.show()
 D = gpx.Dataset(X=x, y=y)
-xtest = jnp.load(home_path + 'npy_folder/test_input.npy')
+
+
+
+########################################################################
+######################## Plot Test dataset #############################
+########################################################################
+xtest = jnp.load(dataset_path + 'test_input.npy')
 #xtest = jnp.load(home_path+ 'fullset_input.npy')
 latent_dist = opt_posterior(xtest, D)
 predictive_dist = opt_posterior.likelihood(latent_dist)
@@ -47,8 +54,10 @@ disturbance_x = disturbance_x*factor
 # pred_std = predictive_dist.stddev()
 
 #plt.scatter(jnp.arange(disturbance_x.shape[0]), disturbance_x*factor, color='blue', label='Actual Data', alpha=0.5)
-plt.scatter(jnp.arange(disturbance_x.shape[0]), disturbance_x, color='blue', label='Actual Data', alpha=0.5)
-plt.plot(jnp.arange(pred_mean.shape[0]), pred_mean, color='red', label='Predictive Mean')
+# plt.scatter(jnp.arange(disturbance_x.shape[0]), disturbance_x, color='blue', label='Actual Data', alpha=0.5)
+# plt.plot(jnp.arange(pred_mean.shape[0]), pred_mean, color='red', label='Predictive Mean')
+plt.plot(jnp.arange(disturbance_x.shape[0]), disturbance_x, 'r*', markersize=10, label='Actual Data')
+plt.plot(jnp.arange(pred_mean.shape[0]), pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='Predictive Mean')
 plt.fill_between(jnp.arange(pred_mean.shape[0]), 
                  pred_mean.flatten() - 1.96 * pred_std.flatten(), 
                  pred_mean.flatten() + 1.96 * pred_std.flatten(), 
@@ -84,3 +93,10 @@ plt.fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]),
                     (pred_mean + 1.96 * pred_std).flatten(), 
                     color='orange', alpha=0.2, label='95% Confidence Interval')
 plt.show()
+
+
+########################################################################
+################## Plot Sparse Traning dataset #########################
+########################################################################
+
+
