@@ -36,7 +36,7 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 home_path = home_path + 'circle_data/'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
-#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len(x_data)-900)
@@ -58,7 +58,7 @@ home_path = home_path.replace('circle_data', 'eight_data')
 #(threshold, cutoff) = (1200, len(x_data)-3500)
 #bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
-bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
+#bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (600, len(x_data)-600)
 #bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
@@ -135,8 +135,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 600
-threshold = 600
+cutoff = len(x_data) - 1200
+threshold = 1600
 
 
 print("cutoff, threshold = ", cutoff, threshold)

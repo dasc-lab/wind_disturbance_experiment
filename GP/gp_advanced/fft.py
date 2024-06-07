@@ -61,8 +61,8 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     y = filtfilt(b, a, data)
     return y
 
-cutoff_freq = peak_frequency+50 #Hz
-filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs)
+cutoff_freq = peak_frequency+100 #Hz
+filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)
 plt.figure(figsize=(12, 6))
 plt.plot(signal, label='Original Signal')
 plt.plot(filtered_data, label='Filtered Signal', linestyle='--')
@@ -93,6 +93,6 @@ def fft_filter(signal, sampling_rate = 5000):
         y = filtfilt(b, a, data)
         return y
     ####### NOTE: Replace 80 if necessary to calculate the cutoff frequency ######
-    cutoff_freq = peak_frequency+80 #Hz
-    filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs)
+    cutoff_freq = peak_frequency+100 #Hz
+    filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order=2)
     return filtered_signal

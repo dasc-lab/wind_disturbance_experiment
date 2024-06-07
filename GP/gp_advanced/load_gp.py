@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
+
 dataset_path = home_path + 'datasets/'
 plot_path = home_path + 'testset_plots/'
 with open(home_path+'gp_model_x_norm3_eight.pkl', 'rb') as f:
@@ -63,10 +64,11 @@ plt.fill_between(jnp.arange(pred_mean.shape[0]),
                  pred_mean.flatten() + 1.96 * pred_std.flatten(), 
                  color='orange', alpha=0.2, label='95% Confidence Interval')
 
-plt.title("Gaussian Process Regression")
+plt.title("Gaussian Process Regression Testset")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.legend()
+plt.savefig(plot_path+'full_testset.png')
 plt.show()
 
 # num_indices = int(xtest.shape[0]/3)
@@ -92,6 +94,8 @@ plt.fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]),
                     (pred_mean - 1.96 * pred_std).flatten(), 
                     (pred_mean + 1.96 * pred_std).flatten(), 
                     color='orange', alpha=0.2, label='95% Confidence Interval')
+plt.title("Gaussian Process Regression Sparse Testset")
+plt.savefig(plot_path+'sparse_testset.png')
 plt.show()
 
 
@@ -99,4 +103,33 @@ plt.show()
 ################## Plot Sparse Traning dataset #########################
 ########################################################################
 
+
+latent_dist = opt_posterior(x, D)
+predictive_dist = opt_posterior.likelihood(latent_dist)
+
+# Obtain the predictive mean and standard deviation
+pred_mean = predictive_dist.mean()
+pred_std = predictive_dist.stddev()
+
+pred_mean = pred_mean*factor
+pred_std = pred_std*factor
+y = y*factor
+slice = 5
+pred_mean = pred_mean[::slice]
+pred_std = pred_std[::slice]
+actual_output = y[::slice]
+plt.figure()
+plt.plot(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), actual_output, 'r*', markersize=10, label='Actual Data')
+plt.plot(np.linspace(0,pred_mean.shape[0],pred_mean.shape[0]), pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
+
+#axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], 'r*', markersize=10, label='Actual Data')
+#axes[i].plot(input[:, i][plot_indices], wind_disturbance_curr[plot_indices], marker = '*',linestyle = '-', color = 'r', markersize=10, label='Actual Data')
+
+plt.fill_between(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), 
+                    (pred_mean - 1.96 * pred_std).flatten(), 
+                    (pred_mean + 1.96 * pred_std).flatten(), 
+                    color='orange', alpha=0.2, label='95% Confidence Interval')
+plt.title("Gaussian Process Regression Sparse Training Set")
+plt.savefig(plot_path+'sparse_trainingset.png')
+plt.show()
 
