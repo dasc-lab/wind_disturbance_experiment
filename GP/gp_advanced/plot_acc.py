@@ -36,7 +36,7 @@ def fft_filter(signal, sampling_rate = 5000):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+50 #Hz
+    cutoff_freq = peak_frequency+100 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 
@@ -125,7 +125,7 @@ def plot_same_dim(array1, array2, array3, dim, title, figure_number, path = home
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 0, 'acc_x', 1)
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 1, 'acc_y', 2)
 plot_same_dim(filtered_acc[threshold:cutoff], filtered_cmd[threshold:cutoff], disturbance[threshold:cutoff], 2, 'acc_z', 3)
-np.save("recorded_acc.npy",acc_arr[threshold:cutoff,:])
+np.save("recorded_acc.npy",acc_arr[threshold:cutoff,: ])
 # for i in range(3):
 #     fig = plt.figure(i+1)
 #     ax1 = plt.subplot2grid((3,1), (0,0) , rowspan=1)

@@ -30,14 +30,14 @@ def fft_filter(signal, sampling_rate = 5000):
     peak_index = np.argmax(magnitude)
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
-    def butter_lowpass_filter(data, cutoff_freq, fs, order=5):
+    def butter_lowpass_filter(data, cutoff_freq, fs, order=2):
         nyq = 0.5 * fs
         normal_cutoff = cutoff_freq / nyq
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+80 #Hz
+    cutoff_freq = peak_frequency+100 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 def apply_fft_filter_to_columns(array, sampling_rate=5000):
@@ -109,8 +109,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_figure8.npy'
-disturbance_file_path = home_path+'disturbance_figure8.npy'
+input_file_path = home_path+ 'input_full.npy'
+disturbance_file_path = home_path+'disturbance_full.npy'
 
 ################## Prepare input ##################
 
