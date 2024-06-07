@@ -1,11 +1,159 @@
 import jax.numpy as jnp
-from jax import jit
+from jax import jit, vmap
 
-def policy(params, state, state_ref):
+def policy( state, state_ref, acc_ref):
     m = 0.641 #kg
     g = 9.8066
-    kx = params[0]
-    kv = params[1]
+    kx = 14
+    kv = 7.4
     ex = state[0:3] - state_ref[0:3]
     ev = state[3:6] - state_ref[3:6]
     return -kx * ex -kv * ev + m*(acc_ref) - m*g 
+
+
+
+cir_radius =      [0.3, 0.3, 0.4, 0.4, 0.4, 0.4]
+cir_angular_vel = [1.5, 1.5, 2.0, 2.5, 3.0, 3.0]
+###### in world frame NOT NED ######
+cir_origin_x =    [0.0, 0.4, 0.4, 0.6, 0.8, 1.0]
+cir_origin_y =    [0.4, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+
+figure8_radius =        [0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.6]
+figure8_angular_vel =   [1.5, 2.0, 2.5, 1.5, 1.5, 2.0, 2.0, 2.5, 1.5]
+figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
+figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+
+def circle_pos_vel_acc(deltaT, radius, angular_vel, origin_x, origin_y):
+    '''
+    Calculate reference pos, vel, and acc for the drone flying in a circular trajectory in NED frame.
+    '''
+
+    ######################################################
+    ################## Reference Pos #####################
+    ######################################################
+    x = radius * jnp.cos(angular_vel * deltaT) + origin_x
+    y = radius * jnp.sin(angular_vel * deltaT) + origin_y
+    ref_pos = [y,  x, -0.4]
+
+    ######################################################
+    ################## Reference Vel #####################
+    ######################################################
+    vx = -radius * angular_vel* jnp.sin(angular_vel * deltaT)
+    vy = radius * angular_vel* jnp.cos(angular_vel * deltaT)
+    ref_vel = [vy, vx,0]
+
+    ######################################################
+    ################## Reference Acc #####################
+    ######################################################
+    ax = -radius * (angular_vel**2) * jnp.cos(angular_vel * deltaT)
+    ay = -radius * (angular_vel**2) * jnp.sin(angular_vel * deltaT)
+    ref_acc = [ay, ax, 0]
+
+    ######################################################
+    ################## To Jnp Array ######################
+    ######################################################
+
+    pos = jnp.array(ref_pos)
+    vel = jnp.array(ref_vel)
+    acc = jnp.array(ref_acc)
+    assert pos.shape == vel.shape == acc.shape, "output shapes are different"
+    return pos, vel, acc
+
+
+
+def figure8_pos_vel_acc(deltaT, radius, angular_vel, origin_x, origin_y):
+    '''
+    Calculate reference pos, vel, and acc for the drone flying in figure8 trajectory in NED frame
+    '''
+    ######################################################
+    ################## Reference Pos #####################
+    ######################################################
+    x = radius * jnp.sin(angular_vel * deltaT) + origin_x
+    y = radius * jnp.sin(angular_vel * deltaT) * jnp.cos(angular_vel * deltaT) + origin_y
+    ref_pos = [y,  x, -0.4]
+
+    ######################################################
+    ################## Reference Vel #####################
+    ######################################################
+    vx = radius * angular_vel * jnp.cos(angular_vel * deltaT)
+    vy = radius * angular_vel * (jnp.cos(angular_vel * deltaT)**2-jnp.sin(angular_vel * deltaT)**2)
+    ref_vel= [vy,vx,0]
+    ######################################################
+    ################## Reference Acc #####################
+    ######################################################
+    ax = -radius * (angular_vel**2) * jnp.sin(angular_vel * deltaT)
+    ay = -radius * 4 * (angular_vel**2) * jnp.sin(angular_vel * deltaT) * jnp.cos(angular_vel * deltaT)
+    ref_acc = [ay,ax,0]
+    pos = jnp.array(ref_pos)
+    vel = jnp.array(ref_vel)
+    acc = jnp.array(ref_acc)
+    assert pos.shape == vel.shape == acc.shape, "output shapes are different"
+    return pos, vel, acc
+
+
+
+def generate_time(start_time, end_time, step_size):
+    '''
+    Generate a time vector to simulate trajectories
+    '''
+    return jnp.arange(start_time, end_time + step_size, step_size)
+
+
+
+def generate_reference_circle(time_array, cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y):
+    '''
+    Generate circle trajectories of different parameters for a specified time period
+    '''
+    ref_pos = ref_vel = ref_acc = jnp.empty((0,3))
+    
+    vectorized_circle_pos_vel_acc = vmap(circle_pos_vel_acc, in_axes=(0, None, None, None, None))
+    for radius, angular_vel, origin_x, origin_y in zip(cir_radius,cir_angular_vel,cir_origin_x,cir_origin_y):
+        pos_arr, vel_arr, acc_arr = vectorized_circle_pos_vel_acc(time_array, radius, angular_vel, origin_x, origin_y)
+        assert pos_arr.shape[1] == vel_arr.shape[1] == acc_arr.shape[1] == 3, "missing dim"
+        assert pos_arr.shape[0] == vel_arr.shape[0] == acc_arr.shape[0] == time_array.shape[0], "first dim"
+       
+        ref_pos = jnp.vstack((ref_pos, pos_arr))
+        ref_vel = jnp.vstack((ref_vel, vel_arr))
+        ref_acc = jnp.vstack((ref_acc, acc_arr))
+        
+
+    return ref_pos, ref_vel, ref_acc
+def generate_reference_vectorize(trajectory, time_array, cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y):
+    def single_trajectory_params(trajectory, radius, angular_vel, origin_x, origin_y):
+        vectorized_circle_pos_vel_acc = vmap(trajectory, in_axes=(0, None, None, None, None))
+        return vectorized_circle_pos_vel_acc(time_array, radius, angular_vel, origin_x, origin_y)
+    
+    vectorized_trajectories = vmap(single_trajectory_params, in_axes=(None, 0, 0, 0, 0))
+    all_pos, all_vel, all_acc = vectorized_trajectories(trajectory, jnp.array(cir_radius), jnp.array(cir_angular_vel), jnp.array(cir_origin_x), jnp.array(cir_origin_y))
+
+    ref_pos = all_pos.reshape(-1, 3)
+    ref_vel = all_vel.reshape(-1, 3)
+    ref_acc = all_acc.reshape(-1, 3)
+    
+    return ref_pos, ref_vel, ref_acc
+# def generate_reference_circle_vectorize(time_array, cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y):
+#     def single_trajectory_params(radius, angular_vel, origin_x, origin_y):
+#         vectorized_circle_pos_vel_acc = vmap(circle_pos_vel_acc, in_axes=(0, None, None, None, None))
+#         return vectorized_circle_pos_vel_acc(time_array, radius, angular_vel, origin_x, origin_y)
+    
+#     vectorized_trajectories = vmap(single_trajectory_params, in_axes=(0, 0, 0, 0))
+#     all_pos, all_vel, all_acc = vectorized_trajectories(jnp.array(cir_radius), jnp.array(cir_angular_vel), jnp.array(cir_origin_x), jnp.array(cir_origin_y))
+
+#     ref_pos = all_pos.reshape(-1, 3)
+#     ref_vel = all_vel.reshape(-1, 3)
+#     ref_acc = all_acc.reshape(-1, 3)
+    
+#     return ref_pos, ref_vel, ref_acc
+
+time_array = generate_time(0, 5, 0.1)
+
+ref_pos, ref_vel, ref_acc = generate_reference_circle(time_array,cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y)
+vec_pos, vec_vel, vec_acc = generate_reference_vectorize(circle_pos_vel_acc, time_array, cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y)
+print("Positions match:", jnp.allclose(ref_pos, vec_pos))
+print("Velocities match:", jnp.allclose(ref_pos, vec_pos))
+print("Accelerations match:", jnp.allclose(ref_acc, vec_acc))
+
+
+# assert jnp.array_equal(ref_pos, vec_pos) and jnp.array_equal(ref_vel,vec_vel) and jnp.array_equal(ref_acc, vec_acc)
