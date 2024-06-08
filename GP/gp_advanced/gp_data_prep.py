@@ -159,9 +159,11 @@ assert new_disturbance.shape[1] == curr_disturbance.shape[1]== disturbance.shape
 ################## Save data points ##################
 plt.figure()
 plt.plot(input)
+plt.title("input vs time")
 plt.show()
 plt.figure()
 plt.plot(disturbance)
+plt.title("disturbance vs time")
 plt.show()
 np.save(input_file_path, input)
 np.save(disturbance_file_path, disturbance)

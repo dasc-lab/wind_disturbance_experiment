@@ -121,6 +121,12 @@ def generate_reference_circle(time_array, cir_radius, cir_angular_vel, cir_origi
 
     return ref_pos, ref_vel, ref_acc
 def generate_reference_vectorize(trajectory, time_array, cir_radius, cir_angular_vel, cir_origin_x, cir_origin_y):
+    '''
+    Generate reference pos, vel, and acc in a given time period.
+
+    trajectory: either circle_pos_vel_acc or figure8_pos_vel_acc
+    
+    '''
     def single_trajectory_params(trajectory, radius, angular_vel, origin_x, origin_y):
         vectorized_circle_pos_vel_acc = vmap(trajectory, in_axes=(0, None, None, None, None))
         return vectorized_circle_pos_vel_acc(time_array, radius, angular_vel, origin_x, origin_y)
