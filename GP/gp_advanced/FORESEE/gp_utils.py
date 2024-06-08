@@ -120,6 +120,16 @@ def initialize_gp_prediction(file_path, gp_params, train_x, train_y, test_x):
     D = Dataset(X=train_x, y=train_y)
     opt_posterior = load_gp_model(file_path)
     latent_dist = opt_posterior(test_x, D)
+    predictive_dist = opt_posterior.likelihood(latent_dist)
+
+    normalize_factor = 3
+# Obtain the predictive mean and standard deviation
+    pred_mean = predictive_dist.mean()
+    pred_std = predictive_dist.stddev()
+
+    pred_mean = pred_mean*normalize_factor
+    pred_std = pred_std*normalize_factor
+    
     return latent_dist
 
 def predict_with_gp_params(gp_params, train_x, train_y, test_x):
