@@ -4,7 +4,7 @@ import optax as ox
 import gpjax as jgp
 import pickle
 import jaxkern as jk
-from jaxutils import Dataset
+from gpjax import Dataset
 import jax.numpy as np
 from jax import jit, random
 from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic, ProductKernel
@@ -86,6 +86,10 @@ def initialize_gp_prediction_distribution(gp_params, train_x, train_y):
     return latent_dist
 
 def initialize_gp_prediction(gp_params, train_x, train_y):
+    def load_gp_model(file_path):
+        with open(file_path, 'rb') as f:
+            opt_posterior = pickle.load(f)
+        return opt_posterior
     meanf = jgp.mean_functions.Zero()
     # kernel = jk.RBF(active_dims=[0,1,2,3,4]) #* jk.Polynomial(active_dims=[0,1,2,3,4])
     # kernel = jk.RBF(active_dims=[0,1,2,3,4]) * jk.RationalQuadratic(active_dims=[0,1,2,3,4])

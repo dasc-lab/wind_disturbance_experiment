@@ -36,17 +36,17 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 home_path = home_path + 'circle_data/'
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
-bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len(x_data)-900)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/cir_traj_r0.4_w3_c10_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+#bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
 
 ########################################################################
@@ -70,7 +70,7 @@ home_path = home_path.replace('circle_data', 'eight_data')
 #(threshold, cutoff) = (200, len(x_data)-600)
 #bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-600)
-#bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
+bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
 
 
@@ -135,8 +135,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 1200
-threshold = 1600
+cutoff = len(x_data) - 100
+threshold = 100
 
 
 print("cutoff, threshold = ", cutoff, threshold)
