@@ -12,16 +12,21 @@ import numpy as np
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
 
-dataset_path = home_path + 'datasets/'
-plot_path = home_path + 'testset_plots/'
-with open(home_path+'gp_model_x_norm3_eight.pkl', 'rb') as f:
+dataset_path = home_path + 'circle_figure8_fullset/'
+model_path = dataset_path + 'models/'
+npy_data_path = dataset_path + 'npy_data_folder/'
+plot_path = dataset_path + 'testset_plots/'
+gp_x_file = 'gp_model_x_norm5_full.pkl'
+gp_y_file = 'gp_model_y_norm5_full.pkl'
+gp_z_file = 'gp_model_z_norm5_full.pkl'
+with open(model_path+gp_x_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
-factor = 3
+factor = 5
 
-x = jnp.load(dataset_path + 'training_input.npy')
-y = jnp.load(dataset_path + 'training_disturbance_x.npy')
-disturbance_x = jnp.load(dataset_path + 'test_disturbance_x.npy')
+x = jnp.load(npy_data_path + 'training_input.npy')
+y = jnp.load(npy_data_path + 'training_disturbance_x.npy')
+disturbance_x = jnp.load(npy_data_path + 'test_disturbance_x.npy')
 #wind_disturbance_x = jnp.load(home_path + 'wind_disturbance_x.npy')
 # plt.figure()
 # plt.plot(disturbance_x)
@@ -37,7 +42,7 @@ D = gpx.Dataset(X=x, y=y)
 ########################################################################
 ######################## Plot Test dataset #############################
 ########################################################################
-xtest = jnp.load(dataset_path + 'test_input.npy')
+xtest = jnp.load(npy_data_path + 'test_input.npy')
 #xtest = jnp.load(home_path+ 'fullset_input.npy')
 latent_dist = opt_posterior(xtest, D)
 predictive_dist = opt_posterior.likelihood(latent_dist)
@@ -64,7 +69,7 @@ plt.fill_between(jnp.arange(pred_mean.shape[0]),
                  pred_mean.flatten() + 1.96 * pred_std.flatten(), 
                  color='orange', alpha=0.2, label='95% Confidence Interval')
 
-plt.title("Gaussian Process Regression Testset")
+plt.title("Whole Testset")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.legend()
