@@ -74,21 +74,24 @@ disturbance_d = {
     2: 'z'
 }
 
-factor = 3
+factor = 5
 gp_model_x = gp_model_y = gp_model_z = None
 pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z = None
 
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 7
+slice = 5
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-dataset_path = home_path + 'datasets/'
-disturbance_file_path = home_path+ 'disturbance_figure8.npy'
-input_file_path = home_path + 'input_figure8.npy'
+#dataset_path = home_path + 'datasets/'
+dataset_path = home_path + 'circle_figure8_fullset/'
+plot_path = dataset_path + 'plots/'
+npy_path = dataset_path + 'npy_data_folder/'
+disturbance_file_path = dataset_path + 'disturbance_full.npy'
+input_file_path = dataset_path + 'input_full.npy'
 wind_disturbance = jnp.load(disturbance_file_path)
 input = jnp.load(input_file_path)
 
@@ -113,14 +116,16 @@ wind_disturbance = wind_disturbance[~rows_to_remove]
 input = input[~rows_to_remove]
 print(f"The remaining length is {wind_disturbance.shape}")
 
-np.save(dataset_path+"fullset_input.npy", input)
+np.save(npy_path + "fullset_input.npy", input)
 assert wind_disturbance.shape[0] == input.shape[0]
 
 
 wind_disturbance_x = jnp.array(wind_disturbance[:,0]).reshape(-1,1)
 wind_disturbance_y = jnp.array(wind_disturbance[:,1]).reshape(-1,1)
 wind_disturbance_z = jnp.array(wind_disturbance[:,2]).reshape(-1,1)
-np.save(dataset_path+"wind_disturbance_x.npy", wind_disturbance_x)
+np.save(npy_path + "wind_disturbance_x.npy", wind_disturbance_x)
+np.save(npy_path + "wind_disturbance_y.npy", wind_disturbance_y)
+np.save(npy_path + "wind_disturbance_z.npy", wind_disturbance_z)
 assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_z.shape# == (set_size,1)
 
 
@@ -134,20 +139,20 @@ test_input = input[mask]
 test_disturbance_x = wind_disturbance_x[mask]
 test_disturbance_y = wind_disturbance_y[mask]
 test_disturbance_z = wind_disturbance_z[mask]
-jnp.save(dataset_path+'test_input.npy', test_input)
-jnp.save(dataset_path+'test_disturbance_x.npy', test_disturbance_x)
-jnp.save(dataset_path+'test_disturbance_y.npy', test_disturbance_y)
-jnp.save(dataset_path+'test_disturbance_z.npy', test_disturbance_z)
+jnp.save(npy_path+'test_input.npy', test_input)
+jnp.save(npy_path+'test_disturbance_x.npy', test_disturbance_x)
+jnp.save(npy_path+'test_disturbance_y.npy', test_disturbance_y)
+jnp.save(npy_path+'test_disturbance_z.npy', test_disturbance_z)
 print(f"training on {training_size} datapoints")
 training_input = input[training_indices]
 
-np.save(dataset_path+"training_input.npy", training_input)
+np.save(npy_path+"training_input.npy", training_input)
 training_disturbance_x = wind_disturbance_x[training_indices]
 training_disturbance_y = wind_disturbance_y[training_indices]
 training_disturbance_z = wind_disturbance_z[training_indices]
-np.save(dataset_path+"training_disturbance_x.npy", training_disturbance_x)
-np.save(dataset_path+"training_disturbance_y.npy", training_disturbance_y)
-np.save(dataset_path+"training_disturbance_z.npy", training_disturbance_z)
+np.save(npy_path+"training_disturbance_x.npy", training_disturbance_x)
+np.save(npy_path+"training_disturbance_y.npy", training_disturbance_y)
+np.save(npy_path+"training_disturbance_z.npy", training_disturbance_z)
 disturbance_x_mean = 0.0
 disturbance_y_mean = 0.0
 disturbance_z_mean = 0.0
@@ -177,7 +182,7 @@ for j in range(3):
 
 
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 0.5
+    noise_level = 1.0
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
@@ -201,8 +206,8 @@ for j in range(3):
     posterior = prior * likelihood
 
 
-    #optimiser = ox.adam(learning_rate=1e-2)
-    optimiser = ox.adam(learning_rate=5e-3) 
+    optimiser = ox.adam(learning_rate=1e-2)
+    #optimiser = ox.adam(learning_rate=5e-3) 
     # Define the marginal log-likelihood
     negative_mll = jit(gpx.objectives.ConjugateMLL(negative=True))
 
@@ -211,7 +216,7 @@ for j in range(3):
         objective=negative_mll,
         train_data=D,
         optim=optimiser,
-        num_iters=1000,
+        num_iters=2000,
         safe=True,
         key=key,
     )
@@ -227,19 +232,19 @@ for j in range(3):
     print("input shape = ", input.shape)
     print("test shape = ", xtest.shape)
     
-    gp_model_file_path = ''
+    gp_model_file_path = 'models/'
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = 'gp_model_x_norm3_eight.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = 'gp_model_y_norm3_eight.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = 'gp_model_z_norm3_eight.pkl'
-    with open(gp_model_file_path, 'wb') as file:
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full.pkl'
+    with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################
     latent_dist = opt_posterior(xtest, D)
@@ -295,7 +300,7 @@ for j in range(3):
 fig.tight_layout()
 #fig.text(f"Mean Sqaure Error = {error_x+error_y+error_z}")
 #plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_{disturbance_d[j]}.png")
-plt.savefig("GP with normalized disturbance by factor of 3.png")
+plt.savefig(plot_path+"GP_fullset_norm5.png")
 plt.show()
 
 
@@ -333,7 +338,7 @@ for j in range(3):
     plt.xlabel('time index')
     plt.ylabel('Disturbance (m/s^2)')
     plt.legend()
-    plt.savefig(f'GP_norm3_{disturbance_d[j]}.png')
+    plt.savefig(plot_path + f'GP_norm5_{disturbance_d[j]}.png')
     plt.show()
 
 num_indices = int(input.shape[0]/4)
@@ -371,11 +376,11 @@ for j in range(3):
                         factor*(pred_mean + 1.96 * pred_std).flatten(), 
                         color='orange', alpha=0.2, label='95% Confidence Interval')
     
-    plt.title(f'{disturbance_d[j]} axis Disturbance vs time index')
+    plt.title(f'sparse training set {disturbance_d[j]} axis Disturbance vs time index')
     plt.xlabel('time index')
     plt.ylabel('Disturbance (m/s^2)')
     plt.legend()
-    plt.savefig(f'GP_norm3_{disturbance_d[j]}.png')
+    plt.savefig(plot_path+f'GP_fullset_norm5_{disturbance_d[j]}.png')
     plt.show()
 
 # for j in range(3):
