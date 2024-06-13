@@ -5,15 +5,18 @@ def state_ref(t):
     pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 
-def policy( t, states):
+def policy( t, states, policy_params):
     '''
     Expect a multiple states as input. Each state is a column vector.
     Should then return multiple control inputs. Each input should be a column vector
     '''
     m = 0.641 #kg
     g = 9.8066
-    kx = 14
-    kv = 7.4
+    # kx = 14
+    # kv = 7.4
+
+    kx = policy_params[0]
+    kv = policy_params[1]
 
     pos_ref, vel_ref, acc_ref = state_ref(t)
 

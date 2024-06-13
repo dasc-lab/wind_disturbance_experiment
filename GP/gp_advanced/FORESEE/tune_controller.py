@@ -104,14 +104,15 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
 # file_path1 = ""
 # file_path2 = ""
 # file_path3 = ""
-# get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
+get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
+get_future_reward_grad = jit(grad(get_future_reward, 1))
 
-# gp_train_x = ""
-# gp_train_y = ""
+gp_train_x = ""
+gp_train_y = ""
 
 
 
-# get_future_reward_grad = jit(grad(get_future_reward, 1))
+
 
 def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y ):
     '''
@@ -122,15 +123,15 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
 
     if use_custom_gd:
         for i in range(100):
-            param_policy_grad = get_future_reward_grad( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y)
+            param_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y)
             param_policy_grad = np.clip( param_policy_grad, -grad_clip, grad_clip )
             params_policy = params_policy - custom_gd_lr_rate * param_policy_grad
             # params_policy =  np.clip( params_policy, -10, 10 )
-        print(f"reward final GD : { get_future_reward( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y ) }")
+        print(f"reward final GD : { get_future_reward( init_state, params_policy, gp_train_x, gp_train_y ) }")
 
     if use_jax_scipy:
         costs_adam = []
-        minimize_function = lambda params: get_future_reward( init_state, params, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y )
+        minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
         solver = jaxopt.ScipyMinimize(fun=minimize_function, maxiter=iter_adam)
         params_policy, cost_state = solver.run(params_policy)
         print(f"Jaxopt state: {cost_state}")
@@ -138,13 +139,13 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
     if use_adam:
         # print(f"inside adam")
         # t0 = time.time()
-        cost = get_future_reward( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y )
+        cost = get_future_reward( init_state, params_policy, gp_train_x, gp_train_y )
         # print(f"adam first reward: {time.time()-t0}")
         best_params = np.copy(params_policy)
         best_cost = np.copy(cost)
         costs_adam = []
         
-        cost = get_future_reward( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y )
+        cost = get_future_reward( init_state, params_policy, gp_train_x, gp_train_y )
         cost_run = [cost]
         
         scheduler = optax.exponential_decay(
@@ -166,12 +167,12 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
         for i in range(iter_adam + 1):
             reset = reset + 1
             
-            grads = get_future_reward_grad( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y)
+            grads = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y)
             updates, opt_state = gradient_transform.update(grads, opt_state)                
             params_policy = optax.apply_updates(params_policy, updates)
             
             # book keeping
-            cost = get_future_reward( init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y)
+            cost = get_future_reward( init_state, params_policy, gp_train_x, gp_train_y)
             cost_run.append(cost)
         
         params_policy = np.copy(best_params)
