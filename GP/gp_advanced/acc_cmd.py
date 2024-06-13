@@ -45,7 +45,7 @@ home_path = home_path + 'circle_data/'
 #(1400, len(x_data)-900)
 #bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
-#bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
 #bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
@@ -57,7 +57,7 @@ home_path = home_path + 'circle_data/'
 ########################################################################
 home_path = home_path.replace('circle_data', 'eight_data')
 
-bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
+#bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
 #bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
@@ -123,7 +123,11 @@ with Reader(bag_path) as reader:
             acc_ref = msg.acc_ref
             diff_pos = pos - pos_ref
             diff_vel = vel - vel_ref
-            thrust = -kx*diff_pos -kv*diff_vel + m * acc_ref #- g*m 
+            if np.linalg.norm(diff_pos) > 2.0:
+                diff_pos = 2.0 * diff_pos/ np.linalg.norm(diff_pos)
+            if np.linalg.norm(diff_vel) > 5.0:
+                diff_vel = 5.0 * diff_vel/ np.linalg.norm(diff_vel)
+            thrust = -kx*diff_pos - kv*diff_vel + m * acc_ref #- g*m 
             #thrust = thrust  + g * m
             acc_cmd = thrust/m
             acc_diff = acc - acc_cmd
@@ -145,8 +149,8 @@ with Reader(bag_path) as reader:
 # print("z min: ", min(z_data))
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
-cutoff = len(acc_cmd_arr) - 3500
-threshold = 1200
+cutoff = len(acc_cmd_arr) - 1000
+threshold = 1000
 
 
 print("cutoff, threshold = ", cutoff, threshold)
