@@ -13,7 +13,9 @@ plt.rcParams.update({'font.size': 10})
 from jax_utils import *
 from gp_utils import *
 from policy import policy
-
+home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
+trajectory_path = home_path + 'circle_figure8_fullset/'
+model_path = trajectory_path + 'models/'
 key = random.PRNGKey(2)
 horizon = 30
 dt = 0.01
@@ -100,15 +102,15 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
         reward =  lax.fori_loop( 0, horizon, body, (reward, states, weights) )[0]
         return reward
     return compute_reward
-
-# file_path1 = ""
-# file_path2 = ""
-# file_path3 = ""
+print(model_path)
+file_path1 = model_path + "gp_model_x_norm5_full.pkl"
+file_path2 = model_path + "gp_model_y_norm5_full.pkl"
+file_path3 = model_path + "gp_model_z_norm5_full.pkl"
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
 get_future_reward_grad = jit(grad(get_future_reward, 1))
 
-gp_train_x = ""
-gp_train_y = ""
+gp_train_x = trajectory_path + "disturbance_full.npy"
+gp_train_y = trajectory_path + "input_full.npy"
 
 
 
