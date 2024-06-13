@@ -1,14 +1,26 @@
 import jax.numpy as jnp
 from jax import jit, vmap
 
-def policy( state, state_ref, acc_ref):
+def state_ref(t):
+    pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
+    return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
+
+def policy( t, states):
+    '''
+    Expect a multiple states as input. Each state is a column vector.
+    Should then return multiple control inputs. Each input should be a column vector
+    '''
     m = 0.641 #kg
     g = 9.8066
     kx = 14
     kv = 7.4
-    ex = state[0:3] - state_ref[0:3]
-    ev = state[3:6] - state_ref[3:6]
-    return -kx * ex -kv * ev + m*(acc_ref) - m*g 
+
+    pos_ref, vel_ref, acc_ref = state_ref(t)
+
+    ex = states[0:3] - pos_ref
+    ev = states[3:6] - vel_ref
+    thrust = - kx * ex - kv * ev + m * acc_ref - m * g
+    return thrust / m, pos_ref, vel_ref
 
 
 
@@ -25,6 +37,7 @@ figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
 figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
+@jit
 def circle_pos_vel_acc(deltaT, radius, angular_vel, origin_x, origin_y):
     '''
     Calculate reference pos, vel, and acc for the drone flying in a circular trajectory in NED frame.
@@ -35,31 +48,27 @@ def circle_pos_vel_acc(deltaT, radius, angular_vel, origin_x, origin_y):
     ######################################################
     x = radius * jnp.cos(angular_vel * deltaT) + origin_x
     y = radius * jnp.sin(angular_vel * deltaT) + origin_y
-    ref_pos = [y,  x, -0.4]
+    ref_pos = jnp.array([y,  x, -0.4])
 
     ######################################################
     ################## Reference Vel #####################
     ######################################################
     vx = -radius * angular_vel* jnp.sin(angular_vel * deltaT)
     vy = radius * angular_vel* jnp.cos(angular_vel * deltaT)
-    ref_vel = [vy, vx,0]
+    ref_vel = jnp.array([vy, vx,0])
 
     ######################################################
     ################## Reference Acc #####################
     ######################################################
     ax = -radius * (angular_vel**2) * jnp.cos(angular_vel * deltaT)
     ay = -radius * (angular_vel**2) * jnp.sin(angular_vel * deltaT)
-    ref_acc = [ay, ax, 0]
+    ref_acc = jnp.array([ay, ax, 0])
 
     ######################################################
     ################## To Jnp Array ######################
     ######################################################
-
-    pos = jnp.array(ref_pos)
-    vel = jnp.array(ref_vel)
-    acc = jnp.array(ref_acc)
-    assert pos.shape == vel.shape == acc.shape, "output shapes are different"
-    return pos, vel, acc
+    # assert pos.shape == vel.shape == acc.shape, "output shapes are different"
+    return ref_pos, ref_vel, ref_acc
 
 
 
