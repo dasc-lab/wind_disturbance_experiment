@@ -4,7 +4,7 @@ from jax import jit, vmap
 def state_ref(t):
     pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
-
+policy_params = [14, 7.4]
 def policy( t, states, policy_params):
     '''
     Expect a multiple states as input. Each state is a column vector.
