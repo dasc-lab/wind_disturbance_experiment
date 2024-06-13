@@ -16,6 +16,7 @@ from policy import policy
 
 key = random.PRNGKey(2)
 horizon = 30
+dt = 0.01
 
 # Custom gradient descent
 grad_clip = 1
@@ -38,62 +39,79 @@ def initialize_sigma_points(X):
     weights = np.ones((1,num_points)) * 1.0/( num_points )
     return sigma_points, weights
 
-@jit
-def get_future_reward(X, policy_params, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y):
+def reward_func(states, weights, pos_ref, vel_ref):
     '''
-    Performs Gradient Descent
+    calculates mean squared error
+    inputs: states and the weights of sigma points
+    returns: calculated reward
     '''
-    states, weights = initialize_sigma_points(X)
-    reward = 0
-    
-    gp0 = initialize_gp_prediction( gp_params1, gp_train_x, gp_train_y[:,0].reshape(-1,1) )
-    gp1 = initialize_gp_prediction( gp_params2, gp_train_x, gp_train_y[:,1].reshape(-1,1) )
-    gp2 = initialize_gp_prediction( gp_params3, gp_train_x, gp_train_y[:,2].reshape(-1,1) )
-    gp3 = initialize_gp_prediction( gp_params4, gp_train_x, gp_train_y[:,3].reshape(-1,1) )
-    
-    # n = 6
-    # N = 2*n+1 = 13
-    # 13 becomes 169 pionts during expansion
-    # compress back to 13 points
+    ex = states[0:3] - pos_ref
+    ev = states[3:6] - vel_ref
 
+    ex_ev_mean = get_mean(jnp.append(ex, ev, axis=0), weights )
 
-    def body(t, inputs):
+    pos_factor = 1.0
+    vel_factor = 0.1
+    reward = pos_factor * jnp.sum(ex_ev_mean[0:3] ** 2) + vel_factor * jnp.sum(ex_ev_mean[3:6])
+    return reward
+
+def setup_future_reward_func(file_path1, file_path2, file_path3):
+
+    gp0 = initialize_gp_prediction( file_path1 ) #, gp_train_x, gp_train_y[:,0].reshape(-1,1) )
+    gp1 = initialize_gp_prediction( file_path2 ) #, gp_train_x, gp_train_y[:,1].reshape(-1,1) )
+    gp2 = initialize_gp_prediction( file_path3 ) #, gp_train_x, gp_train_y[:,2].reshape(-1,1) )
+
+    @jit
+    def compute_reward(X, policy_params, gp_train_x, gp_train_y):
         '''
-        Performs UT-EC with 6 states
+        Performs Gradient Descent
         '''
-        reward, states, weights = inputs
-        # mean_position = get_mean( states, weights )
+        states, weights = initialize_sigma_points(X)
+        reward = 0
 
-        # each state is n x 1
-        # states (sigma points) are n x N
+        # n = 6
+        # N = 2*n+1 = 13
+        # 13 becomes 169 pionts during expansion
+        # compress back to 13 points
 
-        # Caclulates input with geometric controller
-        control_inputs = policy( states, policy_params ) 
-        next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2, gp3] )
+        def body(h, inputs):
+            '''
+            Performs UT-EC with 6 states
+            '''
+            t = h * dt
+            reward, states, weights = inputs
 
-        # Expansion operation
-        # expands 3 points to 9 points
-        next_states_expanded, next_weights_expanded, next_weights_cov_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
-        # take 1st mean, cov -> generate sigma points, weights
-        # take 2nd mean, cov -> generate sigma points, weights
-        # take 3rd mean, cov -> generate sigma points, weights
-        # then put them all together -> 09 points
+            # Caclulates input with geometric controller
+            control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
+            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y )
+
+            # Expansion operation
+            next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
+            
+            # Compression operation
+            next_states, next_weights = sigma_point_compress( next_states_expanded, next_weights_expanded )
+
+            states = next_states
+            weights = next_weights
+
+            reward = reward + reward_func( states, weights, pos_ref, vel_ref ) # reward is loss
+            return reward, states, weights
         
-        # Compression operation
-        next_states, next_weights = sigma_point_compress( next_states_expanded, next_weights_expanded )
+        reward =  lax.fori_loop( 0, horizon, body, (reward, states, weights) )[0]
+        return reward
+    return compute_reward
+
+# file_path1 = ""
+# file_path2 = ""
+# file_path3 = ""
+# get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
+
+# gp_train_x = ""
+# gp_train_y = ""
 
 
-        states = next_states
-        weights = next_weights
 
-        reward = reward + reward_func( states, weights ) # reward is loss
-        return reward, states, weights
-    
-    return lax.fori_loop( 0, horizon, body, (reward, states, weights) )[0]
-
-@jit
-def get_future_reward_grad(X, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y ):
-    return grad(get_future_reward, 1)(X, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y)
+# get_future_reward_grad = jit(grad(get_future_reward, 1))
 
 def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y ):
     '''
@@ -163,11 +181,4 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
         print(f" *************** NANs? :{np.any(np.isnan(params_policy)==True)} ")
     return key, params_policy, costs_adam
 
-def reward_func(states, weights):
-    '''
-    calculates mean squared error
-    inputs: states and the weights of sigma points
-    returns: calculated reward
-    '''
-    new_reward = None
-    return new_reward
+

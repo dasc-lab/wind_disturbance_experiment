@@ -5,6 +5,19 @@ import jax.numpy as jnp
 from jax import jit, lax
 # import numpy as np
 
+# @jit
+def step(x,u,dt):
+    return x+u*dt
+
+def dynamics_step( base_term, state_dot, dt ):
+    next_state = base_term + state_dot * dt
+    return next_state
+
+def dynamics_xdot_noisy(state, action):
+    xdot = jnp.array([ state[0,0]**2, state[1,0]**2 ]).reshape(-1,1)
+    cov = jnp.zeros((2,2))
+    return xdot, cov
+
 @jit
 def get_mean( sigma_points, weights ):
     weighted_points = sigma_points * weights[0]
@@ -23,7 +36,6 @@ def get_mean_cov(sigma_points, weights):
     cov = jnp.diag(jnp.sum(centered_points**2 * weights[0], axis=1))
     return mu, cov
 
-@jit
 def get_ut_cov_root_diagonal(cov):
     offset = 0.000  # TODO: make sure not zero here
     root_term = jnp.diag( jnp.sqrt(jnp.diagonal(cov)+offset)  )
@@ -123,6 +135,34 @@ def sigma_point_expand_with_mean_cov( mus, covs, weights ):
     return new_points, new_weights
 
 @jit
+def sigma_point_expand(sigma_points, weights, control, dt):
+   
+    n, N = sigma_points.shape   
+    
+    # new_points = jnp.zeros((n,N*(2*n+1)))
+    # new_weights = jnp.zeros((1,N*(2*n+1)))
+
+    # because Jax cannot do .at[start, stop] operation without having fixed start/stop/step ..
+    new_points = jnp.zeros((n*(2*n+1),N))
+    new_weights = jnp.zeros((2*n+1,N))
+    
+    def body(i, inputs):
+        new_points, new_weights = inputs        
+        mu, cov = dynamics_xdot_noisy(sigma_points[:,i].reshape(-1,1), control.reshape(-1,1))
+
+        # Albus: look these 2 lines ###########################
+        root_term = get_ut_cov_root_diagonal(cov)           
+        temp_points, temp_weights = generate_sigma_points_gaussian( mu, root_term, sigma_points[:,i].reshape(-1,1), dt )
+        ##############################################
+
+        new_points = new_points.at[:,i].set( temp_points.reshape(-1,1, order='F')[:,0] )
+        new_weights = new_weights.at[:,i].set( temp_weights.reshape(-1,1, order='F')[:,0] * weights[:,i] )   
+        return new_points, new_weights
+    return_points, return_weights = lax.fori_loop(0, N, body, (new_points, new_weights))
+    return return_points.reshape((n, N*(2*n+1)), order='F'), return_weights.reshape((1,N*(2*n+1)), order='F')
+        
+
+@jit
 def sigma_point_compress( sigma_points, weights ):
     mu, cov = get_mean_cov( sigma_points, weights )
     cov_root_term = get_ut_cov_root_diagonal( cov )  
@@ -135,3 +175,17 @@ def sigma_point_compress_GenUT( sigma_points, weights ):
     cov_root_term = get_ut_cov_root_diagonal( cov )  
     base_term = jnp.zeros((mu.shape))
     return generate_sigma_points_gaussian_GenUT( mu, cov_root_term, skewness, kurt, base_term, jnp.array([1.0]) )
+
+@jit
+def foresee_propagate_GenUT( sigma_points, weights, action, dt ):
+    expanded_sigma_points, expanded_weights = sigma_point_expand( sigma_points, weights, action, dt )
+    compressed_sigma_points, compressed_weights = sigma_point_compress_GenUT(expanded_sigma_points, expanded_weights)
+    return compressed_sigma_points, compressed_weights
+
+@jit
+def foresee_propagate( sigma_points, weights, action, dt ):
+
+    #Expansion Layer
+    expanded_sigma_points, expanded_weights = sigma_point_expand( sigma_points, weights, action, dt )
+    compressed_sigma_points, compressed_weights = sigma_point_compress(expanded_sigma_points, expanded_weights)
+    return compressed_sigma_points, compressed_weights
