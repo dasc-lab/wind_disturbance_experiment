@@ -103,7 +103,7 @@ def generate_sigma_points_gaussian_GenUT( mu, cov_root, skewness, kurt, base_ter
 
 @jit
 def sigma_point_expand_with_mean_cov( mus, covs, weights ):
-    n, N = mus.shape
+    n, N = mus.shape # n=6, N=13
     new_points = jnp.zeros((n*(2*n+1),N))
     new_weights = jnp.zeros((2*n+1,N))
 
@@ -120,7 +120,7 @@ def sigma_point_expand_with_mean_cov( mus, covs, weights ):
         new_weights = new_weights.at[:,i].set( temp_weights.reshape(-1,1, order='F')[:,0] * weights[:,i] )   
         return new_points, new_weights
     new_points, new_weights = lax.fori_loop(0, N, body, (new_points, new_weights))
-    return new_points, new_weights
+    return new_points.reshape((n, N*(2*n+1)), oder='F'), new_weights.reshape((1,n*(2*n+1)), order='F')
 
 @jit
 def sigma_point_compress( sigma_points, weights ):

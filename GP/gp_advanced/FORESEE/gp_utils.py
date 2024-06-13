@@ -13,6 +13,8 @@ def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt )
 
     test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
 
+
+
     # X disturbance
     D = Dataset(X=train_x, y=train_y[0])
     latent_dist = gps[0](test_x, D)
@@ -37,7 +39,7 @@ def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt )
     pred_mu = jnp.concatenate( (pred_mean0, pred_mean1, pred_mean2), axis=0 )
     pred_cov = jnp.concatenate( (pred_std0**2, pred_std1**2, pred_std2**2), axis=0 )
 
-    next_states_pos = states[0:3] + states[3:6] * dt
+    next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
     next_states_vel_mu = states[3:6] + control_inputs * dt + pred_mu * dt
     next_states_vel_cov = pred_cov * dt * dt
 
