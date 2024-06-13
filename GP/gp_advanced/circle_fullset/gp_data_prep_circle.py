@@ -19,7 +19,7 @@ print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
 
-def fft_filter(signal, sampling_rate = 5000):
+def fft_filter(signal, sampling_rate = 10000):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -37,7 +37,7 @@ def fft_filter(signal, sampling_rate = 5000):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+100 #Hz
+    cutoff_freq = peak_frequency+1000 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 def apply_fft_filter_to_columns(array, sampling_rate=5000):
