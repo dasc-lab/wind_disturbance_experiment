@@ -11,10 +11,38 @@ from rosbags.typesys import Stores, get_typestore, get_types_from_msg
 from pathlib import Path
 import numpy as np
 
+
 import csv
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.fftpack import fft, fftfreq
+from scipy.signal import butter, filtfilt
+def fft_filter(signal, sampling_rate = 5000):
+    yf = fft_signal = np.fft.fft(signal)
+    xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
+    N = len(signal)
 
+    magnitude = 2.0/N * np.abs(yf[:N//2])
+
+    # Find the peak frequency
+    peak_index = np.argmax(magnitude)
+    peak_frequency = xf[peak_index]
+    peak_amplitude = magnitude[peak_index]
+    def butter_lowpass_filter(data, cutoff_freq, fs, order=2):
+        nyq = 0.5 * fs
+        normal_cutoff = cutoff_freq / nyq
+        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        y = filtfilt(b, a, data)
+        return y
+
+    cutoff_freq = peak_frequency+1000 #Hz
+    filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
+    return filtered_signal
+def apply_fft_filter_to_columns(array, sampling_rate=5000):
+    filtered_array = np.zeros_like(array)
+    for i in range(array.shape[1]):
+        filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
+    return filtered_array
 
 
 save = True
@@ -29,15 +57,17 @@ kx = 14
 kv = 7.4
 m = 0.681
 g = 9.81
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
 
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
+repo_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/'
+plot_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/trajectory_sinusoid_plots/'
 ########################################################################
 ######################## Circle Paths ##################################
 ########################################################################
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
@@ -45,7 +75,7 @@ home_path = home_path + 'circle_data/'
 #(1400, len(x_data)-900)
 #bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
-bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
 #bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
@@ -80,14 +110,14 @@ home_path = home_path.replace('circle_data', 'eight_data')
 
 # Define the topics we want to extract data from
 topic_name = '/drone/combined_data' # Add more topics as needed
-png_name = bag_path.split('/')[-1]+'_trajectory'
+png_name = bag_path.split('/')[-1]+'_trajectory_acc_cmd_disturbance'
 
 
 
 #bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 typestore = get_typestore(Stores.LATEST)
 
-msg_text = Path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg').read_text()
+msg_text = Path(repo_path+'DynamicsData.msg').read_text()
 
 add_types = {}
 
@@ -131,7 +161,7 @@ with Reader(bag_path) as reader:
             #thrust = thrust  + g * m
             acc_cmd = thrust/m
             acc_diff = acc - acc_cmd
-            # disturbance.append(acc_diff)
+            disturbance.append(acc_diff)
             acc_cmd_arr.append(acc_cmd)
             acc_arr.append(acc)
 # Iterate through the messages in the bag file for the current topic
@@ -149,9 +179,11 @@ with Reader(bag_path) as reader:
 # print("z min: ", min(z_data))
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
-cutoff = len(acc_cmd_arr) - 1000
-threshold = 1000
-
+unfiltered_acc_arr = recorded_acc_arr = np.array(acc_arr)
+recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=8000)
+disturbance = recorded_acc_arr - acc_cmd_arr
+cutoff = len(acc_cmd_arr) - 700
+threshold = 1200
 
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)
@@ -162,6 +194,37 @@ print("data set size = ",  cutoff - threshold)
 x = np.array(acc_cmd_arr[threshold:cutoff,0])
 y = np.array(acc_cmd_arr[threshold:cutoff,1])
 z = np.array(acc_cmd_arr[threshold:cutoff,2])
+
+
+disturbance_x = np.array(disturbance[threshold:cutoff,0])
+disturbance_y = np.array(disturbance[threshold:cutoff,1])
+disturbance_z = np.array(disturbance[threshold:cutoff,2])
+
+recorded_acc_arr_x = np.array(recorded_acc_arr[threshold:cutoff,0])
+recorded_acc_arr_y = np.array(recorded_acc_arr[threshold:cutoff,1])
+recorded_acc_arr_z = np.array(recorded_acc_arr[threshold:cutoff,2])
+
+unfiltered_acc_arr_x = np.array(unfiltered_acc_arr[threshold:cutoff,0])
+unfiltered_acc_arr_y = np.array(unfiltered_acc_arr[threshold:cutoff,1])
+unfiltered_acc_arr_z = np.array(unfiltered_acc_arr[threshold:cutoff,2])
+
+plt.figure()
+plt.plot(range(unfiltered_acc_arr_x.size), unfiltered_acc_arr_x , 'r',label='unfiltered recorded acc')
+plt.plot(range(recorded_acc_arr_x.size),  recorded_acc_arr_x, 'b',label='Acc after filter')
+plt.legend()
+plt.show()
+
+plt.figure()
+plt.plot(range(unfiltered_acc_arr_y.size), unfiltered_acc_arr_y , 'r',label='unfiltered recorded acc')
+plt.plot(range(recorded_acc_arr_y.size),  recorded_acc_arr_y, 'b',label='Acc after filter')
+plt.legend()
+plt.show()
+
+plt.figure()
+plt.plot(range(unfiltered_acc_arr_z.size), unfiltered_acc_arr_z , 'r',label='unfiltered recorded acc')
+plt.plot(range(recorded_acc_arr_z.size),  recorded_acc_arr_z, 'b',label='Acc after filter')
+plt.legend()
+plt.show()
 #print("size of x data is: ",x.shape)
 # x_t = x_ideal = np.array(x_ideal[threshold:cutoff])
 # y_t = y_ideal = np.array(y_ideal[threshold:cutoff])
@@ -177,27 +240,60 @@ z = np.array(acc_cmd_arr[threshold:cutoff,2])
 
 fig = plt.figure()
 ax1 = plt.subplot2grid((3,1), (0,0) , rowspan=1)
+ax1.plot(range(recorded_acc_arr_x.size), recorded_acc_arr_x , 'g',label='recorded_acc_x')
+ax1.plot(range(disturbance_x.size), disturbance_x , 'r',label='disturbance x')
 ax1.plot(range(x.size), x , 'b',label='Acc command x')
 # ax1.plot(range(x_t.size), x_t.T, 'b',label='Reference trajectory')
 ax1.legend(loc='upper right')
-ax1.set_title("x")
-ax1.set_ylabel("meters")
+ax1.set_title("acc_cmd_x and disturbance_x")
+ax1.set_ylabel("meters/second^2")
 ax1 = plt.subplot2grid((3,1), (1,0) , rowspan=1)
+ax1.plot(range(recorded_acc_arr_y.size), recorded_acc_arr_y , 'g',label='recorded_acc_y')
+ax1.plot(range(disturbance_y.size), disturbance_y , 'r',label='disturbance y')
 ax1.plot(range(y.size), y,'b',label='Acc command y')
 # ax1.plot(range(y_t.size), y_t.T, 'b',label='Reference trajectory')
 ax1.legend(loc='upper right')
-ax1.set_title("y")
-ax1.set_ylabel("meters")
+ax1.set_title("acc_cmd_y and disturbance_y")
+ax1.set_ylabel("meters/second^2")
 ax1 = plt.subplot2grid((3,1), (2,0) , rowspan=1)
+ax1.plot(range(recorded_acc_arr_z.size), recorded_acc_arr_z , 'g',label='recorded_acc_z')
+ax1.plot(range(disturbance_z.size), disturbance_z , 'r',label='disturbance z')
 ax1.plot(range(z.size), z,'b',label='Actual trajectory')
 # ax1.plot(range(z_t.size), z_t.T, 'b',label='Reference trajectory')
 ax1.legend(loc='upper right')
-ax1.set_ylabel("meters")
-ax1.set_title("z")
+ax1.set_ylabel("meters/second^2")
+ax1.set_title("acc_cmd_z and disturbance_z")
 plt.subplots_adjust(hspace=0.5) 
-png_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/trajectory_sinusoid_plots/' + png_name +'.png'
+png_path = plot_path + png_name +'.png'
 plt.suptitle(png_name)
 plt.savefig(png_path)
+plt.show()
+
+plt.figure()
+plt.plot(range(recorded_acc_arr_x.size), recorded_acc_arr_x , 'g',label='recorded_acc_x')
+plt.plot(range(disturbance_x.size), disturbance_x , 'r',label='disturbance x')
+plt.plot(range(x.size), x , 'b',label='Acc command x')
+plt.title("x axis acc_recorded, acc_cmd, and disturbance")
+plt.legend()
+plt.ylabel("acc")
+plt.show()
+
+plt.figure()
+plt.plot(range(recorded_acc_arr_y.size), recorded_acc_arr_y , 'g',label='recorded_acc_y')
+plt.plot(range(disturbance_y.size), disturbance_y , 'r',label='disturbance y')
+plt.plot(range(y.size), y , 'b',label='Acc command y')
+plt.title("y axis acc_recorded, acc_cmd, and disturbance")
+plt.ylabel("acc")
+plt.legend()
+plt.show()
+
+plt.figure()
+plt.plot(range(recorded_acc_arr_z.size), recorded_acc_arr_z , 'g',label='recorded_acc_z')
+plt.plot(range(disturbance_z.size), disturbance_z , 'r',label='disturbance z')
+plt.plot(range(z.size), z , 'b',label='Acc command z')
+plt.title("z axis acc_recorded, acc_cmd, and disturbance")
+plt.ylabel("acc")
+plt.legend()
 plt.show()
 #input = input("save trajectory to csv? y/n")
 # input = 'n'

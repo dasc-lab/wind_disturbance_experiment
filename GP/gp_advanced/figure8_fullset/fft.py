@@ -8,9 +8,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
-from plot_trajectory_ref import bag_path, cutoff, threshold
+#from plot_trajectory_ref import bag_path, cutoff, threshold
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
-signal = np.load("recorded_acc.npy")
+
+signal = np.load(home_path+"recorded_acc.npy")
 #signal = np.load("cmd_arr.npy")
 #signal = np.load("disturbance.npy")
 cutoff = signal.shape[0]
@@ -61,7 +63,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     y = filtfilt(b, a, data)
     return y
 
-cutoff_freq = peak_frequency+2000 #Hz
+cutoff_freq = peak_frequency+100 #Hz
 filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)
 plt.figure(figsize=(12, 6))
 plt.plot(signal, label='Original Signal')
