@@ -14,23 +14,27 @@ def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt )
     test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
 
 
-
+    #################################################
+    ####### Changed: dataset(.reshape) #######
     # X disturbance
-    D = Dataset(X=train_x, y=train_y[0])
+    #D = Dataset(X=train_x, y=train_y[0])
+    D = Dataset(X=train_x, y=train_y[0].reshape(-1,1))
     latent_dist = gps[0](test_x, D)
     predictive_dist = gps[0].likelihood(latent_dist)
     pred_mean0 = predictive_dist.mean().reshape(-1,1)
     pred_std0 = predictive_dist.stddev().reshape(-1,1)
 
     # Y disturbance
-    D = Dataset(X=train_x, y=train_y[1])
+    #D = Dataset(X=train_x, y=train_y[1])
+    D = Dataset(X=train_x, y=train_y[1].reshape(-1,1))
     latent_dist = gps[1](test_x, D)
     predictive_dist = gps[1].likelihood(latent_dist)
     pred_mean1 = predictive_dist.mean().reshape(-1,1)
     pred_std1 = predictive_dist.stddev().reshape(-1,1)
 
     # Z disturbance
-    D = Dataset(X=train_x, y=train_y[2])
+    #D = Dataset(X=train_x, y=train_y[2])
+    D = Dataset(X=train_x, y=train_y[2].reshape(-1,1))
     latent_dist = gps[2](test_x, D)
     predictive_dist = gps[2].likelihood(latent_dist)
     pred_mean2 = predictive_dist.mean().reshape(-1,1)
