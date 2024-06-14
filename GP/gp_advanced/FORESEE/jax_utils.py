@@ -59,6 +59,15 @@ def get_mean_cov_skew_kurt_for_generation( sigma_points, weights ):
 
 @jit
 def generate_sigma_points_gaussian( mu, cov_root, base_term, factor ):
+    '''
+    Standard UT: Generate sigma points based on a vector of (n,) mus, resulting in 2n+1 points for each dim
+    input:
+    mu: (n,1)
+   
+    output:
+    new_weights: (1, 2n+1)
+    new_points: (n, 2n+1)
+    '''
     n = mu.shape[0]     
     N = 2*n + 1 # total points
 
@@ -120,7 +129,7 @@ def sigma_point_expand_with_mean_cov( mus, covs, weights ):
         new_weights = new_weights.at[:,i].set( temp_weights.reshape(-1,1, order='F')[:,0] * weights[:,i] )   
         return new_points, new_weights
     new_points, new_weights = lax.fori_loop(0, N, body, (new_points, new_weights))
-    return new_points.reshape((n, N*(2*n+1)), oder='F'), new_weights.reshape((1,n*(2*n+1)), order='F')
+    return new_points.reshape((n, N*(2*n+1)), order='F'), new_weights.reshape((1,n*(2*n+1)), order='F')
 
 @jit
 def sigma_point_compress( sigma_points, weights ):
