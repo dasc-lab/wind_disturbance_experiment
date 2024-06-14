@@ -42,7 +42,12 @@ def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt )
 
     pred_mu = jnp.concatenate( (pred_mean0, pred_mean1, pred_mean2), axis=0 )
     pred_cov = jnp.concatenate( (pred_std0**2, pred_std1**2, pred_std2**2), axis=0 )
+    ################################################
+    ############ bug fix: ########################
+    ############ bug: line 52, incompatible shapes control inputs and pred_mu ############
+    pred_mu = pred_mu.reshape(3,-1)
 
+    ################################################
     next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
     next_states_vel_mu = states[3:6] + control_inputs * dt + pred_mu * dt
     next_states_vel_cov = pred_cov * dt * dt

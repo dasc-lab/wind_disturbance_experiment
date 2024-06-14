@@ -91,7 +91,10 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
             # Caclulates input with geometric controller
             control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
             next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y, dt )
-
+            ############################
+            ####### bug fix: ##############
+            ####### reshape cov to (6x6) #######
+            next_states_cov = next_states_cov.reshape(6,-1)
             # Expansion operation
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
             

@@ -129,7 +129,10 @@ def sigma_point_expand_with_mean_cov( mus, covs, weights ):
         new_weights = new_weights.at[:,i].set( temp_weights.reshape(-1,1, order='F')[:,0] * weights[:,i] )   
         return new_points, new_weights
     new_points, new_weights = lax.fori_loop(0, N, body, (new_points, new_weights))
-    return new_points.reshape((n, N*(2*n+1)), order='F'), new_weights.reshape((1,n*(2*n+1)), order='F')
+    ###################################
+    ############## bug fix: ##############
+    ############## change new_weights.reshape((1,n(2n+1))) to new_weights.reshape(1, N*(2n+1))#######
+    return new_points.reshape((n, N*(2*n+1)), order='F'), new_weights.reshape((1,N*(2*n+1)), order='F')
 
 @jit
 def sigma_point_compress( sigma_points, weights ):
