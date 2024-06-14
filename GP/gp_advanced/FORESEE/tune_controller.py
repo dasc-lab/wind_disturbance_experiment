@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 plt.rcParams.update({'font.size': 10})
 
+
 from jax_utils import *
 from gp_utils import *
 from policy import policy
@@ -116,7 +117,7 @@ gp_train_y = trajectory_path + "input_full.npy"
 
 
 
-def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_params1, gp_params2, gp_params3, gp_params4, gp_train_x, gp_train_y ):
+def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_train_x, gp_train_y ):
     '''
     Three Potential Candidates for optimizer, custom Gradient descent, jax scipy optimizer, and adam optimizer. learning rate needs to be adjusted
     '''
@@ -184,4 +185,9 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
         print(f" *************** NANs? :{np.any(np.isnan(params_policy)==True)} ")
     return key, params_policy, costs_adam
 
+def train_policy_updated(init_state, gp_train_x, gp_train_y):
+    costs_adam = []
+    minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
+    solver = jaxopt.ScipyMinimize(fun=minimize_function, maxiter=iter_adam)
+    params_policy, cost_state = solver.run(params_policy)
 
