@@ -14,9 +14,13 @@ plt.rcParams.update({'font.size': 10})
 from jax_utils import *
 from gp_utils import *
 from policy import policy
-home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
+#home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 trajectory_path = home_path + 'circle_figure8_fullset/'
 model_path = trajectory_path + 'models/'
+
+disturbance_path = trajectory_path + 'disturbance_full.npy'
+input_path = trajectory_path + 'input_full.npy'
 key = random.PRNGKey(2)
 horizon = 30
 dt = 0.01
@@ -86,7 +90,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
 
             # Caclulates input with geometric controller
             control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
-            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y )
+            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y, dt )
 
             # Expansion operation
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
@@ -110,9 +114,10 @@ file_path3 = model_path + "gp_model_z_norm5_full.pkl"
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
 get_future_reward_grad = jit(grad(get_future_reward, 1))
 
-gp_train_x = trajectory_path + "disturbance_full.npy"
-gp_train_y = trajectory_path + "input_full.npy"
-
+gp_train_x = jnp.load(input_path)
+gp_train_x = gp_train_x
+gp_train_y = jnp.load(disturbance_path)
+gp_train_y = gp_train_y.T
 
 
 
@@ -185,9 +190,19 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
         print(f" *************** NANs? :{np.any(np.isnan(params_policy)==True)} ")
     return key, params_policy, costs_adam
 
-def train_policy_updated(init_state, gp_train_x, gp_train_y):
+def train_policy_jaxscipy(init_state, gp_train_x, gp_train_y, params_policy):
     costs_adam = []
     minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
     solver = jaxopt.ScipyMinimize(fun=minimize_function, maxiter=iter_adam)
     params_policy, cost_state = solver.run(params_policy)
 
+def generate_state_vector(key, n):
+    return jax.random.normal(key, (n, 1))
+
+# Example usage:
+key = jax.random.PRNGKey(0)  # Initialize the random key
+n = 6  # Size of the state vector
+state_vector = generate_state_vector(key, n)
+print(state_vector)
+
+train_policy_jaxscipy(state_vector, gp_train_x, gp_train_y, [14.0, 7.4])
