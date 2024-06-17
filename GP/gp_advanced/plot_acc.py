@@ -18,7 +18,7 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
-def fft_filter(signal, sampling_rate = 5000):
+def fft_filter(signal, sampling_rate = 100):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -29,18 +29,18 @@ def fft_filter(signal, sampling_rate = 5000):
     peak_index = np.argmax(magnitude)
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
-    def butter_lowpass_filter(data, cutoff, fs, order=5):
+    def butter_lowpass_filter(data, cutoff, fs, order=1):
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+100 #Hz
+    cutoff_freq = peak_frequency+21 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 
-def apply_fft_filter_to_columns(array, sampling_rate=5000):
+def apply_fft_filter_to_columns(array, sampling_rate=100):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
@@ -94,7 +94,7 @@ with Reader(bag_path) as reader:
 
 acc_arr = np.array(acc_arr)
 
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
+filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=100)
 acc_cmd_arr = np.array(acc_cmd_arr)
 #np.save("cmd_arr.npy",acc_cmd_arr)
 # filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)

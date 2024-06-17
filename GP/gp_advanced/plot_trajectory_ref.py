@@ -54,7 +54,7 @@ home_path = home_path + 'circle_data/'
 ########################################################################
 home_path = home_path.replace('circle_data', 'eight_data')
 
-#bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
+bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
 #bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
@@ -70,7 +70,7 @@ home_path = home_path.replace('circle_data', 'eight_data')
 #(threshold, cutoff) = (200, len(x_data)-600)
 #bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-600)
-bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
+#bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
 
 
@@ -135,8 +135,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 100
-threshold = 100
+cutoff = len(x_data) - 3500
+threshold = 1200
 
 
 print("cutoff, threshold = ", cutoff, threshold)

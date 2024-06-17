@@ -19,7 +19,7 @@ print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
 
-def fft_filter(signal, sampling_rate = 5000):
+def fft_filter(signal, sampling_rate = 100):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -37,10 +37,10 @@ def fft_filter(signal, sampling_rate = 5000):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+100 #Hz
+    cutoff_freq = peak_frequency+15 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
-def apply_fft_filter_to_columns(array, sampling_rate=5000):
+def apply_fft_filter_to_columns(array, sampling_rate=100):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
@@ -96,7 +96,7 @@ new_input = np.hstack((new_pos_arr, new_vel_arr))
 #new_disturbance = np.array(disturbance)
 acc_arr = np.array(acc_arr)
 acc_cmd_arr = np.array(acc_cmd_arr)
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=5000)
+filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=100)
 #filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 new_disturbance =  filtered_acc - filtered_cmd
@@ -109,8 +109,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_full.npy'
-disturbance_file_path = home_path+'disturbance_full.npy'
+input_file_path = home_path+ 'input_full_sr100.npy'
+disturbance_file_path = home_path+'disturbance_full_sr100.npy'
 
 ################## Prepare input ##################
 

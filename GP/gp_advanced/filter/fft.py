@@ -7,7 +7,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft, fftfreq
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, group_delay
+import os, sys
+path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
+
+sys.path.append(path)
 from plot_trajectory_ref import bag_path, cutoff, threshold
 
 signal = np.load("recorded_acc.npy")
@@ -20,7 +24,7 @@ N = len(signal)
 
 print("signal shape = ", signal.shape)
 t = np.arange(signal.shape[0])
-sampling_rate = fs = 10000
+sampling_rate = fs = 100#2000
 yf = fft_signal = np.fft.fft(signal)
 xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
 
@@ -54,15 +58,18 @@ plt.ylabel("Magnitude")
 plt.tight_layout()
 plt.show()
 
-def butter_lowpass_filter(data, cutoff, fs, order=5):
+def butter_lowpass_filter(data, cutoff, fs, order=1):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     y = filtfilt(b, a, data)
-    return y
+    return y , b , a
 
-cutoff_freq = peak_frequency+2000 #Hz
-filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)
+cutoff_freq = peak_frequency+20#Hz
+filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)[0]
+print("cutoff frequency: ", cutoff_freq)
+print("sampling frequency", fs)
+_,b,a = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)
 plt.figure(figsize=(12, 6))
 plt.plot(signal, label='Original Signal')
 plt.plot(filtered_data, label='Filtered Signal', linestyle='--')
@@ -73,9 +80,17 @@ plt.legend()
 plt.grid()
 plt.show()
 
+
+plt.figure()
+w, delay = group_delay((b,a), fs=fs)
+plt.plot(w,delay)
+plt.xlabel('Frequency [Hz]')  # X-axis in Hertz
+plt.ylabel('Group delay')  # Y-axis in seconds
+plt.title('Group Delay of Butterworth Lowpass Filter')
+plt.show()
 #np.save("filtered_y_component.npy", filtered_signal)
 
-def fft_filter(signal, sampling_rate = 5000):
+def fft_filter(signal, sampling_rate = 20):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -93,6 +108,6 @@ def fft_filter(signal, sampling_rate = 5000):
         y = filtfilt(b, a, data)
         return y
     ####### NOTE: Replace 80 if necessary to calculate the cutoff frequency ######
-    cutoff_freq = peak_frequency+100 #Hz
+    cutoff_freq = peak_frequency+10 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order=2)
     return filtered_signal
