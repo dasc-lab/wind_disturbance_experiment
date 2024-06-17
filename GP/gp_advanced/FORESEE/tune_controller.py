@@ -39,9 +39,14 @@ def initialize_sigma_points(X):
     '''
     Returns Equally weighted Sigma Particles
     '''
-    # return 2N + 1 points
+    # return (n,2n + 1) points
+    ##########################################
+    ################## Bug fix: ##################
+    ###### shape error:axis 2 is out of bounds for array of dimension 2
+    ###### added  X = X.reshape(-1,1) ######
     n = X.shape[0]
     num_points = 2*n + 1
+    X = X.reshape(-1,1)
     sigma_points = np.repeat( X, num_points, axis=1 )
     weights = np.ones((1,num_points)) * 1.0/( num_points )
     return sigma_points, weights
@@ -195,9 +200,13 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
 
 def train_policy_jaxscipy(init_state, gp_train_x, gp_train_y, params_policy):
     costs_adam = []
-    minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
+    ######################################################
+    ###### bug fix: closed over value in custom_vjp ######
+    ###### added init_state, gp_train_x, gp_train_y to lambda and solver.run ######
+
+    minimize_function = lambda params, init_state, gp_train_x, gp_train_y: get_future_reward( init_state, params, gp_train_x, gp_train_y )
     solver = jaxopt.ScipyMinimize(fun=minimize_function, maxiter=iter_adam)
-    params_policy, cost_state = solver.run(params_policy)
+    params_policy, cost_state = solver.run(init_state, params_policy, gp_train_x, gp_train_y)
 
 def generate_state_vector(key, n):
     return jax.random.normal(key, (n, 1))
@@ -208,4 +217,4 @@ n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
 print(state_vector)
 
-train_policy_jaxscipy(state_vector, gp_train_x, gp_train_y, [14.0, 7.4])
+train_policy_jaxscipy(state_vector, gp_train_x, gp_train_y, jnp.array([14.0, 7.4]))

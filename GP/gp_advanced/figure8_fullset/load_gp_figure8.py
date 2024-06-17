@@ -18,7 +18,7 @@ npy_data_path = dataset_path + 'npy_data_folder/'
 plot_path = dataset_path + 'test_plots/'
 gp_x_file = 'gp_model_x_norm5_figure8.pkl'
 gp_y_file = 'gp_model_y_norm5_figure8.pkl'
-gp_z_file = 'gp_model_z_norm5_circle.pkl'
+gp_z_file = 'gp_model_z_norm5_figure8.pkl'
 with open(model_path+gp_x_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
