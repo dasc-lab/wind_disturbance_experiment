@@ -98,7 +98,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
             next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y, dt )
             ############################
             ####### bug fix: ##############
-            ####### reshape cov to (6x6) #######
+            ####### reshape cov to (6x7) #######
             next_states_cov = next_states_cov.reshape(6,-1)
             # Expansion operation
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
@@ -120,7 +120,7 @@ file_path1 = model_path + "gp_model_x_norm5_full.pkl"
 file_path2 = model_path + "gp_model_y_norm5_full.pkl"
 file_path3 = model_path + "gp_model_z_norm5_full.pkl"
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
-get_future_reward_grad = jit(grad(get_future_reward, 1))
+get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
 
 gp_train_x = jnp.load(input_path)
 gp_train_x = gp_train_x
@@ -198,16 +198,24 @@ def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_l
         print(f" *************** NANs? :{np.any(np.isnan(params_policy)==True)} ")
     return key, params_policy, costs_adam
 
-def train_policy_jaxscipy(init_state, gp_train_x, gp_train_y, params_policy):
+def train_policy_jaxscipy(init_state, params_policy, gp_train_x, gp_train_y):
     costs_adam = []
     ######################################################
     ###### bug fix: closed over value in custom_vjp ######
     ###### added init_state, gp_train_x, gp_train_y to lambda and solver.run ######
+    def minimize_function(params, init_state, gp_train_x, gp_train_y):
+        return get_future_reward(init_state, params, gp_train_x, gp_train_y)
+    # minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
+    minimize_function_with_args = lambda params: minimize_function(params, init_state, gp_train_x, gp_train_y)
+    solver = jaxopt.ScipyMinimize(fun=minimize_function_with_args, maxiter=iter_adam)
+    params_policy, cost_state = solver.run(params_policy)
 
-    minimize_function = lambda params, init_state, gp_train_x, gp_train_y: get_future_reward( init_state, params, gp_train_x, gp_train_y )
-    solver = jaxopt.ScipyMinimize(fun=minimize_function, maxiter=iter_adam)
-    params_policy, cost_state = solver.run(init_state, params_policy, gp_train_x, gp_train_y)
-
+def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
+    for i in range(100):
+        param_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y)
+        param_policy_grad = np.clip( param_policy_grad, -grad_clip, grad_clip )
+        params_policy = params_policy - custom_gd_lr_rate * param_policy_grad
+        # params_policy =  np.clip( params_policy, -10, 10 )
 def generate_state_vector(key, n):
     return jax.random.normal(key, (n, 1))
 
@@ -216,5 +224,5 @@ key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
 print(state_vector)
-
-train_policy_jaxscipy(state_vector, gp_train_x, gp_train_y, jnp.array([14.0, 7.4]))
+train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
+#train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
