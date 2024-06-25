@@ -8,7 +8,7 @@ sys.path.append(plotter_path)
 from plot_trajectory_ref import cutoff, threshold
 import pickle
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced'
-import tensorflow_probability.substrates.jax.bijectors as tfb
+#import tensorflow_probability.substrates.jax.bijectors as tfb
 import numpy as np
 
 import gpjax as gpx
@@ -18,7 +18,9 @@ import jax.random as jr
 import optax as ox
 from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic, ProductKernel
 import matplotlib.pyplot as plt
-
+plt.figure()
+plt.plot(np.arange(146), np.ones((146,1)))
+plt.show()
 
 key = jr.key(123)
 
@@ -81,11 +83,12 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 5
+slice = 200
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 #dataset_path = home_path + 'datasets/'
 dataset_path = home_path + 'circle_figure8_fullset/'
 plot_path = dataset_path + 'plots/'
@@ -211,16 +214,21 @@ for j in range(3):
     # Define the marginal log-likelihood
     negative_mll = jit(gpx.objectives.ConjugateMLL(negative=True))
 
-    opt_posterior, history =gpx.fit(
+    # opt_posterior, history =gpx.fit(
+    #     model=posterior,
+    #     objective=negative_mll,
+    #     train_data=D,
+    #     optim=optimiser,
+    #     num_iters=2000,
+    #     safe=True,
+    #     key=key,
+    # )
+    
+    opt_posterior, history = gpx.fit_scipy(
         model=posterior,
         objective=negative_mll,
         train_data=D,
-        optim=optimiser,
-        num_iters=2000,
-        safe=True,
-        key=key,
     )
-    
     print("after training, predicting")
     # Infer the predictive posterior distribution
     xplot = input
@@ -300,14 +308,14 @@ for j in range(3):
 fig.tight_layout()
 #fig.text(f"Mean Sqaure Error = {error_x+error_y+error_z}")
 #plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_{disturbance_d[j]}.png")
-plt.savefig(plot_path+"GP_fullset_norm5.png")
+plt.savefig(plot_path+"GP_fullset_norm5_gpu.png")
 plt.show()
 
 
 
 
 for j in range(3):
-    fig = plt.figure(j)
+    fig = plt.figure()
     if j == 0:
         actual_output = wind_disturbance_curr = wind_disturbance_x
         pred_mean = pred_mean_x
@@ -321,7 +329,9 @@ for j in range(3):
         pred_mean = pred_mean_z
         pred_std = pred_std_z
 
-    
+    print("output shape:", actual_output.shape)
+    print("pred mean shape: ", pred_mean.shape)
+    print("pred std shape: ", pred_std.shape)
     actual_output = factor* actual_output
     plt.plot(np.linspace(0,actual_output.shape[0],actual_output.shape[0]), actual_output, 'r*', markersize=10, label='Actual Data')
     plt.plot(np.linspace(0,xplot.shape[0],xplot.shape[0]), factor*pred_mean, marker = '.', linestyle = '-', color ='b', markersize=10, label='GP Prediction')
@@ -338,7 +348,7 @@ for j in range(3):
     plt.xlabel('time index')
     plt.ylabel('Disturbance (m/s^2)')
     plt.legend()
-    plt.savefig(plot_path + f'GP_norm5_{disturbance_d[j]}.png')
+    plt.savefig(plot_path + f'GP_norm5_{disturbance_d[j]}_gpu.png')
     plt.show()
 
 num_indices = int(input.shape[0]/4)
@@ -347,7 +357,7 @@ print("plot_indices shape is: ", plot_indices.shape)
 
 sorted_indices = np.sort(plot_indices)
 for j in range(3):
-    fig = plt.figure(j)
+    fig = plt.figure()
     if j == 0:
         actual_output = wind_disturbance_curr = wind_disturbance_x
         pred_mean = pred_mean_x
@@ -360,7 +370,7 @@ for j in range(3):
         actual_output = wind_disturbance_curr = wind_disturbance_z
         pred_mean = pred_mean_z
         pred_std = pred_std_z
-
+    print("output shape:", actual_output.shape)
     actual_output = actual_output[sorted_indices]
     pred_mean = pred_mean[sorted_indices]
     pred_std = pred_std[sorted_indices]
@@ -469,7 +479,7 @@ for j in range(3):
     # plt.show()
 
 # Perform the comparison and update
-compare_and_update(file_path, error_x+error_y+error_z)
+#compare_and_update(file_path, error_x+error_y+error_z)
 
  # fig, axes = plt.subplots(3, 1, figsize=(15, 10))  # Adjust subplot grid as needed
     # axes = axes.flatten()
