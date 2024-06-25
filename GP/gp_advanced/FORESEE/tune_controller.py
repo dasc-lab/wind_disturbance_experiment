@@ -100,7 +100,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
             ############################
             ####### bug fix: ##############
             ####### reshape cov to (6x7) #######
-            next_states_cov = next_states_cov.reshape(6,-1)
+            #next_states_cov = next_states_cov.reshape(6,-1)
             # Expansion operation
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
             
