@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
-home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 dataset_path = home_path + 'circle_figure8_fullset/'
 model_path = dataset_path + 'models/'
 npy_data_path = dataset_path + 'npy_data_folder/'
@@ -19,7 +19,7 @@ plot_path = dataset_path + 'testset_plots/'
 gp_x_file = 'gp_model_x_norm5_full_gpu.pkl'
 gp_y_file = 'gp_model_y_norm5_full_gpu.pkl'
 gp_z_file = 'gp_model_z_norm5_full_gpu.pkl'
-assert model_path + gp_x_file== '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/circle_figure8_fullset/models/gp_model_x_norm5_full_gpu.pkl'
+
 with open(model_path+gp_x_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
