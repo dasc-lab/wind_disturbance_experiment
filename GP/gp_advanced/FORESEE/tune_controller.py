@@ -203,10 +203,10 @@ def train_policy_jaxscipy(init_state, params_policy, gp_train_x, gp_train_y):
     ######################################################
     ###### bug fix: closed over value in custom_vjp ######
     ###### added init_state, gp_train_x, gp_train_y to lambda and solver.run ######
-    def minimize_function(params, init_state, gp_train_x, gp_train_y):
+    def minimize_function(init_state, params, gp_train_x, gp_train_y):
         return get_future_reward(init_state, params, gp_train_x, gp_train_y)
     # minimize_function = lambda params: get_future_reward( init_state, params, gp_train_x, gp_train_y )
-    minimize_function_with_args = lambda params: minimize_function(params, init_state, gp_train_x, gp_train_y)
+    minimize_function_with_args = lambda params: minimize_function(init_state, params,  gp_train_x, gp_train_y)
     solver = jaxopt.ScipyMinimize(fun=minimize_function_with_args, maxiter=iter_adam)
     params_policy, cost_state = solver.run(params_policy)
 
@@ -224,5 +224,5 @@ key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
 print(state_vector)
-train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
-#train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
+#train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
+train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
