@@ -244,14 +244,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full_gpu.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full_gpu.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full_gpu.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################
