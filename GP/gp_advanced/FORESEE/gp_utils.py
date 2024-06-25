@@ -53,7 +53,7 @@ def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt )
     next_states_vel_cov = pred_cov * dt * dt
 
     next_states_mu = jnp.append( next_states_pos, next_states_vel_mu, axis=0 )
-    next_states_cov = jnp.append( jnp.zeros((3,1)), next_states_vel_cov, axis=1 )
+    next_states_cov = jnp.append( jnp.zeros((3,13)), next_states_vel_cov, axis=0 )
     return next_states_mu, next_states_cov    
 
 def train_gp(likelihood, posterior, parameter_state, train_x, train_y):
