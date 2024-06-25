@@ -15,7 +15,8 @@ from jax_utils import *
 from gp_utils import *
 from policy import policy
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
 trajectory_path = home_path + 'circle_figure8_fullset/'
 model_path = trajectory_path + 'models/'
 
@@ -122,13 +123,19 @@ file_path3 = model_path + "gp_model_z_norm5_full.pkl"
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3)
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
 
+
+
+
 gp_train_x = jnp.load(input_path)
 gp_train_x = gp_train_x
 gp_train_y = jnp.load(disturbance_path)
 gp_train_y = gp_train_y.T
+print("hello0")
+print(get_future_reward(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
+print(get_future_reward_grad(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
 
 
-
+print("hello")
 
 def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_train_x, gp_train_y ):
     '''
