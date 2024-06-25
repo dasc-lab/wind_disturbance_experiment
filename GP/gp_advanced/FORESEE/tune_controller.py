@@ -15,15 +15,15 @@ from jax_utils import *
 from gp_utils import *
 from policy import policy
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-#home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
+# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
 trajectory_path = home_path + 'circle_figure8_fullset/'
 model_path = trajectory_path + 'models/'
 
 disturbance_path = trajectory_path + 'disturbance_full.npy'
 input_path = trajectory_path + 'input_full.npy'
 key = random.PRNGKey(2)
-horizon = 30
+horizon = 4#30
 dt = 0.01
 
 # Custom gradient descent
@@ -65,7 +65,7 @@ def reward_func(states, weights, pos_ref, vel_ref):
 
     pos_factor = 1.0
     vel_factor = 0.1
-    reward = pos_factor * jnp.sum(ex_ev_mean[0:3] ** 2) + vel_factor * jnp.sum(ex_ev_mean[3:6])
+    reward = pos_factor * jnp.sum(ex_ev_mean[0:3] ** 2) + vel_factor * jnp.sum(ex_ev_mean[3:6] ** 2)
     return reward
 
 def setup_future_reward_func(file_path1, file_path2, file_path3):
@@ -74,7 +74,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
     gp1 = initialize_gp_prediction( file_path2 ) #, gp_train_x, gp_train_y[:,1].reshape(-1,1) )
     gp2 = initialize_gp_prediction( file_path3 ) #, gp_train_x, gp_train_y[:,2].reshape(-1,1) )
 
-    @jit
+    # @jit
     def compute_reward(X, policy_params, gp_train_x, gp_train_y):
         '''
         Performs Gradient Descent
@@ -96,6 +96,8 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
 
             # Caclulates input with geometric controller
             control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
+            jax.debug.print("🤯 states {x} 🤯", x=states)
+            jax.debug.print("🤯 inputs {x} 🤯", x=control_inputs)
             next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y, dt )
             ############################
             ####### bug fix: ##############
@@ -132,10 +134,13 @@ gp_train_y = jnp.load(disturbance_path)
 gp_train_y = gp_train_y.T
 print("hello0")
 print(get_future_reward(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
+print("hello1")
 print(get_future_reward_grad(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
 
 
 print("hello")
+
+exit()
 
 def train_policy( run, key, use_custom_gd, use_jax_scipy, use_adam, adam_start_learning_rate, init_state, params_policy, gp_train_x, gp_train_y ):
     '''

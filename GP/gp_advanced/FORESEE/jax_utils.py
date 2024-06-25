@@ -25,7 +25,7 @@ def get_mean_cov(sigma_points, weights):
 
 @jit
 def get_ut_cov_root_diagonal(cov):
-    offset = 0.000  # TODO: make sure not zero here
+    offset = 0.001  # TODO: make sure not zero here
     root_term = jnp.diag( jnp.sqrt(jnp.diagonal(cov)+offset)  )
     return root_term
 
