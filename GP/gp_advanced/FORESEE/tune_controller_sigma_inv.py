@@ -12,8 +12,10 @@ plt.rcParams.update({'font.size': 10})
 # gpjax version: '0.8.2'
 
 from jax_utils import *
-from gp_utils import *
+from gp_utils_sigma_inv import *
 from policy import policy
+import gpjax as gpx
+
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 # home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
@@ -73,7 +75,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
     gp0 = initialize_gp_prediction( file_path1 ) #, gp_train_x, gp_train_y[:,0].reshape(-1,1) )
     gp1 = initialize_gp_prediction( file_path2 ) #, gp_train_x, gp_train_y[:,1].reshape(-1,1) )
     gp2 = initialize_gp_prediction( file_path3 ) #, gp_train_x, gp_train_y[:,2].reshape(-1,1) )
-
+    
     @jit
     def compute_reward(X, policy_params, gp_train_x, gp_train_y):
         '''
@@ -81,7 +83,14 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
         '''
         states, weights = initialize_sigma_points(X)
         reward = 0
-
+        x = gp_train_x
+        y = gp_train_y
+        D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
+        D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
+        D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
+        sigma0 = gp0.compute_sigma_inv(train_data=D0)
+        sigma1 = gp1.compute_sigma_inv(train_data=D1)
+        sigma2 = gp2.compute_sigma_inv(train_data=D2)
         # n = 6
         # N = 2*n+1 = 13
         # 13 becomes 169 pionts during expansion
@@ -98,7 +107,8 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
             control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
             # jax.debug.print("🤯 states {x} 🤯", x=states)
             # jax.debug.print("🤯 inputs {x} 🤯", x=control_inputs)
-            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], gp_train_x, gp_train_y, dt )
+            
+            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], [sigma0, sigma1, sigma2], gp_train_x, gp_train_y, dt )
             ############################
             ####### bug fix: ##############
             ####### reshape cov to (6x7) #######
@@ -133,14 +143,14 @@ gp_train_x = gp_train_x[::80]
 gp_train_y = jnp.load(disturbance_path)
 gp_train_y = gp_train_y[::80].T
 t0 = time.time()
-print(f"hello0 ")
+print(f"before jit ")
 print(get_future_reward(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
-print(f"hello1 {time.time()-t0}")
+print(f"jit first time run time: {time.time()-t0}")
 
 t0 = time.time()
-print(f"hello0 ")
+print(f"jitted")
 print(get_future_reward(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
-print(f"hello1 {time.time()-t0}")
+print(f"jitted run time: {time.time()-t0}")
 
 # t0 = time.time()
 # print(f"hello0 ")
@@ -149,7 +159,7 @@ print(f"hello1 {time.time()-t0}")
 
 print(f"GRAD: ")
 t0 = time.time()
-print(f"hello0 ")
+print(f"GRAD before JIT: ")
 print(get_future_reward_grad(jnp.zeros((6,1)), jnp.ones(2),gp_train_x, gp_train_y ))
 print(f"hello1 {time.time()-t0}")
 
@@ -259,6 +269,7 @@ def generate_state_vector(key, n):
 key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
-print(state_vector)
+print("state vector:", state_vector)
+
 train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
 # train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
