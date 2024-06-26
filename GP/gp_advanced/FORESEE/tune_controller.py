@@ -9,7 +9,7 @@ jax.config.update("jax_enable_x64", True)
 import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 plt.rcParams.update({'font.size': 10})
-
+# gpjax version: '0.8.2'
 
 from jax_utils import *
 from gp_utils import *
