@@ -47,18 +47,18 @@ plt.show()
 
 
 # Define the Butterworth filters
-def butter_lowpass(cutoff, fs, order=5):
+def butter_lowpass(cutoff, fs, order=1):
     nyquist = 0.5 * fs
     normal_cutoff = cutoff / nyquist
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
 
 # Sampling frequency
-fs1 = 10000.0  # Hz
-fs2 = 15
+fs1 = 20.0  # Hz
+fs2 = 12
 # Cutoff frequencies for the two filters
-cutoff1 = 3000.0  # Hz
-cutoff2 = 6.0  # Hz
+cutoff1 = 4.6  # Hz
+cutoff2 = 4  # Hz
 
 # Filter order
 order = 1

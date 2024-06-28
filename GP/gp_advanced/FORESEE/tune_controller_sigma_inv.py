@@ -25,8 +25,8 @@ model_path = trajectory_path + 'models/'
 disturbance_path = trajectory_path + 'disturbance_full.npy'
 input_path = trajectory_path + 'input_full.npy'
 key = random.PRNGKey(2)
-horizon = 300 #200
-dt = 0.05 #0.01
+horizon = 100 #200
+dt = 0.1 #0.01
 
 # Custom gradient descent
 grad_clip = 1
@@ -270,6 +270,9 @@ key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
 print("state vector:", state_vector)
-
+t0 = time.time()
+print("before the optimizer")
 train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
+print("after the optimizer \n")
+print(f"custom optimizer took {time.time()-t0} seconds to run")
 # train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)

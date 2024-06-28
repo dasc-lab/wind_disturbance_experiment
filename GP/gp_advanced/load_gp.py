@@ -2,7 +2,7 @@ from jax import config
 
 config.update("jax_enable_x64", True)
 import pickle
-import gpjax as gpx
+
 from jax import grad, jit
 import jax.numpy as jnp
 import jax.random as jr
@@ -11,11 +11,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 
-
+import os, sys
+gpjax_path = os.path.join(home_path+'FORESEE/GPJax')
+sys.path.append(gpjax_path)
+import gpjax as gpx
 dataset_path = home_path + 'circle_figure8_fullset/'
 model_path = dataset_path + 'models/'
-npy_data_path = dataset_path + 'npy_data_folder/'
+# npy_data_path = dataset_path + 'npy_data_folder/'
+npy_data_path = dataset_path + 'npy_data_folder_sr20/'
 plot_path = dataset_path + 'testset_plots/'
+# gp_x_file = 'gp_model_x_norm5_full_sr20_clamped.pkl'
+# gp_y_file = 'gp_model_y_norm5_full_sr20_clamped.pkl'
+# gp_z_file = 'gp_model_z_norm5_full_sr20_clamped.pkl'
 gp_x_file = 'gp_model_x_norm5_full.pkl'
 gp_y_file = 'gp_model_y_norm5_full.pkl'
 gp_z_file = 'gp_model_z_norm5_full.pkl'

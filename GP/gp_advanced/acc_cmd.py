@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
-def fft_filter(signal, sampling_rate = 100):
+def fft_filter(signal, sampling_rate):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -28,17 +28,17 @@ def fft_filter(signal, sampling_rate = 100):
     peak_index = np.argmax(magnitude)
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
-    def butter_lowpass_filter(data, cutoff_freq, fs, order=2):
+    def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
         nyq = 0.5 * fs
         normal_cutoff = cutoff_freq / nyq
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+15 #Hz
+    cutoff_freq = peak_frequency+4 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
-def apply_fft_filter_to_columns(array, sampling_rate=100):
+def apply_fft_filter_to_columns(array, sampling_rate):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
@@ -77,7 +77,7 @@ home_path = home_path + 'circle_data/'
 #(780, len(x_data) -1600)
 #bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
-#bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
 #bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
@@ -87,7 +87,7 @@ home_path = home_path + 'circle_data/'
 ########################################################################
 home_path = home_path.replace('circle_data', 'eight_data')
 
-bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
 #bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
@@ -180,10 +180,10 @@ with Reader(bag_path) as reader:
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
 unfiltered_acc_arr = recorded_acc_arr = np.array(acc_arr)
-recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=100)
+recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=20)
 disturbance = recorded_acc_arr - acc_cmd_arr
-cutoff = len(acc_cmd_arr) - 3500
-threshold = 1200
+cutoff = len(acc_cmd_arr) - 2500
+threshold = 1000
 
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)

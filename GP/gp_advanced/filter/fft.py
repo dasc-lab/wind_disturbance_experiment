@@ -24,7 +24,7 @@ N = len(signal)
 
 print("signal shape = ", signal.shape)
 t = np.arange(signal.shape[0])
-sampling_rate = fs = 100#2000
+sampling_rate = fs = 20#2000
 yf = fft_signal = np.fft.fft(signal)
 xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
 
@@ -65,7 +65,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=1):
     y = filtfilt(b, a, data)
     return y , b , a
 
-cutoff_freq = peak_frequency+20#Hz
+cutoff_freq = peak_frequency+4.0#Hz
 filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)[0]
 print("cutoff frequency: ", cutoff_freq)
 print("sampling frequency", fs)
@@ -73,7 +73,7 @@ _,b,a = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)
 plt.figure(figsize=(12, 6))
 plt.plot(signal, label='Original Signal')
 plt.plot(filtered_data, label='Filtered Signal', linestyle='--')
-plt.title('Original and Low-pass Filtered Signal')
+plt.title(f'Original and Low-pass Filtered Signal cutoff = {cutoff_freq}, sr = {fs}')
 plt.xlabel('Sample Index')
 plt.ylabel('Amplitude')
 plt.legend()
@@ -107,7 +107,7 @@ def fft_filter(signal, sampling_rate = 20):
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
-    ####### NOTE: Replace 80 if necessary to calculate the cutoff frequency ######
-    cutoff_freq = peak_frequency+10 #Hz
+    ####### NOTE: Replace  if necessary to calculate the cutoff frequency ######
+    cutoff_freq = peak_frequency+2 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order=2)
     return filtered_signal

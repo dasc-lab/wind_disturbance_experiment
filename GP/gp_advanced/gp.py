@@ -3,11 +3,15 @@ from jax import config
 config.update("jax_enable_x64", True)
 import sys
 import os
-plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
-sys.path.append(plotter_path)
+
 from plot_trajectory_ref import cutoff, threshold
 import pickle
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced'
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+plotter_path = os.path.join(home_path)
+gpjax_path = os.path.join(home_path+'FORESEE/GPJax')
+sys.path.append(plotter_path)
+
+sys.path.append(gpjax_path)
 import tensorflow_probability.substrates.jax.bijectors as tfb
 import numpy as np
 
@@ -81,17 +85,18 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 5
+slice = 7
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 #dataset_path = home_path + 'datasets/'
-dataset_path = home_path + 'circle_figure8_fullset/'
+dataset_path = home_path + 'partial_data/'
 plot_path = dataset_path + 'plots/'
+# npy_path = dataset_path + 'npy_data_folder/'
 npy_path = dataset_path + 'npy_data_folder/'
-disturbance_file_path = dataset_path + 'disturbance_full.npy'
-input_file_path = dataset_path + 'input_full.npy'
+disturbance_file_path = dataset_path + 'disturbance_partial.npy'
+input_file_path = dataset_path + 'input_partial.npy'
 wind_disturbance = jnp.load(disturbance_file_path)
 input = jnp.load(input_file_path)
 
@@ -182,7 +187,7 @@ for j in range(3):
 
 
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 1.0
+    noise_level = 0.8
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
@@ -236,14 +241,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full_sr20_clamped.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full_sr20_clamped.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full_sr20_clamped.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################

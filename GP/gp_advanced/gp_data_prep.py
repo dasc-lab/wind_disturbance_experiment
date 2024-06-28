@@ -10,7 +10,7 @@ plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Pro
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 sys.path.append(plotter_path)
 from plot_trajectory_ref import bag_path, cutoff, threshold
-
+from numpy.linalg import norm
 ####### change bag_path in plot_trajectory_ref.py ######
 from scipy.fftpack import fft, fftfreq
 
@@ -19,7 +19,7 @@ print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
 
-def fft_filter(signal, sampling_rate = 100):
+def fft_filter(signal, sampling_rate = 20):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -30,17 +30,19 @@ def fft_filter(signal, sampling_rate = 100):
     peak_index = np.argmax(magnitude)
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
-    def butter_lowpass_filter(data, cutoff_freq, fs, order=2):
+    print("sampling rate = ", sampling_rate)
+    def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
         nyq = 0.5 * fs
         normal_cutoff = cutoff_freq / nyq
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+15 #Hz
+    cutoff_freq = peak_frequency+4.0 #Hz
+    print("cutoff_freq = ", cutoff_freq)
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
-def apply_fft_filter_to_columns(array, sampling_rate=100):
+def apply_fft_filter_to_columns(array, sampling_rate=20):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
@@ -82,6 +84,10 @@ with Reader(bag_path) as reader:
             acc_ref = msg.acc_ref
             diff_pos = pos - pos_ref
             diff_vel = vel - vel_ref
+            if norm(diff_pos) > 2:
+                diff_pos = 2*diff_pos/norm(diff_pos)
+            if norm(diff_vel) > 5:
+                diff_vel = 5*diff_vel/norm(diff_vel)
             thrust = -kx*diff_pos -kv*diff_vel + m * acc_ref #- g*m 
             #thrust = thrust  + g * m
             acc_cmd = thrust/m
@@ -96,7 +102,7 @@ new_input = np.hstack((new_pos_arr, new_vel_arr))
 #new_disturbance = np.array(disturbance)
 acc_arr = np.array(acc_arr)
 acc_cmd_arr = np.array(acc_cmd_arr)
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=100)
+filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=20)
 #filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 new_disturbance =  filtered_acc - filtered_cmd
@@ -109,8 +115,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_full_sr100.npy'
-disturbance_file_path = home_path+'disturbance_full_sr100.npy'
+input_file_path = home_path+ 'input_partial.npy'
+disturbance_file_path = home_path+'disturbance_partial.npy'
 
 ################## Prepare input ##################
 
