@@ -101,6 +101,29 @@ def predict_states_noisy(X, policy_params, key):
     states, states_ref, key =  lax.fori_loop( 0, horizon, body, (states, states_ref, key) )
     return states, states_ref
 
+
+
+@jit
+def predict_states_noisy_gp(X, policy_params, key):
+
+    states = jnp.zeros((X.shape[0], horizon+1))
+    states = states.at[:,0].set( X[:,0] )
+    states_ref = jnp.zeros((X.shape[0], horizon))
+
+    def body(h, inputs):
+        t = h * dt
+        states, states_ref, key = inputs
+        control_input, pos_ref, vel_ref = policy( t, states[:,[h]], policy_params )         # mean_position = get_mean( states, weights )
+        next_states, next_states_cov = get_next_states_noisy_predict( states[:,[h]], control_input, dt )
+        key, subkey = jax.random.split(key)
+        next_states = next_states + jax.random.normal( subkey, shape=(6,13) ) * jnp.sqrt( next_states_cov )
+        states = states.at[:,h+1].set( next_states[:,0] )
+        states_ref = states_ref.at[:,h].set( jnp.append(pos_ref[:,0], vel_ref[:,0]) )
+        return states, states_ref, key
+    states, states_ref, key =  lax.fori_loop( 0, horizon, body, (states, states_ref, key) )
+    return states, states_ref
+
+
 def setup_future_reward_func(dynamics_type='ideal'):
 
     @jit
@@ -131,6 +154,33 @@ def setup_future_reward_func(dynamics_type='ideal'):
         return reward
     return compute_reward
 
+def setup_future_reward_func_gp():
+
+    @jit
+    def compute_reward(X, policy_params, gp_train_x, gp_train_y):
+        '''
+        Performs Gradient Descent
+        '''
+        states, weights = initialize_sigma_points(X)
+        reward = 0
+        def body(h, inputs):
+            '''
+            Performs UT-EC with 6 states
+            '''
+            t = h * dt
+            reward, states, weights = inputs
+            control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
+           
+            next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, dt )
+            next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
+            next_states, next_weights = sigma_point_compress( next_states_expanded, next_weights_expanded )
+            states = next_states
+            weights = next_weights
+            reward = reward + reward_func( states, weights, pos_ref, vel_ref ) # reward is loss
+            return reward, states, weights
+        reward =  lax.fori_loop( 0, horizon, body, (reward, states, weights) )[0]
+        return reward
+    return compute_reward
 print(model_path)
 file_path1 = model_path + "gp_model_x_norm5_full.pkl"
 file_path2 = model_path + "gp_model_y_norm5_full.pkl"
