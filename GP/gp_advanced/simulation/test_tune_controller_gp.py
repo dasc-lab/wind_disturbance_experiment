@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 plt.rcParams.update({'font.size': 10})
 # gpjax version: '0.8.2'
-
+import gpjax as gpx
 from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
@@ -104,19 +104,24 @@ def predict_states_noisy(X, policy_params, key):
 
 
 @jit
-def predict_states_noisy_gp(X, policy_params, key):
+def predict_states_gp(X, policy_params, gps, gp_train_x, gp_train_y, dt):
 
     states = jnp.zeros((X.shape[0], horizon+1))
     states = states.at[:,0].set( X[:,0] )
     states_ref = jnp.zeros((X.shape[0], horizon))
-
+    x = gp_train_x
+    y = gp_train_y
+    D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
+    D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
+    D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
+    sigma0 = gp0.compute_sigma_inv(train_data=D0)
+    sigma1 = gp1.compute_sigma_inv(train_data=D1)
+    sigma2 = gp2.compute_sigma_inv(train_data=D2)
     def body(h, inputs):
         t = h * dt
         states, states_ref, key = inputs
         control_input, pos_ref, vel_ref = policy( t, states[:,[h]], policy_params )         # mean_position = get_mean( states, weights )
-        next_states, next_states_cov = get_next_states_noisy_predict( states[:,[h]], control_input, dt )
-        key, subkey = jax.random.split(key)
-        next_states = next_states + jax.random.normal( subkey, shape=(6,13) ) * jnp.sqrt( next_states_cov )
+        next_states, next_states_cov = get_next_states_with_gp_sigma_inv( states[:,[h]], control_input,gps,[sigma0, sigma1, sigma2], gp_train_x, gp_train_y, dt )
         states = states.at[:,h+1].set( next_states[:,0] )
         states_ref = states_ref.at[:,h].set( jnp.append(pos_ref[:,0], vel_ref[:,0]) )
         return states, states_ref, key
