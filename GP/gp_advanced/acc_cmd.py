@@ -35,7 +35,7 @@ def fft_filter(signal, sampling_rate):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+4 #Hz
+    cutoff_freq = peak_frequency+80 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 def apply_fft_filter_to_columns(array, sampling_rate):
@@ -71,13 +71,13 @@ home_path = home_path + 'circle_data/'
 #(1200, len(x_data)-700)
 #bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
-#bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len(x_data)-900)
 #bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
 #bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
-bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
+#bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
 #bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
@@ -180,10 +180,10 @@ with Reader(bag_path) as reader:
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
 unfiltered_acc_arr = recorded_acc_arr = np.array(acc_arr)
-recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=20)
+recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=10000)
 disturbance = recorded_acc_arr - acc_cmd_arr
-cutoff = len(acc_cmd_arr) - 2500
-threshold = 1000
+cutoff = len(acc_cmd_arr) - 900
+threshold = 1400
 
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)

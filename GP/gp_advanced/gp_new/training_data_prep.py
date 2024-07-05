@@ -1,52 +1,56 @@
 from rosbags.rosbag2 import Reader
 from rosbags.typesys import Stores, get_typestore, get_types_from_msg
-#from geometry_msgs.msg import TransformStamped
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os, sys
-plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/')
+folder_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/gp_new/'
+plotter_path = os.path.join(folder_path)
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+filter_path = os.path.join(home_path + 'filter/')
 sys.path.append(plotter_path)
+
+sys.path.append(filter_path)
+print(filter_path)
 from plot_trajectory_ref import bag_path, cutoff, threshold
 from numpy.linalg import norm
 ####### change bag_path in plot_trajectory_ref.py ######
 from scipy.fftpack import fft, fftfreq
-
 from scipy.signal import butter, filtfilt
+from lowpassfilter import *
 print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
+training_size_factor = 1
+# def fft_filter(signal, sampling_rate = 20):
+#     yf = fft_signal = np.fft.fft(signal)
+#     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
+#     N = len(signal)
 
-def fft_filter(signal, sampling_rate = 20):
-    yf = fft_signal = np.fft.fft(signal)
-    xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
-    N = len(signal)
+#     magnitude = 2.0/N * np.abs(yf[:N//2])
 
-    magnitude = 2.0/N * np.abs(yf[:N//2])
+#     # Find the peak frequency
+#     peak_index = np.argmax(magnitude)
+#     peak_frequency = xf[peak_index]
+#     peak_amplitude = magnitude[peak_index]
+#     print("sampling rate = ", sampling_rate)
+#     def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
+#         nyq = 0.5 * fs
+#         normal_cutoff = cutoff_freq / nyq
+#         b, a = butter(order, normal_cutoff, btype='low', analog=False)
+#         y = filtfilt(b, a, data)
+#         return y
 
-    # Find the peak frequency
-    peak_index = np.argmax(magnitude)
-    peak_frequency = xf[peak_index]
-    peak_amplitude = magnitude[peak_index]
-    print("sampling rate = ", sampling_rate)
-    def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
-        nyq = 0.5 * fs
-        normal_cutoff = cutoff_freq / nyq
-        b, a = butter(order, normal_cutoff, btype='low', analog=False)
-        y = filtfilt(b, a, data)
-        return y
-
-    cutoff_freq = peak_frequency+3.0 #Hz
-    print("cutoff_freq = ", cutoff_freq)
-    filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
-    return filtered_signal
-def apply_fft_filter_to_columns(array, sampling_rate=20):
-    filtered_array = np.zeros_like(array)
-    for i in range(array.shape[1]):
-        filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
-    return filtered_array
+#     cutoff_freq = peak_frequency+3.0 #Hz
+#     print("cutoff_freq = ", cutoff_freq)
+#     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
+#     return filtered_signal
+# def apply_fft_filter_to_columns(array, sampling_rate=20):
+#     filtered_array = np.zeros_like(array)
+#     for i in range(array.shape[1]):
+#         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
+#     return filtered_array
 topic_name = '/drone/combined_data' # Add more topics as needed
 typestore = get_typestore(Stores.LATEST)
 
@@ -102,7 +106,7 @@ new_input = np.hstack((new_pos_arr, new_vel_arr))
 #new_disturbance = np.array(disturbance)
 acc_arr = np.array(acc_arr)
 acc_cmd_arr = np.array(acc_cmd_arr)
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=20)
+filtered_acc = apply_fft_filter_to_columns(acc_arr)
 #filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 new_disturbance =  filtered_acc - filtered_cmd
@@ -111,10 +115,12 @@ new_input = new_input[threshold:cutoff,:]
 new_disturbance = new_disturbance[threshold:cutoff,:]
 print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
-
+plt.figure()
+plt.plot(filtered_acc)
+plt.show()
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_partial.npy'
-disturbance_file_path = home_path+'disturbance_partial.npy'
+input_file_path = folder_path+ 'training/input_new.npy'
+disturbance_file_path = folder_path+'training/disturbance_new.npy'
 
 ################## Prepare input ##################
 

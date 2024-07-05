@@ -10,7 +10,10 @@ key = random.PRNGKey(2)
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/FORESEE/'
 
 def get_next_states_with_gp( states, control_inputs, gps, sigma_inv, train_x, train_y, dt ):
-
+    
+    '''
+    Propogate sigma points through the nonliear GP
+    '''
     test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
 
 

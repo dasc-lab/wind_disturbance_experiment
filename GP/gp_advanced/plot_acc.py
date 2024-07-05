@@ -36,7 +36,7 @@ def fft_filter(signal, sampling_rate = 20):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+4.0 #Hz
+    cutoff_freq = peak_frequency+20.0 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 
@@ -94,7 +94,7 @@ with Reader(bag_path) as reader:
 
 acc_arr = np.array(acc_arr)
 
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=20)
+filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=1000)
 acc_cmd_arr = np.array(acc_cmd_arr)
 #np.save("cmd_arr.npy",acc_cmd_arr)
 # filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)

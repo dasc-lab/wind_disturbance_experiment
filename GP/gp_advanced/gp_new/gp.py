@@ -85,13 +85,13 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 5
+slice = 7
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 #dataset_path = home_path + 'datasets/'
-dataset_path = home_path + 'partial_data/'
+dataset_path = home_path + 'gp_new/'
 plot_path = dataset_path + 'plots/'
 # npy_path = dataset_path + 'npy_data_folder/'
 npy_path = dataset_path + 'npy_data_folder/'
@@ -136,7 +136,7 @@ assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_
 
 
 
-training_size = n = int(wind_disturbance.shape[0]*0.8)
+training_size = n = int(wind_disturbance.shape[0]*0.7)
 training_indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
 mask = jnp.ones(wind_disturbance.shape[0], dtype=bool)
 mask = mask.at[training_indices].set(False)
@@ -187,7 +187,7 @@ for j in range(3):
 
 
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 1.2
+    noise_level = 0.8
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
@@ -221,7 +221,7 @@ for j in range(3):
         objective=negative_mll,
         train_data=D,
         optim=optimiser,
-        num_iters=1500,
+        num_iters=2000,
         safe=True,
         key=key,
     )
@@ -241,14 +241,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_partial.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full_sr20_clamped.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_partial.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full_sr20_clamped.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_partial.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full_sr20_clamped.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################

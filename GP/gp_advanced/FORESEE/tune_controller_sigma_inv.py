@@ -85,12 +85,15 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
         reward = 0
         x = gp_train_x
         y = gp_train_y
+
+        ###### precomputes all necessary inverses to save time ######
         D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
         D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
         D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
         sigma0 = gp0.compute_sigma_inv(train_data=D0)
         sigma1 = gp1.compute_sigma_inv(train_data=D1)
         sigma2 = gp2.compute_sigma_inv(train_data=D2)
+
         # n = 6
         # N = 2*n+1 = 13
         # 13 becomes 169 pionts during expansion
@@ -98,7 +101,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
 
         def body(h, inputs):
             '''
-            Performs UT-EC with 6 states
+            Performs UT-EC with 2n+1 states, on each sigma point
             '''
             t = h * dt
             reward, states, weights = inputs
@@ -111,8 +114,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3):
             next_states_mean, next_states_cov = get_next_states_with_gp( states, control_inputs, [gp0, gp1, gp2], [sigma0, sigma1, sigma2], gp_train_x, gp_train_y, dt )
             ############################
             ####### bug fix: ##############
-            ####### reshape cov to (6x7) #######
+            ####### reshape cov #######
             #next_states_cov = next_states_cov.reshape(6,-1)
+            
             # Expansion operation
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
             
@@ -255,13 +259,14 @@ def train_policy_jaxscipy(init_state, params_policy, gp_train_x, gp_train_y):
     minimize_function_with_args = lambda params: minimize_function(init_state, params,  gp_train_x, gp_train_y)
     solver = jaxopt.ScipyMinimize(fun=minimize_function_with_args, maxiter=iter_adam)
     params_policy, cost_state = solver.run(params_policy)
-
+    return params_policy
 def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     for i in range(iter_adam):
         param_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y)
         param_policy_grad = np.clip( param_policy_grad, -grad_clip, grad_clip )
         params_policy = params_policy - custom_gd_lr_rate * param_policy_grad
         # params_policy =  np.clip( params_policy, -10, 10 )
+        return params_policy
 def generate_state_vector(key, n):
     return jax.random.normal(key, (n, 1))
 
@@ -269,10 +274,11 @@ def generate_state_vector(key, n):
 key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
-print("state vector:", state_vector)
+print("state vector: \n", state_vector)
 t0 = time.time()
 print("before the optimizer")
-train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
+params_policy = train_policy_custom(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)
 print("after the optimizer \n")
 print(f"custom optimizer took {time.time()-t0} seconds to run")
+print("params_policy = ", params_policy)
 # train_policy_jaxscipy(state_vector,  jnp.array([14.0, 7.4]),gp_train_x, gp_train_y)

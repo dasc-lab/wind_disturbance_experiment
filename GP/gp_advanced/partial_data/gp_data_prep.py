@@ -38,7 +38,7 @@ def fft_filter(signal, sampling_rate = 20):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+3.0 #Hz
+    cutoff_freq = peak_frequency+1.5 #Hz
     print("cutoff_freq = ", cutoff_freq)
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
@@ -113,8 +113,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_partial.npy'
-disturbance_file_path = home_path+'disturbance_partial.npy'
+input_file_path = home_path+ 'partial_data/input_partial.npy'
+disturbance_file_path = home_path+'partial_data/disturbance_partial.npy'
 
 ################## Prepare input ##################
 

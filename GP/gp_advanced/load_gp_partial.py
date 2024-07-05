@@ -26,14 +26,14 @@ gp_x_file = 'gp_model_x_norm5_partial.pkl'
 # gp_x_file = 'gp_model_x_norm5_full.pkl'
 # gp_y_file = 'gp_model_y_norm5_full.pkl'
 # gp_z_file = 'gp_model_z_norm5_full.pkl'
-with open(model_path+gp_x_file, 'rb') as f:
+with open(model_path+gp_y_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
 factor = 5
 
 x = jnp.load(npy_data_path + 'training_input.npy')
-y = jnp.load(npy_data_path + 'training_disturbance_x.npy')
-disturbance_x = jnp.load(npy_data_path + 'test_disturbance_x.npy')
+y = jnp.load(npy_data_path + 'training_disturbance_y.npy')
+disturbance_x = jnp.load(npy_data_path + 'test_disturbance_y.npy')
 #wind_disturbance_x = jnp.load(home_path + 'wind_disturbance_x.npy')
 # plt.figure()
 # plt.plot(disturbance_x)
@@ -126,7 +126,7 @@ pred_std = predictive_dist.stddev()
 pred_mean = pred_mean*factor
 pred_std = pred_std*factor
 y = y*factor
-slice = 5
+slice = 3
 pred_mean = pred_mean[::slice]
 pred_std = pred_std[::slice]
 actual_output = y[::slice]

@@ -136,7 +136,13 @@ def sigma_point_expand_with_mean_cov( mus, covs, weights ):
 
 @jit
 def sigma_point_compress( sigma_points, weights ):
+    
+    
+    
     mu, cov = get_mean_cov( sigma_points, weights )
+    #######################################
+    ############# mu.shape is (6,1)  #############
+    ############# cov.shape is (6,6) #############
     cov_root_term = get_ut_cov_root_diagonal( cov )  
     base_term = jnp.zeros((mu.shape))
     return generate_sigma_points_gaussian( mu, cov_root_term, base_term, jnp.array([1.0]) )
