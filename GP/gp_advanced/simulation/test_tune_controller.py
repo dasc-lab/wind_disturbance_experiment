@@ -15,6 +15,9 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
+# dynamics_type = 'ideal'
+dynamics_type = 'noisy'
+
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
 # home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
@@ -155,8 +158,15 @@ n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
 print(state_vector)
 
+def setup_predict_states(dynamics_type='ideal'):
+    if dynamics_type=='ideal':
+        return predict_states_ideal
+    elif dynamics_type=='noisy':
+        return predict_states_noisy
+
 # first run
-get_future_reward = setup_future_reward_func(dynamics_type='noisy') #file_path1, file_path2, file_path3)
+get_future_reward = setup_future_reward_func(dynamics_type=dynamics_type) #file_path1, file_path2, file_path3)
+predict_states = setup_predict_states(dynamics_type=dynamics_type)
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
 get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
 
@@ -165,9 +175,9 @@ get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y 
 # params_init = jnp.array([14.0, 7.4])
 params_init = jnp.array([7.0, 3.4])
 key, subkey = jax.random.split(key)
-states, states_ref = predict_states_noisy(state_vector, params_init, subkey)
+states, states_ref = predict_states(state_vector, params_init, subkey)
 key, subkey = jax.random.split(key)
-states2, states_ref2 = predict_states_noisy(state_vector, params_init, subkey)
+states2, states_ref2 = predict_states(state_vector, params_init, subkey)
 fig, ax = plt.subplots()
 ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='reference')
 ax.plot(states[0,:], states[1,:], 'g', label='states unoptimized')
@@ -180,10 +190,10 @@ ax.set_ylabel('Y')
 
 params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
 print(f"new params: {params_optimized}")
-key, subkey = jax.random.split(subkey)
-states_optimized, states_ref_optimized = predict_states_noisy(state_vector, params_optimized, subkey)
-key, subkey = jax.random.split(subkey)
-states_optimized2, states_ref_optimized2 = predict_states_noisy(state_vector, params_optimized, subkey)
+key, subkey = jax.random.split(key)
+states_optimized, states_ref_optimized = predict_states(state_vector, params_optimized, subkey)
+key, subkey = jax.random.split(key)
+states_optimized2, states_ref_optimized2 = predict_states(state_vector, params_optimized, subkey)
 ax.plot(states_optimized[0,:], states_optimized[1,:], 'k', label='states optimized')
 ax.plot(states_optimized2[0,:], states_optimized2[1,:], 'k--', label='states2 optimized')
 ax.legend()
