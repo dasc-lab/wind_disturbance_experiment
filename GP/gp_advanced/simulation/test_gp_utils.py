@@ -24,6 +24,42 @@ def get_next_states_ideal(states, control_inputs, dt):
 
     return states_next, cov_next
 
+def get_next_states_noisy_predict(states, control_inputs, dt):
+    # double integertor dynamics
+
+    m = 0.681 #kg
+    g = 9.8066
+
+    states_next_pos = states[0:3] + states[3:6] * dt
+
+    drag_mean = - 0.01 * states[3:6]/jnp.maximum(0.01*jnp.ones(1),jnp.linalg.norm(states[3:6], axis=0)) * jnp.square(states[3:6])
+    drag_cov = 0.005 * jnp.ones( (3,1) )
+
+    states_next_vel = states[3:6] + control_inputs * dt + g * dt + drag_mean * dt
+
+    states_next = jnp.append( states_next_pos, states_next_vel, axis=0 )
+    cov_next = jnp.append( jnp.zeros( (3,1) ), drag_cov, axis=0)
+
+    return states_next, cov_next
+
+def get_next_states_noisy(states, control_inputs, dt):
+    # double integertor dynamics
+
+    m = 0.681 #kg
+    g = 9.8066
+
+    states_next_pos = states[0:3] + states[3:6] * dt
+
+    drag_mean = - 0.01 * states[3:6]/jnp.maximum(0.01*jnp.ones(13),jnp.linalg.norm(states[3:6], axis=0)) * jnp.square(states[3:6])
+    drag_cov = 0.005 * jnp.ones( (3,13) )
+
+    states_next_vel = states[3:6] + control_inputs * dt + g * dt + drag_mean * dt
+
+    states_next = jnp.append( states_next_pos, states_next_vel, axis=0 )
+    cov_next = jnp.append( jnp.zeros( (3,13) ), drag_cov, axis=0)
+
+    return states_next, cov_next
+
 def get_next_states_with_gp( states, control_inputs, gps, train_x, train_y, dt ):
 
     test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
