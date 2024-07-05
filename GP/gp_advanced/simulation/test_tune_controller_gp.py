@@ -114,9 +114,9 @@ def predict_states_gp(X, policy_params, gps, gp_train_x, gp_train_y, dt):
     D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
     D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
     D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
-    sigma0 = gp0.compute_sigma_inv(train_data=D0)
-    sigma1 = gp1.compute_sigma_inv(train_data=D1)
-    sigma2 = gp2.compute_sigma_inv(train_data=D2)
+    sigma0 = gps[0].compute_sigma_inv(train_data=D0)
+    sigma1 = gps[1].compute_sigma_inv(train_data=D1)
+    sigma2 = gps[2].compute_sigma_inv(train_data=D2)
     def body(h, inputs):
         t = h * dt
         states, states_ref, key = inputs
