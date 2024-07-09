@@ -19,8 +19,8 @@ from test_policy import policy
 dynamics_type = 'noisy'
 
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-# home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
+# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
 
 trajectory_path = home_path + 'circle_figure8_fullset/'
 model_path = trajectory_path + 'models/'
@@ -92,7 +92,7 @@ def predict_states_noisy(X, policy_params, key):
         t = h * dt
         states, states_ref, key = inputs
         control_input, pos_ref, vel_ref = policy( t, states[:,[h]], policy_params )         # mean_position = get_mean( states, weights )
-        next_states, next_states_cov = get_next_states_noisy_predict( states[:,[h]], control_input, dt )
+        next_states, next_states_cov, _, _ = get_next_states_noisy_predict( states[:,[h]], control_input, dt )
         key, subkey = jax.random.split(key)
         next_states = next_states + jax.random.normal( subkey, shape=(6,13) ) * jnp.sqrt( next_states_cov )
         states = states.at[:,h+1].set( next_states[:,0] )

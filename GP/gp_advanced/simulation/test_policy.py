@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from jax import jit, vmap
+from jax import jit, vmap, lax
 
 def state_ref(t):
     pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
@@ -21,7 +21,9 @@ def policy( t, states, policy_params):
     pos_ref, vel_ref, acc_ref = state_ref(t)
 
     ex = states[0:3] - pos_ref
+    # ex = lax.cond( jnp.linalg.norm(ex)>2, lambda z: 2.0 * z / jnp.linalg.norm(z), lambda z: z, ex )
     ev = states[3:6] - vel_ref
+    # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     thrust = - kx * ex - kv * ev + m * acc_ref - m * g
     return thrust / m, pos_ref, vel_ref
 
