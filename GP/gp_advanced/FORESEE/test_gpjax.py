@@ -84,8 +84,14 @@ opt_posterior, history = gpx.fit(
 import time
 t0 = time.time()
 latent_dist = opt_posterior.predict(xtest, train_data=D)
+print(f"time org: {time.time()-t0}")
+t0 = time.time()
 latent_dist = opt_posterior.predict(xtest, train_data=D)
+print(f"time org: {time.time()-t0}")
+t0 = time.time()
 latent_dist = opt_posterior.predict(xtest, train_data=D)
+print(f"time org: {time.time()-t0}")
+t0 = time.time()
 latent_dist = opt_posterior.predict(xtest, train_data=D)
 print(f"time org: {time.time()-t0}")
 
@@ -93,10 +99,17 @@ sigma_inv = opt_posterior.compute_sigma_inv(train_data=D)
 
 t0 = time.time()
 latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
-latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
-latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
+print(f"time new: {time.time()-t0}")
+t0 = time.time()
 latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
 print(f"time new: {time.time()-t0}")
+t0 = time.time()
+latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
+print(f"time new: {time.time()-t0}")
+t0 = time.time()
+latent_dist = opt_posterior.predict_with_sigma_inv(xtest, train_data=D, Sigma_inv=sigma_inv)
+print(f"time new: {time.time()-t0}")
+
 
 predictive_dist = opt_posterior.likelihood(latent_dist)
 
