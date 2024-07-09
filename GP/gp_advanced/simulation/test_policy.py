@@ -25,6 +25,7 @@ def policy( t, states, policy_params):
     ev = states[3:6] - vel_ref
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     thrust = - kx * ex - kv * ev + m * acc_ref - m * g
+    # thrust = jnp.clip( thrust, -14*m, 14*m ) #tanh/sigmoid
     return thrust / m, pos_ref, vel_ref
 
 

@@ -15,17 +15,17 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-# dynamics_type = 'ideal'
+dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-dynamics_type = 'gp'
+# dynamics_type = 'gp'
 
-# optimizer = 'scipy'
-optimizer = 'custom_gd'
+optimizer = 'scipy'
+# optimizer = 'custom_gd'
 
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
 # home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-# home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
+# home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 
 trajectory_path = home_path + 'circle_figure8_fullset/'
 model_path = trajectory_path + 'models/'
@@ -42,7 +42,7 @@ custom_gd_lr_rate = 0.1
 grad_clip = 1.0
 
 # scipy optimizer
-iter_adam=1000 #4000
+iter_adam=200 #4000
 
 def initialize_sigma_points(X):
     '''
@@ -308,7 +308,7 @@ ax_acc[2].plot( disturbance_means2[2,:], 'r--' )
 ax_acc[0].set_ylabel('X')
 ax_acc[1].set_ylabel('Y')
 ax_acc[2].set_ylabel('Z')
-
+# plt.show()
 
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
 if optimizer=='scipy':
