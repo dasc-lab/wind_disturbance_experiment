@@ -18,7 +18,7 @@ def get_next_states_ideal(states, control_inputs, dt):
 
     states_next_pos = states[0:3] + states[3:6] * dt
 
-    states_next_vel = states[3:6] + control_inputs * dt + g * dt
+    states_next_vel = states[3:6] + control_inputs * dt + g * dt * jnp.array([ [0], [0], [1] ])
 
     states_next = jnp.append( states_next_pos, states_next_vel, axis=0 )
     cov_next = jnp.zeros( (6,13) )
@@ -39,7 +39,7 @@ def get_next_states_noisy_predict(states, control_inputs, dt):
     drag_mean = - factor * states[3:6]/jnp.maximum(0.01*jnp.ones(1),jnp.linalg.norm(states[3:6], axis=0)) * jnp.square(states[3:6])
     drag_cov = 0.005 * jnp.ones( (3,1) )
 
-    states_next_vel = states[3:6] + control_inputs * dt + g * dt + drag_mean * dt
+    states_next_vel = states[3:6] + control_inputs * dt + g * dt * jnp.array([ [0], [0], [1] ]) + drag_mean * dt
 
     states_next = jnp.append( states_next_pos, states_next_vel, axis=0 )
     cov_next = jnp.append( jnp.zeros( (3,1) ), drag_cov, axis=0)
@@ -58,7 +58,7 @@ def get_next_states_noisy(states, control_inputs, dt):
     drag_mean = - factor * states[3:6]/jnp.maximum(0.01*jnp.ones(13),jnp.linalg.norm(states[3:6], axis=0)) * jnp.square(states[3:6])
     drag_cov = 0.005 * jnp.ones( (3,13) )
 
-    states_next_vel = states[3:6] + control_inputs * dt + g * dt + drag_mean * dt
+    states_next_vel = states[3:6] + control_inputs * dt + g * dt * jnp.array([ [0], [0], [1] ]) + drag_mean * dt
 
     states_next = jnp.append( states_next_pos, states_next_vel, axis=0 )
     cov_next = jnp.append( jnp.zeros( (3,13) ), drag_cov, axis=0)
@@ -160,7 +160,7 @@ def get_next_states_with_gp_sigma_inv_predict( states, control_inputs, dt, gps, 
     
     ################################################
     next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
-    next_states_vel_mu = states[3:6] + control_inputs * dt + g * dt + pred_mu * dt
+    next_states_vel_mu = states[3:6] + control_inputs * dt + g * dt * jnp.array([ [0], [0], [1] ]) + pred_mu * dt
     next_states_vel_cov = pred_cov * dt * dt
 
     next_states_mu = jnp.append( next_states_pos, next_states_vel_mu, axis=0 )

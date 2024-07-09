@@ -15,8 +15,8 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-dynamics_type = 'ideal'
-# dynamics_type = 'noisy'
+# dynamics_type = 'ideal'
+dynamics_type = 'noisy'
 # dynamics_type = 'gp'
 
 optimizer = 'scipy'
