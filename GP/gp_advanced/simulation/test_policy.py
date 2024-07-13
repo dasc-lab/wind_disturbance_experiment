@@ -1,10 +1,11 @@
 import jax.numpy as jnp
 from jax import jit, vmap, lax
-
+import jax
 def state_ref(t):
     pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 policy_params = [14, 7.4]
+@jit
 def policy( t, states, policy_params):
     '''
     Expect a multiple states as input. Each state is a column vector.
@@ -26,10 +27,13 @@ def policy( t, states, policy_params):
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     # thrust = - kx * ex - kv * ev + m * acc_ref - m * g
     thrust = - kx * ex - kv * ev + m * acc_ref - m * g * jnp.array([ [0], [0], [1] ])
-    thrust = thrust.at[0,0].set( 0.2 * g * jnp.tanh( 100*thrust[0,0] ) )
-    thrust = thrust.at[1,0].set( 0.2 * g * jnp.tanh( 100*thrust[1,0] ) )
-    thrust = thrust.at[2,0].set( 1.6 * g * jnp.tanh( 100*thrust[2,0] ) )
-    thrust = jnp.clip( thrust, -14*m, 14*m ) #tanh/sigmoid
+    tanh_slope = 0.93
+    jax.debug.print("acc = {acc}",acc=thrust/m)
+    # jax.debug.print("thrust shape = {shape}", shape = thrust.shape)
+    thrust = thrust.at[0,0].set( 0.2 * g * jnp.tanh( tanh_slope*thrust[0,0] ) )
+    thrust = thrust.at[1,0].set( 0.2 * g * jnp.tanh( tanh_slope*thrust[1,0] ) )
+    thrust = thrust.at[2,0].set( 1.6 * g * jnp.tanh( tanh_slope*thrust[2,0] ) )
+    # thrust = jnp.clip( thrust, -14*m, 14*m ) #tanh/sigmoid
     return thrust / m, pos_ref, vel_ref
 
 
