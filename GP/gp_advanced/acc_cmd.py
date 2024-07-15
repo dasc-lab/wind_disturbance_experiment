@@ -71,16 +71,21 @@ plot_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
-bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
+# bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
 #(500,500)
 # bag_path = home_path + 'cir_traj_r0.2_w2_c0.80_h0.4_kxv74_unclipped'
 #(500,500)
 # bag_path = home_path + 'cir_traj_r0.4_w2_c0.80_h0.4_kxv74_unclipped'
 #(500,500)
+# bag_path = home_path + 'cir_traj_r0.4_w1.5_c00_h0.5_kxv74_unclipped'
+# bag_path = home_path + 'cir_traj_r0.4_w2_c00_h0.5_kxv74_unclipped_fanoff'
+#(200, 200)
+
 
 
 
 ################## prev data ##################
+# home_path = home_path + 'prev_data/'
 # bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
 # bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
@@ -101,13 +106,26 @@ bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
 ########################################################################
 
 home_path = home_path.replace('circle_data', 'eight_data')
+
+
+
 # bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+# (500, 500)
 # bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
+#(200,1000)
+######################## no disturbance ##################
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c00_h0.5_kxv74_unclipped_fanoff'
 
+# bag_path = home_path + 'eight_traj_r0.4_w2.5_c00_h0.5_kxv74_unclipped_fanoff'
 
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_unclipped_fanoff'
+# (700,1000)
 ################## previous data ##################
 # bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
@@ -127,7 +145,6 @@ home_path = home_path.replace('circle_data', 'eight_data')
 #(threshold, cutoff) = (300, len(x_data)-600)
 # bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
-
 
 
 # Define the topics we want to extract data from
@@ -230,21 +247,25 @@ unfiltered_acc_arr_x = np.array(unfiltered_acc_arr[threshold:cutoff,0])
 unfiltered_acc_arr_y = np.array(unfiltered_acc_arr[threshold:cutoff,1])
 unfiltered_acc_arr_z = np.array(unfiltered_acc_arr[threshold:cutoff,2])
 
+clip_val = 3
 plt.figure()
 plt.plot(range(unfiltered_acc_arr_x.size), unfiltered_acc_arr_x , 'r',label='unfiltered recorded acc')
 plt.plot(range(recorded_acc_arr_x.size),  recorded_acc_arr_x, 'b',label='Acc after filter')
+plt.ylim(-clip_val,clip_val)
 plt.legend()
 plt.show()
 
 plt.figure()
 plt.plot(range(unfiltered_acc_arr_y.size), unfiltered_acc_arr_y , 'r',label='unfiltered recorded acc')
 plt.plot(range(recorded_acc_arr_y.size),  recorded_acc_arr_y, 'b',label='Acc after filter')
+plt.ylim(-clip_val,clip_val)
 plt.legend()
 plt.show()
 
 plt.figure()
 plt.plot(range(unfiltered_acc_arr_z.size), unfiltered_acc_arr_z , 'r',label='unfiltered recorded acc')
 plt.plot(range(recorded_acc_arr_z.size),  recorded_acc_arr_z, 'b',label='Acc after filter')
+plt.ylim(-clip_val,clip_val)
 plt.legend()
 plt.show()
 #print("size of x data is: ",x.shape)

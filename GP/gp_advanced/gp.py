@@ -85,18 +85,18 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 7
+slice = 3
 
 
 ################################### Data Prep ##########################################
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 #dataset_path = home_path + 'datasets/'
-dataset_path = home_path + 'partial_data/'
+dataset_path = home_path + 'gp_final/'
 plot_path = dataset_path + 'plots/'
 # npy_path = dataset_path + 'npy_data_folder/'
 npy_path = dataset_path + 'npy_data_folder/'
-disturbance_file_path = dataset_path + 'disturbance_partial.npy'
-input_file_path = dataset_path + 'input_partial.npy'
+disturbance_file_path = dataset_path + 'disturbance_new.npy'
+input_file_path = dataset_path + 'input_new.npy'
 wind_disturbance = jnp.load(disturbance_file_path)
 input = jnp.load(input_file_path)
 
@@ -241,14 +241,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_full_sr20_clamped.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_full_sr20_clamped.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_full_sr20_clamped.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################

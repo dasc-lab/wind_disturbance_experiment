@@ -15,25 +15,26 @@ import os, sys
 gpjax_path = os.path.join(home_path+'FORESEE/GPJax')
 sys.path.append(gpjax_path)
 import gpjax as gpx
-dataset_path = home_path + 'circle_figure8_fullset/'
+# dataset_path = home_path + 'circle_figure8_fullset/'
+dataset_path = home_path + 'gp_final/'
 model_path = dataset_path + 'models/'
 # npy_data_path = dataset_path + 'npy_data_folder/'
-npy_data_path = dataset_path + 'npy_data_folder_sr20/'
+npy_data_path = dataset_path + 'npy_data_folder/'
 plot_path = dataset_path + 'testset_plots/'
 # gp_x_file = 'gp_model_x_norm5_full_sr20_clamped.pkl'
 # gp_y_file = 'gp_model_y_norm5_full_sr20_clamped.pkl'
 # gp_z_file = 'gp_model_z_norm5_full_sr20_clamped.pkl'
-gp_x_file = 'gp_model_x_norm5_full.pkl'
-gp_y_file = 'gp_model_y_norm5_full.pkl'
-gp_z_file = 'gp_model_z_norm5_full.pkl'
-with open(model_path+gp_x_file, 'rb') as f:
+gp_x_file = 'gp_model_x_norm5.pkl'
+gp_y_file = 'gp_model_y_norm5.pkl'
+gp_z_file = 'gp_model_z_norm5.pkl'
+with open(model_path+gp_y_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
 factor = 5
 
 x = jnp.load(npy_data_path + 'training_input.npy')
-y = jnp.load(npy_data_path + 'training_disturbance_x.npy')
-disturbance_x = jnp.load(npy_data_path + 'test_disturbance_x.npy')
+y = jnp.load(npy_data_path + 'training_disturbance_y.npy')
+disturbance_x = jnp.load(npy_data_path + 'test_disturbance_y.npy')
 #wind_disturbance_x = jnp.load(home_path + 'wind_disturbance_x.npy')
 # plt.figure()
 # plt.plot(disturbance_x)

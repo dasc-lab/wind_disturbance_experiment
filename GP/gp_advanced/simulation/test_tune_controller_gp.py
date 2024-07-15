@@ -27,11 +27,12 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 # home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
 # home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 
-trajectory_path = home_path + 'circle_figure8_fullset/'
+# trajectory_path = home_path + 'circle_figure8_fullset/'
+trajectory_path = home_path + 'gp_final/'
 model_path = trajectory_path + 'models/'
 
-disturbance_path = trajectory_path + 'disturbance_full.npy'
-input_path = trajectory_path + 'input_full.npy'
+disturbance_path = trajectory_path + 'disturbance_new.npy'
+input_path = trajectory_path + 'input_new.npy'
 key = random.PRNGKey(2)
 horizon = 150 #200
 dt = 0.05 #0.01
@@ -215,9 +216,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     return compute_reward
 
 print(model_path)
-file_path1 = model_path + "gp_model_x_norm5_full.pkl"
-file_path2 = model_path + "gp_model_y_norm5_full.pkl"
-file_path3 = model_path + "gp_model_z_norm5_full.pkl"
+file_path1 = model_path + "gp_model_x_norm5.pkl"
+file_path2 = model_path + "gp_model_y_norm5.pkl"
+file_path3 = model_path + "gp_model_z_norm5.pkl"
 
 
 gp_train_x = jnp.load(input_path)

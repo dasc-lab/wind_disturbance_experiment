@@ -34,7 +34,7 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
-# bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
+bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
 #(500,500)
 # bag_path = home_path + 'cir_traj_r0.2_w2_c0.80_h0.4_kxv74_unclipped'
 #(500,500)
@@ -67,13 +67,16 @@ home_path = home_path.replace('circle_data', 'eight_data')
 
 
 
-bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
 # (500, 500)
 # bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
+# (200,800)
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
-
+#(200,1000)
 ######################## no disturbance ##################
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c00_h0.5_kxv74_unclipped_fanoff'
 

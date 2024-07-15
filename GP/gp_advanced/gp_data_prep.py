@@ -113,8 +113,8 @@ print("new input shape = ", new_input.shape)
 print("new_disturbance shape = ", new_disturbance.shape)
 
 ################## loading previous datapoints ##################
-input_file_path = home_path+ 'input_partial.npy'
-disturbance_file_path = home_path+'disturbance_partial.npy'
+input_file_path = home_path+ 'input_new.npy'
+disturbance_file_path = home_path+'disturbance_new.npy'
 
 ################## Prepare input ##################
 
