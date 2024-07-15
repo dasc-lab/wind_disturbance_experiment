@@ -40,8 +40,8 @@ home_path = home_path + 'circle_data/'
 #(500,500)
 # bag_path = home_path + 'cir_traj_r0.4_w2_c0.80_h0.4_kxv74_unclipped'
 #(500,500)
-
-
+# bag_path = home_path + 'cir_traj_r0.4_w2_c00_h0.5_kxv74_unclipped_fanoff'
+#(200, 200)
 
 ################## prev data ##################
 # bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
@@ -64,13 +64,23 @@ home_path = home_path + 'circle_data/'
 ########################################################################
 
 home_path = home_path.replace('circle_data', 'eight_data')
-# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+
+
+
+bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+# (500, 500)
 # bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
 # bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
 # bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
 
+######################## no disturbance ##################
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c00_h0.5_kxv74_unclipped_fanoff'
 
+# bag_path = home_path + 'eight_traj_r0.4_w2.5_c00_h0.5_kxv74_unclipped_fanoff'
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_unclipped_fanoff'
+# (700,1000)
 ################## previous data ##################
 # bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)

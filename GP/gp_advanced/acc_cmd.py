@@ -25,7 +25,7 @@ def fft_filter(signal, sampling_rate):
     magnitude = 2.0/N * np.abs(yf[:N//2])
 
     # Find the peak frequency
-    peak_index = np.argmax(magnitude)
+    peak_index = np.argmax(magnitude[0:10])
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
     def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
@@ -35,7 +35,7 @@ def fft_filter(signal, sampling_rate):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+80 #Hz
+    cutoff_freq = peak_frequency+3 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 def apply_fft_filter_to_columns(array, sampling_rate):
@@ -53,57 +53,79 @@ save = True
 # angular_vel = 1.0 #rad/s
 # center_x = 0
 # center_y = 0
-kx = 14
+# kx = 14
+# kv = 7.4
+kx = 14.0
 kv = 7.4
 m = 0.681
 g = 9.81
 
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
+
 repo_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/'
+home_path = repo_path + 'GP/gp_advanced/recorded_data/'
 plot_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/trajectory_sinusoid_plots/'
+
 ########################################################################
 ######################## Circle Paths ##################################
 ########################################################################
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
-#bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
+#(500,500)
+# bag_path = home_path + 'cir_traj_r0.2_w2_c0.80_h0.4_kxv74_unclipped'
+#(500,500)
+# bag_path = home_path + 'cir_traj_r0.4_w2_c0.80_h0.4_kxv74_unclipped'
+#(500,500)
+
+
+
+################## prev data ##################
+# bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
-#bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
-bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
-#(1400, len(x_data)-900)
-#bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
+#(1400, len(x_data)-900), (2500, len(x_data)-2500)
+# bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
-#bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
-#bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
-#bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
 
 ########################################################################
 ######################## Figure Eight Paths ############################
 ########################################################################
-home_path = home_path.replace('circle_data', 'eight_data')
 
+home_path = home_path.replace('circle_data', 'eight_data')
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
+# bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
+
+
+################## previous data ##################
 # bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
-#bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-800)
-#bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (600, len(x_data)-600)
-#bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
-#bag_path = home_path + 'eight_traj_r0.4_w1.5_c10_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w1.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (600, len(x_data)-800)
-#bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(threshold, cutoff) = (1000, len(x_data)-3000)
-#bag_path = home_path + 'eight_traj_r0.4_w2_c10_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w2_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (200, len(x_data)-600)
-#bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
-#(threshold, cutoff) = (100, len(x_data)-600)
-#bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
+# bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
+#(threshold, cutoff) = (300, len(x_data)-600)
+# bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
 #(threshold, cutoff) = (100, len(x_data)-100)
 
 
@@ -153,10 +175,10 @@ with Reader(bag_path) as reader:
             acc_ref = msg.acc_ref
             diff_pos = pos - pos_ref
             diff_vel = vel - vel_ref
-            if np.linalg.norm(diff_pos) > 2.0:
-                diff_pos = 2.0 * diff_pos/ np.linalg.norm(diff_pos)
-            if np.linalg.norm(diff_vel) > 5.0:
-                diff_vel = 5.0 * diff_vel/ np.linalg.norm(diff_vel)
+            # if np.linalg.norm(diff_pos) > 2.0:
+            #     diff_pos = 2.0 * diff_pos/ np.linalg.norm(diff_pos)
+            # if np.linalg.norm(diff_vel) > 5.0:
+            #     diff_vel = 5.0 * diff_vel/ np.linalg.norm(diff_vel)
             thrust = -kx*diff_pos - kv*diff_vel + m * acc_ref #- g*m 
             #thrust = thrust  + g * m
             acc_cmd = thrust/m
@@ -180,10 +202,10 @@ with Reader(bag_path) as reader:
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
 unfiltered_acc_arr = recorded_acc_arr = np.array(acc_arr)
-recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=10000)
+recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=100)
 disturbance = recorded_acc_arr - acc_cmd_arr
-cutoff = len(acc_cmd_arr) - 900
-threshold = 1400
+cutoff = len(acc_cmd_arr) - 500
+threshold = 500
 
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)

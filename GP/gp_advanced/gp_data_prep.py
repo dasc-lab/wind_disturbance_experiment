@@ -19,7 +19,7 @@ print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
 
-def fft_filter(signal, sampling_rate = 20):
+def fft_filter(signal, sampling_rate = 1000):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -27,7 +27,7 @@ def fft_filter(signal, sampling_rate = 20):
     magnitude = 2.0/N * np.abs(yf[:N//2])
 
     # Find the peak frequency
-    peak_index = np.argmax(magnitude)
+    peak_index = np.argmax(magnitude[0:10])
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
     print("sampling rate = ", sampling_rate)
@@ -42,7 +42,7 @@ def fft_filter(signal, sampling_rate = 20):
     print("cutoff_freq = ", cutoff_freq)
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
-def apply_fft_filter_to_columns(array, sampling_rate=20):
+def apply_fft_filter_to_columns(array, sampling_rate=1000):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)
@@ -102,7 +102,7 @@ new_input = np.hstack((new_pos_arr, new_vel_arr))
 #new_disturbance = np.array(disturbance)
 acc_arr = np.array(acc_arr)
 acc_cmd_arr = np.array(acc_cmd_arr)
-filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=20)
+filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=1000)
 #filtered_cmd = apply_fft_filter_to_columns(acc_cmd_arr, sampling_rate=5000)
 filtered_cmd = acc_cmd_arr
 new_disturbance =  filtered_acc - filtered_cmd

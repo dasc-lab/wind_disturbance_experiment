@@ -24,15 +24,19 @@ N = len(signal)
 
 print("signal shape = ", signal.shape)
 t = np.arange(signal.shape[0])
-sampling_rate = fs = 20#2000
+sampling_rate = fs = 1000#2000
 yf = fft_signal = np.fft.fft(signal)
 xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
 
 
+
 magnitude = 2.0/N * np.abs(yf[:N//2])
 
+
+
+freq_range = 10
 # Find the peak frequency
-peak_index = np.argmax(magnitude)
+peak_index = np.argmax(magnitude[0:freq_range])
 peak_frequency = xf[peak_index]
 peak_amplitude = magnitude[peak_index]
 
@@ -65,7 +69,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=1):
     y = filtfilt(b, a, data)
     return y , b , a
 
-cutoff_freq = peak_frequency+4.0#Hz
+cutoff_freq = peak_frequency+50.0#Hz
 filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)[0]
 print("cutoff frequency: ", cutoff_freq)
 print("sampling frequency", fs)
@@ -90,7 +94,7 @@ plt.title('Group Delay of Butterworth Lowpass Filter')
 plt.show()
 #np.save("filtered_y_component.npy", filtered_signal)
 
-def fft_filter(signal, sampling_rate = 20):
+def fft_filter(signal, sampling_rate = 1000):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -108,6 +112,6 @@ def fft_filter(signal, sampling_rate = 20):
         y = filtfilt(b, a, data)
         return y
     ####### NOTE: Replace  if necessary to calculate the cutoff frequency ######
-    cutoff_freq = peak_frequency+2 #Hz
+    cutoff_freq = peak_frequency+5 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order=2)
     return filtered_signal
