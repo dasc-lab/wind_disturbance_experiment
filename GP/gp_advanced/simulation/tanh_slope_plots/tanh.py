@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 e = np.linspace(-5, 5, 400)
 
 # Control parameters
-U_max = 0.2*9.81  # Maximum control value
+# U_max = 0.2*9.81  # Maximum control value
+U_max = 1
 # k_values = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5]  # Different k values for illustration
 # k_values = np.linspace(0.01,1,10 )
-k_values = [3]
+k_values = [1]
 # Plot the control output for different k values
 plt.figure(figsize=(12, 8))
 

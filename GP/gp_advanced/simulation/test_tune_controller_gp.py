@@ -34,11 +34,11 @@ model_path = trajectory_path + 'models/'
 disturbance_path = trajectory_path + 'disturbance_new.npy'
 input_path = trajectory_path + 'input_new.npy'
 key = random.PRNGKey(2)
-horizon = 150 #200
+horizon = 300 #200
 dt = 0.05 #0.01
 
 # custom optimizer
-iter_adam_custom = 200
+iter_adam_custom = 300
 custom_gd_lr_rate = 0.1
 grad_clip = 1.0
 
@@ -216,9 +216,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     return compute_reward
 
 print(model_path)
-file_path1 = model_path + "gp_model_x_norm5.pkl"
-file_path2 = model_path + "gp_model_y_norm5.pkl"
-file_path3 = model_path + "gp_model_z_norm5.pkl"
+file_path1 = model_path + "gp_model_x_norm5_clipped.pkl"
+file_path2 = model_path + "gp_model_y_norm5_clipped.pkl"
+file_path3 = model_path + "gp_model_z_norm5_clipped.pkl"
 
 
 gp_train_x = jnp.load(input_path)
@@ -251,8 +251,13 @@ def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     #     params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
     return params_policy
     
+# def generate_state_vector(key, n):
+#     return jax.random.normal(key, (n, 1))
 def generate_state_vector(key, n):
-    return jax.random.normal(key, (n, 1))
+    state_vector = jax.random.normal(key, (n, 1))
+    state_vector = state_vector.at[0,0].set(0)
+    state_vector = state_vector.at[1,0].set(0.8)
+    return state_vector
 
 # Example usage:
 key = jax.random.PRNGKey(0)  # Initialize the random key
@@ -278,7 +283,7 @@ get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_tra
 
 # plot trajectory with initial parameter
 # params_init = jnp.array([14.0, 7.4])
-params_init = jnp.array([7.0, 3.4])
+params_init = jnp.array([7.0, 4.0])
 key, subkey = jax.random.split(key)
 states, states_ref, control_inputs, disturbance_means, disturbance_covs = predict_states(state_vector, params_init, subkey)
 key, subkey = jax.random.split(key)
@@ -287,8 +292,8 @@ fig, ax = plt.subplots()
 ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='reference')
 ax.plot(states[0,:], states[1,:], 'g', label='states unoptimized')
 ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
-ax.set_xlim([-0.4,1.3])
-ax.set_ylim([-1.3, 0.4])
+# ax.set_xlim([-0.4,1.3])
+# ax.set_ylim([-1.3, 0.4])
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
