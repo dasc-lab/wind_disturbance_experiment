@@ -85,7 +85,7 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 3
+slice = 8
 
 
 ################################### Data Prep ##########################################
@@ -136,7 +136,7 @@ assert wind_disturbance_x.shape == wind_disturbance_y.shape == wind_disturbance_
 
 
 
-training_size = n = int(wind_disturbance.shape[0]*0.7)
+training_size = n = int(wind_disturbance.shape[0]*0.8)
 training_indices = jr.choice(key, wind_disturbance_x.size, (training_size,) , replace=False)
 mask = jnp.ones(wind_disturbance.shape[0], dtype=bool)
 mask = mask.at[training_indices].set(False)
@@ -187,7 +187,7 @@ for j in range(3):
 
 
     D = gpx.Dataset(X=x, y=y)
-    noise_level = 0.8
+    noise_level = 0.1
     # Construct the prior
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
@@ -241,14 +241,14 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_clipped_moredata.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_clipped_moredata.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5.pkl'
+        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_clipped_moredata.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################

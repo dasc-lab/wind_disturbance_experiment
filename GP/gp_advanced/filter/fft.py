@@ -69,7 +69,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=1):
     y = filtfilt(b, a, data)
     return y , b , a
 
-cutoff_freq = peak_frequency+50.0#Hz
+cutoff_freq = peak_frequency+3.0#Hz
 filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, fs, order = 1)[0]
 print("cutoff frequency: ", cutoff_freq)
 print("sampling frequency", fs)

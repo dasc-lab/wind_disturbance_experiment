@@ -71,35 +71,23 @@ plot_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
-# bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
-#(500,500)
-# bag_path = home_path + 'cir_traj_r0.2_w2_c0.80_h0.4_kxv74_unclipped'
-#(500,500)
-# bag_path = home_path + 'cir_traj_r0.4_w2_c0.80_h0.4_kxv74_unclipped'
-#(500,500)
-# bag_path = home_path + 'cir_traj_r0.4_w1.5_c00_h0.5_kxv74_unclipped'
-# bag_path = home_path + 'cir_traj_r0.4_w2_c00_h0.5_kxv74_unclipped_fanoff'
-#(200, 200)
+
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c00_h0.5_kxv74_clipped_new'
+# (200,500)
+
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.60_h0.5_kxv74_clipped_new'
+# (500,500)
+
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.80_h0.5_kxv74_clipped_new'
+# (800, len-500)
 
 
+# bag_path = home_path + 'cir_traj_r0.4_w1.0_c0.60_h0.5_kxv74_clipped_new'
+# (500,500)
 
-
-################## prev data ##################
-# home_path = home_path + 'prev_data/'
-# bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
-#(1200, len(x_data)-700)
-# bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
-#(1600, len(x_data)-1200)
-# bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
-#(1400, len(x_data)-900), (2500, len(x_data)-2500)
-# bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
-#(780, len(x_data) -1600)
-# bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
-#(1000, len(x_data)-1000)
-# bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
-#(800, len(x_data)-800)
-# bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
-#(1000, len(x_data) - 2500)
+################## fanoff data ##################
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c00_h0.5_kxv74_fanoff_clipped_new'
+# (500, 2500)
 
 ########################################################################
 ######################## Figure Eight Paths ############################
@@ -107,44 +95,21 @@ home_path = home_path + 'circle_data/'
 
 home_path = home_path.replace('circle_data', 'eight_data')
 
+bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_clipped_new'
+# (500,500)
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c0.80_h0.5_kxv74_clipped_new'
+# (1200, 1000)
 
 
-# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
-# (500, 500)
-# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
-# (200,800)
-# bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
-# (200,800)
-# bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
-# (200,800)
-# bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
-#(200,1000)
-######################## no disturbance ##################
-# bag_path = home_path + 'eight_traj_r0.4_w2.0_c00_h0.5_kxv74_unclipped_fanoff'
 
-# bag_path = home_path + 'eight_traj_r0.4_w2.5_c00_h0.5_kxv74_unclipped_fanoff'
 
-# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_unclipped_fanoff'
-# (700,1000)
-################## previous data ##################
-# bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
-#(threshold, cutoff) = (1200, len(x_data)-3500)
-# bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
-#(threshold, cutoff) = (200, len(x_data)-800)
-# bag_path = home_path + 'eight_traj_r0.2_w2.5_c1.20_h0.4_fanhigh'
-#(threshold, cutoff) = (600, len(x_data)-600)
-# bag_path = home_path + 'eight_traj_r0.4_w1.5_c1.20_h0.4_fanhigh'
-#(threshold, cutoff) = (100, len(x_data)-100)
-# bag_path = home_path + 'eight_traj_r0.4_w1.5_c10_h0.4_fanhigh'
-#(threshold, cutoff) = (600, len(x_data)-800)
-# bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
-#(threshold, cutoff) = (1000, len(x_data)-3000)
-# bag_path = home_path + 'eight_traj_r0.4_w2_c10_h0.4_fanhigh'
-#(threshold, cutoff) = (200, len(x_data)-600)
-# bag_path = home_path + 'eight_traj_r0.4_w2.5_c10_h0.4_fanhigh'
-#(threshold, cutoff) = (300, len(x_data)-600)
-# bag_path = home_path + 'eight_traj_r0.6_w1.5_c10_h0.4_fanhigh'
-#(threshold, cutoff) = (100, len(x_data)-100)
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_fanoff_clipped_new'
+# (500,500)
+
+
+
+
 
 
 # Define the topics we want to extract data from
@@ -219,7 +184,7 @@ with Reader(bag_path) as reader:
 # assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 acc_cmd_arr = np.array(acc_cmd_arr)
 unfiltered_acc_arr = recorded_acc_arr = np.array(acc_arr)
-recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=100)
+recorded_acc_arr = apply_fft_filter_to_columns(recorded_acc_arr, sampling_rate=1000)
 disturbance = recorded_acc_arr - acc_cmd_arr
 cutoff = len(acc_cmd_arr) - 500
 threshold = 500
