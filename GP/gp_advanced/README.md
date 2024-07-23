@@ -1,6 +1,6 @@
 # Gaussian Data and Model for Wind Experiements
 
-## Reading recorded data, visualizing the trajectories, and truncating takeoff and landing data
+## Visualizing trajectories and truncating takeoff and landing data
 Use `plot_trejectory_ref.py` to visualize the trajectories and its 3D components. Use `bag_path` variable to select different trajectories to be processed. Adjust variables `cutoff` and `threshold` to remove takeoff and landing data, where `threshold` removes takeoff data towards the beginning of the recording and `cutoff` removes landing data from the recording. Please ensure no takeoff and landing data is included as this can mess up Gaussian Process training. Other files such as `plot_acc.py` may import `cutoff` and `threshold`. 
 
 ## Visualize Acceleration and Applying Low-Pass Filter
