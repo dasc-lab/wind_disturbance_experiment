@@ -15,9 +15,9 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-# dynamics_type = 'ideal'
+dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-dynamics_type = 'gp'
+# dynamics_type = 'gp'
 
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
@@ -191,7 +191,13 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         Performs Gradient Descent
         '''
         states, weights = initialize_sigma_points(X)
-        reward = 0
+        kx = policy_params[0]
+        kv = policy_params[1]
+        w1 = 5
+        w2 = 1
+        # reward = 0 + w1 * (kx-7)**2 + w2 * (kv-4)**2
+        reward = 0 + w1 * (kx)**2 + w2 * (kv)**2
+        # reward = 0
         def body(h, inputs):
             '''
             Performs UT-EC with 6 states
@@ -314,6 +320,9 @@ ax_acc[2].plot( disturbance_means2[2,:], 'r--' )
 ax_acc[0].set_ylabel('X')
 ax_acc[1].set_ylabel('Y')
 ax_acc[2].set_ylabel('Z')
+w1 = 0.2
+w2 = 0.05
+plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
 # plt.show()
 
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
@@ -349,7 +358,7 @@ ax.legend()
 ax_acc[0].legend()
 ax_acc[1].legend()
 ax_acc[2].legend()
-
+plt.savefig(f"gain_tuning/plots/component_wx{w1}_wv{w2}.png")
 plt.show()
 
 

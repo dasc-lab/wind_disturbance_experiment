@@ -55,8 +55,8 @@ save = True
 # center_y = 0
 # kx = 14
 # kv = 7.4
-kx = 14.0
-kv = 7.4
+kx = 7
+kv = 4
 m = 0.681
 g = 9.81
 

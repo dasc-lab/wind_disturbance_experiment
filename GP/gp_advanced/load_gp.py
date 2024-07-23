@@ -30,14 +30,14 @@ plot_path = dataset_path + 'testset_plots/'
 gp_x_file = 'gp_model_x_norm5_clipped_moredata.pkl'
 gp_y_file = 'gp_model_y_norm5_clipped_moredata.pkl'
 gp_z_file = 'gp_model_z_norm5_clipped_moredata.pkl'
-with open(model_path+gp_x_file, 'rb') as f:
+with open(model_path+gp_y_file, 'rb') as f:
     opt_posterior = pickle.load(f)
 
 factor = 5
 
 x = jnp.load(npy_data_path + 'training_input.npy')
-y = jnp.load(npy_data_path + 'training_disturbance_x.npy')
-disturbance_x = jnp.load(npy_data_path + 'test_disturbance_x.npy')
+y = jnp.load(npy_data_path + 'training_disturbance_y.npy')
+disturbance_x = jnp.load(npy_data_path + 'test_disturbance_y.npy')
 #wind_disturbance_x = jnp.load(home_path + 'wind_disturbance_x.npy')
 # plt.figure()
 # plt.plot(disturbance_x)
