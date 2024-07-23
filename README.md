@@ -13,4 +13,4 @@
 6. To record figure8 data, `ros2 launch trajectory_driver figureeight.launch.py` 
 7. Outside of docker, push changes to github with `git push origin foresee`. Then copy and paste data into recorded data folder.
 # Gaussian Process and Simulation
-See GP/gp_advanced/README.md for detailed walkthrough.
+See `GP/gp_advanced/README.md` for detailed walkthrough.
