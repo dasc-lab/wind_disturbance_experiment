@@ -2,7 +2,8 @@ import jax.numpy as jnp
 from jax import jit, vmap, lax
 import jax
 def state_ref(t):
-    pos, vel, acc = circle_pos_vel_acc( t, cir_radius[1], cir_angular_vel[1], cir_origin_x[1], cir_origin_y[1] )
+    dataset_index = 0
+    pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 # policy_params = [14, 7.4]
 policy_params = [7, 4]
@@ -55,11 +56,15 @@ cir_origin_y =    [0.0, 0.0, 0.0, 0.0, 0.0]
 # cir_origin_x =    [0.5, 0.4, 0.4, 0.6, 0.8, 1.0]
 # cir_origin_y =    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
+figure8_radius =        [0.4, 0.4]
+figure8_angular_vel =   [1, 1]
+figure8_origin_x =      [0.0, 0.8]
+figure8_origin_y =      [0.0, 0.0]
 
-figure8_radius =        [0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.6]
-figure8_angular_vel =   [1.5, 2.0, 2.5, 1.5, 1.5, 2.0, 2.0, 2.5, 1.5]
-figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
-figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+# figure8_radius =        [0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.6]
+# figure8_angular_vel =   [1.5, 2.0, 2.5, 1.5, 1.5, 2.0, 2.0, 2.5, 1.5]
+# figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
+# figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
 @jit

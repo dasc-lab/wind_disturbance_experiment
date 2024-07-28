@@ -15,9 +15,9 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-dynamics_type = 'ideal'
+# dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-# dynamics_type = 'gp'
+dynamics_type = 'gp'
 
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
@@ -193,8 +193,8 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         states, weights = initialize_sigma_points(X)
         kx = policy_params[0]
         kv = policy_params[1]
-        w1 = 5
-        w2 = 1
+        w1 = 0.5
+        w2 = 0.1
         # reward = 0 + w1 * (kx-7)**2 + w2 * (kv-4)**2
         reward = 0 + w1 * (kx)**2 + w2 * (kv)**2
         # reward = 0
@@ -257,13 +257,13 @@ def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     #     params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
     return params_policy
     
-# def generate_state_vector(key, n):
-#     return jax.random.normal(key, (n, 1))
 def generate_state_vector(key, n):
-    state_vector = jax.random.normal(key, (n, 1))
-    state_vector = state_vector.at[0,0].set(0)
-    state_vector = state_vector.at[1,0].set(0.8)
-    return state_vector
+    return jax.random.normal(key, (n, 1))
+# def generate_state_vector(key, n):
+#     state_vector = jax.random.normal(key, (n, 1))
+#     state_vector = state_vector.at[0,0].set(0)
+#     state_vector = state_vector.at[1,0].set(0)
+#     return state_vector
 
 # Example usage:
 key = jax.random.PRNGKey(0)  # Initialize the random key
@@ -284,9 +284,10 @@ def setup_predict_states(file_path1, file_path2, file_path3, dynamics_type='idea
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 predict_states = setup_predict_states(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
-get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
-get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
-
+# get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
+# get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
+get_future_reward( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
+get_future_reward_grad( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
 # plot trajectory with initial parameter
 # params_init = jnp.array([14.0, 7.4])
 params_init = jnp.array([7.0, 4.0])
