@@ -6,7 +6,7 @@ plt.ion()
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.set_xlim(-0.5,0.5)
-ax.set_ylim(0,1.1)
+ax.set_ylim(-0.5,0.5)
 ax.set_zlim(0,1)
 specifier = 'eight_traj_r0.4_w1_c00_h0.5_kxv14_81_7_09_'
 ideal_array = np.load('compare_trajectory/figure8/ideal_trajectory_'+ specifier+'.npy')
