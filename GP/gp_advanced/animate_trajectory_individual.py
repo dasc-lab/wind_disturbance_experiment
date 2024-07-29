@@ -14,19 +14,20 @@ optimized_array = np.load('compare_trajectory/optimized_trajectory_cir_r0.4_w1.0
 # x = np.linspace(0,5,5000)
 # y = np.ones(x.shape)
 # z = 5* np.ones(x.shape)
-x_ideal = ideal_array[:,0]
-y_ideal = ideal_array[:,1] 
-z_ideal = ideal_array[:,2]
+slice = 3
+x_ideal = ideal_array[:,0][::slice]
+y_ideal = ideal_array[:,1][::slice]
+z_ideal = ideal_array[:,2][::slice]
 
 
 
-x = unoptimized_array[:,0]
-y = unoptimized_array[:,1]
-z = unoptimized_array[:,2]
+x = unoptimized_array[:,0][::slice]
+y = unoptimized_array[:,1][::slice]
+z = unoptimized_array[:,2][::slice]
 
-x_op = optimized_array[:,0]
-y_op = optimized_array[:,1]
-z_op = optimized_array[:,2]
+x_op = optimized_array[:,0][::slice]
+y_op = optimized_array[:,1][::slice]
+z_op = optimized_array[:,2][::slice]
 # p  = ax.plot(x[0],y[0],z[0], 'r')#,c = 'b', s = 20)
 ideal_trajectory = ax.scatter(x_ideal[0], y_ideal[0], z_ideal[0], c='black', s= 20, marker = '^', label = 'reference trajectory')
 optimized_trajectory = ax.scatter(x_op[0], y_op[0], z_op[0], c='springgreen', s= 20, label = 'optimized trajectory')
@@ -35,7 +36,7 @@ ax.legend()
 T = x.shape[0]
 metadata = dict(title='Movie Test', artist='Matplotlib',comment='Movie support!')
 name = 'cir_r0.4_w1.0_c0.00_h0.5.mp4'
-writer = FFMpegWriter(fps=20, metadata=metadata)
+writer = FFMpegWriter(fps=15, metadata=metadata)
 with writer.saving(fig, 'animated_plots/'+name, 100):
     for t in range(T):
 
