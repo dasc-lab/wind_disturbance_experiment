@@ -15,9 +15,9 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-# dynamics_type = 'ideal'
+dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-dynamics_type = 'gp'
+# dynamics_type = 'gp'
 
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
@@ -257,13 +257,13 @@ def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     #     params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
     return params_policy
     
-def generate_state_vector(key, n):
-    return jax.random.normal(key, (n, 1))
 # def generate_state_vector(key, n):
-#     state_vector = jax.random.normal(key, (n, 1))
-#     state_vector = state_vector.at[0,0].set(0)
-#     state_vector = state_vector.at[1,0].set(0)
-#     return state_vector
+#     return jax.random.normal(key, (n, 1))
+def generate_state_vector(key, n):
+    state_vector = jax.random.normal(key, (n, 1))
+    state_vector = state_vector.at[0,0].set(0.0)
+    state_vector = state_vector.at[1,0].set(0.0)
+    return state_vector
 
 # Example usage:
 key = jax.random.PRNGKey(0)  # Initialize the random key
@@ -321,9 +321,9 @@ ax_acc[2].plot( disturbance_means2[2,:], 'r--' )
 ax_acc[0].set_ylabel('X')
 ax_acc[1].set_ylabel('Y')
 ax_acc[2].set_ylabel('Z')
-w1 = 0.2
-w2 = 0.05
-plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
+# w1 = 0.2
+# w2 = 0.05
+# plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
 # plt.show()
 
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
@@ -335,6 +335,7 @@ else:
     print(f"NOT IMPLEMENTED ERROR")
     exit()
 print(f"new params: {params_optimized}")
+ax.set_title(f'gains: {params_optimized[0]},{params_optimized[1]}')
 key, subkey = jax.random.split(key)
 states_optimized, states_ref_optimized, control_inputs_optimized, disturbance_means_optimized, disturbance_covs_optimized = predict_states(state_vector, params_optimized, subkey)
 key, subkey = jax.random.split(key)
@@ -359,7 +360,7 @@ ax.legend()
 ax_acc[0].legend()
 ax_acc[1].legend()
 ax_acc[2].legend()
-plt.savefig(f"gain_tuning/plots/component_wx{w1}_wv{w2}.png")
+# plt.savefig(f"gain_tuning/plots/component_wx{w1}_wv{w2}.png")
 plt.show()
 
 

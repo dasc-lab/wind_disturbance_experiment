@@ -2,7 +2,7 @@ import jax.numpy as jnp
 from jax import jit, vmap, lax
 import jax
 def state_ref(t):
-    dataset_index = 0
+    dataset_index = 1
     pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 # policy_params = [14, 7.4]
@@ -29,8 +29,8 @@ def policy( t, states, policy_params):
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     # thrust = - kx * ex - kv * ev + m * acc_ref - m * g
     thrust = - kx * ex - kv * ev + m * acc_ref - m * g * jnp.array([ [0], [0], [1] ])
-    tanh_a = 6*0.681
-    tanh_k = 0.286
+    tanh_a = 3.8
+    tanh_k = 0.286*1.5
 
 
     tanh_az = 15*0.681
