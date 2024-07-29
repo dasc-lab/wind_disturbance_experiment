@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-save = True
+save = False
 # Open the ROS2 bag file
 #bag = rosbag.Bag('drone_trajectory.bag')
 radius = 0.2
@@ -247,7 +247,7 @@ with Reader(bag_path) as reader:
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 cutoff = len(x_data) - 800
-threshold = 00
+threshold = 0
 
 
 print("cutoff, threshold = ", cutoff, threshold)
