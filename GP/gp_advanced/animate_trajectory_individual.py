@@ -28,9 +28,9 @@ x_op = optimized_array[:,0]
 y_op = optimized_array[:,1]
 z_op = optimized_array[:,2]
 # p  = ax.plot(x[0],y[0],z[0], 'r')#,c = 'b', s = 20)
-ideal_trajectory = ax.scatter(x_ideal[0], y_ideal[0], z_ideal[0], c='deepskyblue', s= 20, label = 'ideal trajectory')
+ideal_trajectory = ax.scatter(x_ideal[0], y_ideal[0], z_ideal[0], c='black', s= 20, marker = '^', label = 'reference trajectory')
 optimized_trajectory = ax.scatter(x_op[0], y_op[0], z_op[0], c='springgreen', s= 20, label = 'optimized trajectory')
-trajectory = ax.scatter( x[0], y[0], z[0], c = 'brown', s=20, label = 'unoptimized trajecotry')
+trajectory = ax.scatter( x[0], y[0], z[0], c = 'brown', s=20, alpha = '0.5', label = 'unoptimized trajecotry')
 ax.legend()
 T = x.shape[0]
 metadata = dict(title='Movie Test', artist='Matplotlib',comment='Movie support!')
