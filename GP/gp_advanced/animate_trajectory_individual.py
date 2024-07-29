@@ -8,9 +8,9 @@ ax = fig.add_subplot(111, projection='3d')
 ax.set_xlim(-0.5,0.5)
 ax.set_ylim(-0.5,0.5)
 ax.set_zlim(0,1)
-specifier = 'eight_traj_r0.4_w1_c00_h0.5_kxv14_81_7_09_'
+specifier = 'eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47'
 ideal_array = np.load('compare_trajectory/figure8/ideal_trajectory_'+ specifier+'.npy')
-unoptimized_array = np.load('compare_trajectory/figure8/unoptimized_trajectory_eight_traj_r0.4_w1_c00_h0.5_kxv74.npy')
+unoptimized_array = np.load('compare_trajectory/unoptimized_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00.npy')
 optimized_array = np.load('compare_trajectory/figure8/optimized_trajectory_'+specifier+'.npy')
 # x = np.linspace(0,5,5000)
 # y = np.ones(x.shape)
