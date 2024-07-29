@@ -120,10 +120,10 @@ home_path = home_path.replace('circle_data', 'eight_data')
 # bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c00_h0.5_kxv14_81_7_09_fanon_clipped_new'
 #(500,3200)
 # bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c00_h0.5_kxv19_04_9_30_fanon_clipped_new'
-# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff_clipped_new'
+bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff_clipped_new'
 # bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanon_clipped_new'
 # (500, 4500)
-bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47_fanon_clipped_new'
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47_fanon_clipped_new'
 # (500, 800)
 # bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv18_56_9_45_fanon_clipped_new'
 # (500, 1200)
@@ -246,8 +246,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 800
-threshold = 00
+cutoff = len(x_data) - 1000
+threshold = 1200
 
 
 print("cutoff, threshold = ", cutoff, threshold)
@@ -262,14 +262,14 @@ z = np.array(z_data[threshold:cutoff])
 if save :
     stacked_array = np.column_stack((x,y,z))
     #'eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00'
-    np.save('compare_trajectory/figure8/optimized_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47.npy',stacked_array)
+    np.save('compare_trajectory/figure8/unoptimized_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff.npy',stacked_array)
 #print("size of x data is: ",x.shape)
 x_t = x_ideal = np.array(x_ideal[threshold:cutoff])
 y_t = y_ideal = np.array(y_ideal[threshold:cutoff])
 z_t = z_ideal = np.array(z_ideal[threshold:cutoff])
 if save : 
     stacked_array = np.column_stack((x_t,y_t,z_t))
-    np.save('compare_trajectory/figure8/ideal_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47.npy',stacked_array)
+    np.save('compare_trajectory/figure8/ideal_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff.npy',stacked_array)
 # Scatter plot
 ax.set_zlim(0,1)
 ax.scatter(x, y, z, c= 'r')
