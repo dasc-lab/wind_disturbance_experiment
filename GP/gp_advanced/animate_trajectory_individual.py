@@ -8,8 +8,9 @@ ax = fig.add_subplot(111, projection='3d')
 ax.set_xlim(-0.5,0.5)
 ax.set_ylim(-0.5,0.5)
 ax.set_zlim(0,1)
-ideal_array = np.load('compare_trajectory/ideal_trajectory_cir_r0.4_w1.0_c0.00_h0.5_fanoff.npy')
-unoptimized_array = np.load('compare_trajectory/unoptimized_trajectory_cir_r0.4_w1.0_c0.00_h0.5_kxv7_4_fanoff.npy')
+specifier = 'cir_traj_r0.4_w1.0_c0.60_h0.5_fanoff'
+ideal_array = np.load('compare_trajectory/ideal_trajectory_cir_traj_r0.4_w1.0_c0.60_h0.5_fanoff.npy')
+unoptimized_array = np.load('compare_trajectory/unoptimized_trajectory_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv7_4_fanoff.npy')
 optimized_array = np.load('compare_trajectory/optimized_trajectory_cir_r0.4_w1.0_c0.00_h0.5_kxv19_9.npy')
 # x = np.linspace(0,5,5000)
 # y = np.ones(x.shape)
@@ -35,7 +36,7 @@ trajectory = ax.scatter( x[0], y[0], z[0], c = 'brown', s=20, alpha = 0.5, label
 ax.legend()
 T = x.shape[0]
 metadata = dict(title='Movie Test', artist='Matplotlib',comment='Movie support!')
-name = 'cir_r0.4_w1.0_c0.00_h0.5_fanoff.mp4'
+name = '.mp4'
 writer = FFMpegWriter(fps=15, metadata=metadata)
 with writer.saving(fig, 'animated_plots/'+name, 100):
     for t in range(T):
