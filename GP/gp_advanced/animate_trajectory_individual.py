@@ -36,7 +36,7 @@ trajectory = ax.scatter( x[0], y[0], z[0], c = 'brown', s=20, alpha = 0.5, label
 ax.legend()
 T = x.shape[0]
 metadata = dict(title='Movie Test', artist='Matplotlib',comment='Movie support!')
-name = '.mp4'
+name = specifier+'.mp4'
 writer = FFMpegWriter(fps=15, metadata=metadata)
 with writer.saving(fig, 'animated_plots/'+name, 100):
     for t in range(T):

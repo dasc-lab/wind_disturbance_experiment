@@ -247,7 +247,7 @@ with Reader(bag_path) as reader:
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
 cutoff = len(x_data) - 1000
-threshold = 200
+threshold = 1000
 
 
 print("cutoff, threshold = ", cutoff, threshold)
