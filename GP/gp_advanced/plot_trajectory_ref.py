@@ -16,8 +16,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-
-save = True
+save = False
 # Open the ROS2 bag file
 #bag = rosbag.Bag('drone_trajectory.bag')
 radius = 0.2
@@ -34,26 +33,140 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 ##### NOTE: The 'threshold' and 'cutoff' for each dataset are calculated and displayed beneath the bag_path of the dataset ######
 ##### NOTE: Replace the 'threshold' and 'cutoff' variables in this file with the value beneath each bag_path. Please do not uncomment the values #####
 home_path = home_path + 'circle_data/'
+
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanoff_clipped_new'
+#(500, 800)
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
+#(500, 800)
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv14_81_7_09_tank_0_31_fanon_clipped_new'
+#(500, 800)
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_04_9_30_tank_0_31_fanon_clipped_new'
+#(500, 800)
+
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv7_00_4_00_tank_0_31_fanoff_clipped_new'
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
+# (500,800)
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv14_81_7_25_tank_0_31_fanon_clipped_new'
+# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv18_86_8_93_tank_0_31_fanon_clipped_new'
+
+
+# bag_path = home_path + '27_07_2024_cir_traj_r0.4_w1.0_c0.60_h0.5_kxv14_7_4_fanon_clipped_new'
+# bag_path = home_path + '27_07_2024_cir_traj_r0.2_w1.5_c0.80_h0.5_kxv14_7_4_fanon_clipped_new'
+# bag_path = home_path + '27_07_2024_cir_traj_r0.2_w1.5_c0.80_h0.5_kxv74_fanon_clipped_new'
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c00_h0.5_kxv74_clipped_new'
+# (200,500)
+
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.60_h0.5_kxv74_clipped_new'
+# (500,500)
+
+bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.80_h0.5_kxv74_clipped_new'
+# (800, len-500)
+
+
+# bag_path = home_path + 'cir_traj_r0.4_w1.0_c0.60_h0.5_kxv74_clipped_new'
+#(500,500)
+
+
+
+################## fanoff data ##################
+# bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.80_h0.5_kxv74_fanoff_clipped_new'
+# (500, len-1000)
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c00_h0.5_kxv74_fanoff_clipped_new'
+# (500, 2500)
+
+################## unclipped data ##################
+
+# bag_path = home_path + 'cir_traj_r0.2_w1.5_c0.50_h0.4_kxv74_unclipped'
+# #(500,500)
+# # bag_path = home_path + 'cir_traj_r0.2_w2_c0.80_h0.4_kxv74_unclipped'
+# #(500,500)
+# # bag_path = home_path + 'cir_traj_r0.4_w2_c0.80_h0.4_kxv74_unclipped'
+# #(500,500)
+# # bag_path = home_path + 'cir_traj_r0.4_w2_c00_h0.5_kxv74_unclipped_fanoff'
+# #(200, 200)
+
+################## prev data ##################
 # bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
-# bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+home_path = home_path + 'prev_data/'
+bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
 # bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len(x_data)-900), (2500, len(x_data)-2500)
 # bag_path = home_path + 'cir_traj_r0.4_w2.5_c0.60_h0.4_fanhigh'
 #(780, len(x_data) -1600)
-bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.4_w3_c0.80_h0.4_fanhigh'
 #(1000, len(x_data)-1000)
 # bag_path = home_path + 'cir_traj_r0.4_w3_c10_h0.4_fanhigh'
 #(800, len(x_data)-800)
 # bag_path = home_path + 'eight_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1000, len(x_data) - 2500)
 
+
+
+
+
+
+
+
+########################################################################
+########################################################################
 ########################################################################
 ######################## Figure Eight Paths ############################
 ########################################################################
+########################################################################
+########################################################################
+
 home_path = home_path.replace('circle_data', 'eight_data')
 
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c00_h0.5_kxv14_81_7_09_fanon_clipped_new'
+#(500,3200)
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c00_h0.5_kxv19_04_9_30_fanon_clipped_new'
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff_clipped_new'
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanon_clipped_new'
+# (500, 4500)
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv15_16_7_47_fanon_clipped_new'
+# (500, 800)
+# bag_path = home_path + '28_7_2024_eight_traj_r0.4_w1_c080_h0.5_kxv18_56_9_45_fanon_clipped_new'
+# (500, 1200)
+
+
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_clipped_new'
+# (500,500)
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c0.80_h0.5_kxv74_clipped_new'
+# (1200, 1000)
+
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_fanoff_clipped_new'
+# (500,500)
+
+
+
+################## unclipped data ##################
+
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.4_kxv74_unclipped'
+# (500, 500)
+# bag_path = home_path + 'eight_traj_r0.2_w2.5_c10_h0.5_kxv74_unclipped'
+# (200,800)
+# bag_path = home_path + 'eight_traj_r0.4_w1.5_c0.80_h0.4_kxv74_unclipped'
+# (200,800)
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c1.20_h0.5_kxv74_unclipped'
+# (200,800)
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c10_h0.5_kxv74_unclipped'
+#(200,1000)
+
+
+
+######################## no disturbance ##################
+# bag_path = home_path + 'eight_traj_r0.4_w2.0_c00_h0.5_kxv74_unclipped_fanoff'
+
+# bag_path = home_path + 'eight_traj_r0.4_w2.5_c00_h0.5_kxv74_unclipped_fanoff'
+
+# bag_path = home_path + 'eight_traj_r0.4_w1_c00_h0.5_kxv74_unclipped_fanoff'
+# (700,1000)
+################## previous data ##################
 # bag_path = home_path + 'eight_traj_r0.2_w1.5_c0.80_h0.4_fanhigh'
 #(threshold, cutoff) = (1200, len(x_data)-3500)
 # bag_path = home_path + 'eight_traj_r0.2_w2_c1.20_h0.4_fanhigh'
@@ -135,8 +248,8 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 1000
-threshold = 1000
+cutoff = len(x_data) - 1200
+threshold = 1600
 
 
 print("cutoff, threshold = ", cutoff, threshold)
@@ -148,11 +261,17 @@ ax = fig.add_subplot(111, projection='3d')
 x = np.array(x_data[threshold:cutoff])
 y = np.array(y_data[threshold:cutoff])
 z = np.array(z_data[threshold:cutoff])
+if save :
+    stacked_array = np.column_stack((x,y,z))
+    #'eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00'
+    np.save('compare_trajectory/figure8/unoptimized_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff.npy',stacked_array)
 #print("size of x data is: ",x.shape)
 x_t = x_ideal = np.array(x_ideal[threshold:cutoff])
 y_t = y_ideal = np.array(y_ideal[threshold:cutoff])
 z_t = z_ideal = np.array(z_ideal[threshold:cutoff])
-
+if save : 
+    stacked_array = np.column_stack((x_t,y_t,z_t))
+    np.save('compare_trajectory/figure8/ideal_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff.npy',stacked_array)
 # Scatter plot
 ax.set_zlim(0,1)
 ax.scatter(x, y, z, c= 'r')

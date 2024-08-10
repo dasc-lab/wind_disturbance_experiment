@@ -10,7 +10,7 @@ plotter_path = os.path.join('/Users/albusfang/Coding Projects/gp_ws/Gaussian Pro
 sys.path.append(plotter_path)
 ####### change bag_path in plot_trajectory_ref.py ######
 from plot_trajectory_ref import bag_path, cutoff, threshold
-
+print(bag_path.split('/')[-1])
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
@@ -18,7 +18,7 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 print("bag path is: ", bag_path)
 print("cutoff = ", cutoff)
 print("threshold = ", threshold)
-def fft_filter(signal, sampling_rate = 20):
+def fft_filter(signal, sampling_rate = 100):
     yf = fft_signal = np.fft.fft(signal)
     xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
     N = len(signal)
@@ -26,7 +26,7 @@ def fft_filter(signal, sampling_rate = 20):
     magnitude = 2.0/N * np.abs(yf[:N//2])
 
     # Find the peak frequency
-    peak_index = np.argmax(magnitude)
+    peak_index = np.argmax(magnitude[0:10])
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
     def butter_lowpass_filter(data, cutoff, fs, order=1):
@@ -36,11 +36,11 @@ def fft_filter(signal, sampling_rate = 20):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+20.0 #Hz
+    cutoff_freq = peak_frequency+5.0 #Hz
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 
-def apply_fft_filter_to_columns(array, sampling_rate=20):
+def apply_fft_filter_to_columns(array, sampling_rate=100):
     filtered_array = np.zeros_like(array)
     for i in range(array.shape[1]):
         filtered_array[:, i] = fft_filter(array[:, i], sampling_rate)

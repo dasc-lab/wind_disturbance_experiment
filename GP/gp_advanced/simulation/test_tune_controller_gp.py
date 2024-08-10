@@ -15,29 +15,30 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-# dynamics_type = 'ideal'
-dynamics_type = 'noisy'
+dynamics_type = 'ideal'
+# dynamics_type = 'noisy'
 # dynamics_type = 'gp'
 
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
 
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+# home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
 # home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 
-trajectory_path = home_path + 'circle_figure8_fullset/'
+# trajectory_path = home_path + 'circle_figure8_fullset/'
+trajectory_path = home_path + 'gp_final/'
 model_path = trajectory_path + 'models/'
 
-disturbance_path = trajectory_path + 'disturbance_full.npy'
-input_path = trajectory_path + 'input_full.npy'
+disturbance_path = trajectory_path + 'disturbance_new.npy'
+input_path = trajectory_path + 'input_new.npy'
 key = random.PRNGKey(2)
-horizon = 150 #200
+horizon = 300 #200
 dt = 0.05 #0.01
 
 # custom optimizer
-iter_adam_custom = 200
+iter_adam_custom = 300
 custom_gd_lr_rate = 0.1
 grad_clip = 1.0
 
@@ -190,7 +191,13 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         Performs Gradient Descent
         '''
         states, weights = initialize_sigma_points(X)
-        reward = 0
+        kx = policy_params[0]
+        kv = policy_params[1]
+        w1 = 0.5
+        w2 = 0.1
+        # reward = 0 + w1 * (kx-7)**2 + w2 * (kv-4)**2
+        reward = 0 + w1 * (kx)**2 + w2 * (kv)**2
+        # reward = 0
         def body(h, inputs):
             '''
             Performs UT-EC with 6 states
@@ -215,9 +222,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     return compute_reward
 
 print(model_path)
-file_path1 = model_path + "gp_model_x_norm5_full.pkl"
-file_path2 = model_path + "gp_model_y_norm5_full.pkl"
-file_path3 = model_path + "gp_model_z_norm5_full.pkl"
+file_path1 = model_path + "gp_model_x_norm5_clipped.pkl"
+file_path2 = model_path + "gp_model_y_norm5_clipped.pkl"
+file_path3 = model_path + "gp_model_z_norm5_clipped.pkl"
 
 
 gp_train_x = jnp.load(input_path)
@@ -250,8 +257,13 @@ def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     #     params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
     return params_policy
     
+# def generate_state_vector(key, n):
+#     return jax.random.normal(key, (n, 1))
 def generate_state_vector(key, n):
-    return jax.random.normal(key, (n, 1))
+    state_vector = jax.random.normal(key, (n, 1))
+    state_vector = state_vector.at[0,0].set(0.0)
+    state_vector = state_vector.at[1,0].set(0.0)
+    return state_vector
 
 # Example usage:
 key = jax.random.PRNGKey(0)  # Initialize the random key
@@ -272,12 +284,13 @@ def setup_predict_states(file_path1, file_path2, file_path3, dynamics_type='idea
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 predict_states = setup_predict_states(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
-get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
-get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
-
+# get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
+# get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
+get_future_reward( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
+get_future_reward_grad( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
 # plot trajectory with initial parameter
 # params_init = jnp.array([14.0, 7.4])
-params_init = jnp.array([7.0, 3.4])
+params_init = jnp.array([7.0, 4.0])
 key, subkey = jax.random.split(key)
 states, states_ref, control_inputs, disturbance_means, disturbance_covs = predict_states(state_vector, params_init, subkey)
 key, subkey = jax.random.split(key)
@@ -286,8 +299,8 @@ fig, ax = plt.subplots()
 ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='reference')
 ax.plot(states[0,:], states[1,:], 'g', label='states unoptimized')
 ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
-ax.set_xlim([-0.4,1.3])
-ax.set_ylim([-1.3, 0.4])
+# ax.set_xlim([-0.4,1.3])
+# ax.set_ylim([-1.3, 0.4])
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
@@ -308,6 +321,9 @@ ax_acc[2].plot( disturbance_means2[2,:], 'r--' )
 ax_acc[0].set_ylabel('X')
 ax_acc[1].set_ylabel('Y')
 ax_acc[2].set_ylabel('Z')
+# w1 = 0.2
+# w2 = 0.05
+# plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
 # plt.show()
 
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
@@ -319,6 +335,7 @@ else:
     print(f"NOT IMPLEMENTED ERROR")
     exit()
 print(f"new params: {params_optimized}")
+ax.set_title(f'gains: {params_optimized[0]},{params_optimized[1]}')
 key, subkey = jax.random.split(key)
 states_optimized, states_ref_optimized, control_inputs_optimized, disturbance_means_optimized, disturbance_covs_optimized = predict_states(state_vector, params_optimized, subkey)
 key, subkey = jax.random.split(key)
@@ -343,7 +360,7 @@ ax.legend()
 ax_acc[0].legend()
 ax_acc[1].legend()
 ax_acc[2].legend()
-
+# plt.savefig(f"gain_tuning/plots/component_wx{w1}_wv{w2}.png")
 plt.show()
 
 

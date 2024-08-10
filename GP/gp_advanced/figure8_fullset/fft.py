@@ -22,7 +22,7 @@ N = len(signal)
 
 print("signal shape = ", signal.shape)
 t = np.arange(signal.shape[0])
-sampling_rate = fs = 10000
+sampling_rate = fs = 50
 yf = fft_signal = np.fft.fft(signal)
 xf = fft_freq = np.fft.fftfreq(len(signal), 1 / sampling_rate)[:len(fft_signal)//2]
 
@@ -73,6 +73,7 @@ plt.xlabel('Sample Index')
 plt.ylabel('Amplitude')
 plt.legend()
 plt.grid()
+plt.savefig('/frequencydomain.png')
 plt.show()
 
 #np.save("filtered_y_component.npy", filtered_signal)

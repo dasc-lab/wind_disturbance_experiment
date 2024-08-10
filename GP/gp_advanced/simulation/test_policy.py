@@ -1,10 +1,13 @@
 import jax.numpy as jnp
 from jax import jit, vmap, lax
-
+import jax
 def state_ref(t):
-    pos, vel, acc = circle_pos_vel_acc( t, cir_radius[0], cir_angular_vel[0], cir_origin_x[0], cir_origin_y[0] )
+    dataset_index = 1
+    pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
-policy_params = [14, 7.4]
+# policy_params = [14, 7.4]
+policy_params = [7, 4]
+@jit
 def policy( t, states, policy_params):
     '''
     Expect a multiple states as input. Each state is a column vector.
@@ -26,25 +29,42 @@ def policy( t, states, policy_params):
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     # thrust = - kx * ex - kv * ev + m * acc_ref - m * g
     thrust = - kx * ex - kv * ev + m * acc_ref - m * g * jnp.array([ [0], [0], [1] ])
-    # thrust = thrust.at[0,0].set( 0.2 * g * jnp.tanh( 100*thrust[0,0] ) )
-    # thrust = thrust.at[1,0].set( 0.2 * g * jnp.tanh( 100*thrust[1,0] ) )
-    # thrust = thrust.at[2,0].set( 1.6 * g * jnp.tanh( 100*thrust[2,0] ) )
-    thrust = jnp.clip( thrust, -14*m, 14*m ) #tanh/sigmoid
+    tanh_a = 3.8
+    tanh_k = 0.286*1.5
+
+
+    tanh_az = 15*0.681
+    tanh_kz = 0.1
+    
+    # jax.debug.print("acc = {acc}",acc=thrust/m)
+    # jax.debug.print("thrust shape = {shape}", shape = thrust.shape)
+    thrust = thrust.at[0,0].set( tanh_a * jnp.tanh( tanh_k * thrust[0,0] ) )
+    thrust = thrust.at[1,0].set( tanh_a * jnp.tanh( tanh_k * thrust[1,0] ) )
+    thrust = thrust.at[2,0].set( tanh_az * jnp.tanh( tanh_kz * thrust[2,0] ) )
+    # thrust = jnp.clip( thrust, -14*m, 14*m ) #tanh/sigmoid
     return thrust / m, pos_ref, vel_ref
 
-
-
-cir_radius =      [0.3, 0.3, 0.4, 0.4, 0.4, 0.4]
-cir_angular_vel = [1.5, 1.5, 2.0, 2.5, 3.0, 3.0]
+cir_radius =      [0.2, 0.2, 0.2, 0.2, 0.4]
+cir_angular_vel = [1.0, 1.0, 1.0, 1.5, 1.0]
 ###### in world frame NOT NED ######
-cir_origin_x =    [0.0, 0.4, 0.4, 0.6, 0.8, 1.0]
-cir_origin_y =    [0.4, 0.0, 0.0, 0.0, 0.0, 0.0]
+cir_origin_x =    [0.0, 0.6, 0.8, 0.8, 0.6]
+cir_origin_y =    [0.0, 0.0, 0.0, 0.0, 0.0]
 
+# cir_radius =      [0.2, 0.3, 0.4, 0.4, 0.4, 0.4]
+# cir_angular_vel = [1.5, 1.5, 2.0, 2.5, 3.0, 3.0]
+# ###### in world frame NOT NED ######
+# cir_origin_x =    [0.5, 0.4, 0.4, 0.6, 0.8, 1.0]
+# cir_origin_y =    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-figure8_radius =        [0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.6]
-figure8_angular_vel =   [1.5, 2.0, 2.5, 1.5, 1.5, 2.0, 2.0, 2.5, 1.5]
-figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
-figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+figure8_radius =        [0.4, 0.4]
+figure8_angular_vel =   [1, 1]
+figure8_origin_x =      [0.0, 0.8]
+figure8_origin_y =      [0.0, 0.0]
+
+# figure8_radius =        [0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.6]
+# figure8_angular_vel =   [1.5, 2.0, 2.5, 1.5, 1.5, 2.0, 2.0, 2.5, 1.5]
+# figure8_origin_x =      [0.8, 1.2, 1.2, 1.2, 1.0, 0.4, 1.0, 1.0, 1.0]
+# figure8_origin_y =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
 @jit
