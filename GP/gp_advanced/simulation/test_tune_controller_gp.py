@@ -1,7 +1,7 @@
 import time
 import jax
 import jax.numpy as np
-from jax import random, grad, jit, lax
+from jax import random, grad, jit, lax, value_and_grad, jacrev, jacfwd
 import optax
 import jaxopt
 jax.config.update("jax_enable_x64", True)
@@ -15,17 +15,17 @@ from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
 
-dynamics_type = 'ideal'
+# dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-# dynamics_type = 'gp'
+dynamics_type = 'gp'
 
-optimizer = 'scipy'
-# optimizer = 'custom_gd'
+# optimizer = 'scipy'
+optimizer = 'custom_gd'
 
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 # home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
-# home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 
 # trajectory_path = home_path + 'circle_figure8_fullset/'
 trajectory_path = home_path + 'gp_final/'
@@ -34,7 +34,7 @@ model_path = trajectory_path + 'models/'
 disturbance_path = trajectory_path + 'disturbance_new.npy'
 input_path = trajectory_path + 'input_new.npy'
 key = random.PRNGKey(2)
-horizon = 300 #200
+horizon = 30 #300 #200
 dt = 0.05 #0.01
 
 # custom optimizer
@@ -240,8 +240,10 @@ def train_policy_jaxscipy(init_state, params_policy, gp_train_x, gp_train_y):
     params_policy, cost_state = solver.run(params_policy)
     return params_policy
 
+@jit
 def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
 
+    @jit
     def body(i, inputs):
         params_policy = inputs
         params_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y )
@@ -284,6 +286,7 @@ def setup_predict_states(file_path1, file_path2, file_path3, dynamics_type='idea
 get_future_reward = setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 predict_states = setup_predict_states(file_path1, file_path2, file_path3, dynamics_type=dynamics_type)
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
+get_future_reward_value_and_grad = jit(value_and_grad(get_future_reward, argnums=1))
 # get_future_reward( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
 # get_future_reward_grad( state_vector, jnp.array([14.0, 7.4]), gp_train_x, gp_train_y )
 get_future_reward( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
@@ -326,6 +329,31 @@ ax_acc[2].set_ylabel('Z')
 # plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
 # plt.show()
 
+minimize_func = lambda params: get_future_reward( state_vector, params, gp_train_x, gp_train_y )
+minimize_func_value_and_grad = jit(value_and_grad(minimize_func))
+minimize_func_jac = jit(jacfwd( minimize_func ))
+
+params_policy_grad = minimize_func_jac( params_init )
+params_policy_grad = minimize_func_jac( params_init )
+params_policy_grad = minimize_func_jac( params_init )
+t0 = time.time()
+params_policy_jac = minimize_func_jac( params_init )
+t1 = time.time()
+print(f"time jac: {t1 - t0}")
+
+value, params_policy_grad = minimize_func_value_and_grad( params_init )
+value, params_policy_grad = minimize_func_value_and_grad( params_init )
+value, params_policy_grad = minimize_func_jac( params_init )
+t0 = time.time()
+value, params_policy_grad = minimize_func_value_and_grad( params_init )
+t1 = time.time()
+
+# solver = jaxopt.ScipyMinimize(fun=minimize_func, maxiter=iter_adam)
+# solver.run(params_init)
+
+
+print(f"time grad: {t1 - t0}, grad: {params_policy_grad}, jac: {params_policy_jac}")
+exit()
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
 if optimizer=='scipy':
     params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
