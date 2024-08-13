@@ -36,7 +36,7 @@ home_path = home_path + 'circle_data/'
 
 # bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanoff_clipped_new'
 #(500, 800)
-# bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
+bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
 #(500, 800)
 # bag_path = home_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv14_81_7_09_tank_0_31_fanon_clipped_new'
 #(500, 800)
@@ -59,7 +59,7 @@ home_path = home_path + 'circle_data/'
 # bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.60_h0.5_kxv74_clipped_new'
 # (500,500)
 
-bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.80_h0.5_kxv74_clipped_new'
+# bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.80_h0.5_kxv74_clipped_new'
 # (800, len-500)
 
 
@@ -89,7 +89,7 @@ bag_path = home_path + 'cir_traj_r0.2_w1.0_c0.80_h0.5_kxv74_clipped_new'
 # bag_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/data_prep/cir_traj_r0.4_w2_c0.40_h0.4_fanhigh'
 #(1200, len(x_data)-700)
 home_path = home_path + 'prev_data/'
-bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
+# bag_path = home_path + 'cir_traj_r0.3_w1.5_c00.4_h0.4_fanhigh'
 #(1600, len(x_data)-1200)
 # bag_path = home_path + 'cir_traj_r0.3_w1.5_c0.40_h0.4_fanhigh'
 #(1400, len(x_data)-900), (2500, len(x_data)-2500)
@@ -215,13 +215,18 @@ timestamps = []
 x_ideal = []
 y_ideal = []
 z_ideal = []
-
+pos_vector = []
+vel_vector = []
+acc_vector = []
 with Reader(bag_path) as reader:
     for item in reader.connections:
         print(item.topic, item.msgtype)
     for item, timestamp, rawdata in reader.messages():
         if item.topic == topic_name:
             msg = typestore.deserialize_cdr(rawdata, item.msgtype)
+            pos_vector.append(msg.pos)
+            vel_vector.append(msg.vel)
+            acc_vector.append(msg.acc)
             x_data.append(msg.pos[0])
             y_data.append(msg.pos[1])
             z_data.append(-msg.pos[2])
@@ -248,10 +253,11 @@ with Reader(bag_path) as reader:
 # print("z max: ", max(z_data))
 # print("z min: ", min(z_data))
 assert len(x_data) == len(y_data) == len(z_data), "Lengths of the lists are not the same."
-cutoff = len(x_data) - 1200
-threshold = 1600
-
-
+cutoff = len(x_data) - 800
+threshold = 500
+np.save("pos_vec.npy", np.array(pos_vector[threshold:cutoff]))
+np.save("vel_vec.npy", np.array(vel_vector[threshold:cutoff]))
+np.save("acc_vec.npy", np.array(acc_vector[threshold:cutoff]))
 print("cutoff, threshold = ", cutoff, threshold)
 print("data set size = ",  cutoff - threshold)
 # indices = np.arange(1, len(x_data) + 1)
@@ -269,7 +275,7 @@ if save :
 x_t = x_ideal = np.array(x_ideal[threshold:cutoff])
 y_t = y_ideal = np.array(y_ideal[threshold:cutoff])
 z_t = z_ideal = np.array(z_ideal[threshold:cutoff])
-if save : 
+if save :
     stacked_array = np.column_stack((x_t,y_t,z_t))
     np.save('compare_trajectory/figure8/ideal_trajectory_eight_traj_r0.4_w1_c080_h0.5_kxv7_00_4_00_fanoff.npy',stacked_array)
 # Scatter plot

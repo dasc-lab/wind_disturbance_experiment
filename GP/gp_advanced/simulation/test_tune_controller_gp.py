@@ -1,5 +1,7 @@
 import time
-import jax
+import jax, jaxlib
+# print("jax: ", jax.__version__)
+# print("jaxlib: ", jaxlib.__version__)
 import jax.numpy as np
 from jax import random, grad, jit, lax
 import optax
@@ -10,17 +12,21 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 plt.rcParams.update({'font.size': 10})
 # gpjax version: '0.8.2'
+import sys
+sys.path.append('./FORESEE/GPJax')
 import gpjax as gpx
+print(gpx.__version__)
 from test_jax_utils import *
 from test_gp_utils import *
 from test_policy import policy
+from jax.experimental import host_callback as hcb
 
-dynamics_type = 'ideal'
+# dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
-# dynamics_type = 'gp'
+dynamics_type = 'gp'
 
-optimizer = 'scipy'
-# optimizer = 'custom_gd'
+# optimizer = 'scipy'
+optimizer = 'custom_gd'
 
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
@@ -38,9 +44,9 @@ horizon = 300 #200
 dt = 0.05 #0.01
 
 # custom optimizer
-iter_adam_custom = 300
-custom_gd_lr_rate = 0.1
-grad_clip = 1.0
+iter_adam_custom = 50
+custom_gd_lr_rate = 0.005
+grad_clip = 100.0
 
 # scipy optimizer
 iter_adam=200 #4000
@@ -157,6 +163,7 @@ def setup_predict_states_gp(file_path1, file_path2, file_path3, gp_train_x, gp_t
             next_states, next_states_cov, disturbance_mean, disturbance_cov = get_next_states_with_gp_sigma_inv_predict( states[:,[h]], control_input, dt, [gp0, gp1, gp2],[sigma0, sigma1, sigma2], gp_train_x, gp_train_y )
             disturbance_means = disturbance_means.at[:,h].set( disturbance_mean[:,0] )
             disturbance_covs = disturbance_covs.at[:,h].set( disturbance_cov[:,0] )
+            ## add uncertainty to periodic disturbance
             key, subkey = jax.random.split(key)
             next_states = next_states + jax.random.normal( subkey, shape=(6,1) ) * jnp.sqrt( next_states_cov )
             states = states.at[:,h+1].set( next_states[:,0] )
@@ -245,6 +252,7 @@ def train_policy_custom(init_state, params_policy, gp_train_x, gp_train_y):
     def body(i, inputs):
         params_policy = inputs
         params_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y )
+        # hcb.id_print(params_policy_grad)
         params_policy_grad = jnp.clip( params_policy_grad, -grad_clip, grad_clip )
         params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
         return params_policy
