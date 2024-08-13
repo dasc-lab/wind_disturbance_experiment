@@ -167,6 +167,105 @@ def get_next_states_with_gp_sigma_inv_predict( states, control_inputs, dt, gps, 
     next_states_cov = jnp.append( jnp.zeros((3,1)), next_states_vel_cov, axis=0 )
     return next_states_mu, next_states_cov, pred_mu, pred_cov
 
+@jit
+def get_next_states_with_sparse_gp_sigma_inv( states, control_inputs, dt, gps, L, L_inv, Lz, Lz_inv, Kzz_inv_Kzx_diff, D ):
+    
+    '''
+    Propogate sigma points through the nonliear GP
+    '''
+    test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
+    g = 9.8066
+
+    #################################################
+    ####### Changed: dataset(.reshape) #######
+    # X disturbance
+    #D = Dataset(X=train_x, y=train_y[0])
+    latent_dist = gps[0].predict_with_sigma_inv(test_x, L[0], L_inv[0], Lz[0], Lz_inv[0], Kzz_inv_Kzx_diff[0])
+    # latent_dist = gps[0].predict(test_x, train_data=D[0])
+    predictive_dist = gps[0].posterior.likelihood(latent_dist)
+    pred_mean0 = predictive_dist.mean().reshape(-1,1)
+    pred_std0 = predictive_dist.stddev().reshape(-1,1)
+
+    # Y disturbance
+    #D = Dataset(X=train_x, y=train_y[1])
+    latent_dist = gps[1].predict_with_sigma_inv(test_x, L[1], L_inv[1], Lz[1], Lz_inv[1], Kzz_inv_Kzx_diff[1])
+    # latent_dist = gps[0].predict(test_x, train_data=D[1])
+    predictive_dist = gps[1].posterior.likelihood(latent_dist)
+    pred_mean1 = predictive_dist.mean().reshape(-1,1)
+    pred_std1 = predictive_dist.stddev().reshape(-1,1)
+
+    # Z disturbance
+    #D = Dataset(X=train_x, y=train_y[2])
+    latent_dist = gps[2].predict_with_sigma_inv(test_x, L[2], L_inv[2], Lz[2], Lz_inv[2], Kzz_inv_Kzx_diff[2])
+    # latent_dist = gps[0].predict(test_x, train_data=D[2])
+    predictive_dist = gps[2].posterior.likelihood(latent_dist)
+    pred_mean2 = predictive_dist.mean().reshape(-1,1)
+    pred_std2 = predictive_dist.stddev().reshape(-1,1)
+
+    pred_mu = jnp.concatenate( (pred_mean0.T, pred_mean1.T, pred_mean2.T), axis=0 ) #3x13
+    pred_cov = jnp.concatenate( (pred_std0.T**2, pred_std1.T**2, pred_std2.T**2), axis=0 ) #3x13
+    ################################################
+    ############ bug fix: ########################
+    ############ bug: line 52, incompatible shapes control inputs and pred_mu ############
+    #pred_mu = pred_mu.reshape(3,-1)
+    
+    ################################################
+    next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
+    next_states_vel_mu = states[3:6] + control_inputs * dt + g * dt + pred_mu * dt
+    next_states_vel_cov = pred_cov * dt * dt
+
+    next_states_mu = jnp.append( next_states_pos, next_states_vel_mu, axis=0 )
+    next_states_cov = jnp.append( jnp.zeros((3,13)), next_states_vel_cov, axis=0 )
+    return next_states_mu, next_states_cov
+
+@jit
+def get_next_states_with_sparse_gp_sigma_inv_predict( states, control_inputs, dt, gps, L, L_inv, Lz, Lz_inv, Kzz_inv_Kzx_diff ):
+    
+    '''
+    Propogate sigma points through the nonliear GP
+    '''
+    test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
+    g = 9.8066
+
+    #################################################
+    ####### Changed: dataset(.reshape) #######
+    # X disturbance
+    #D = Dataset(X=train_x, y=train_y[0])
+    latent_dist = gps[0].predict_with_sigma_inv(test_x, L[0], L_inv[0], Lz[0], Lz_inv[0], Kzz_inv_Kzx_diff[0])
+    predictive_dist = gps[0].posterior.likelihood(latent_dist)
+    pred_mean0 = predictive_dist.mean().reshape(-1,1)
+    pred_std0 = predictive_dist.stddev().reshape(-1,1)
+
+    # Y disturbance
+    #D = Dataset(X=train_x, y=train_y[1])
+    latent_dist = gps[1].predict_with_sigma_inv(test_x, L[1], L_inv[1], Lz[1], Lz_inv[1], Kzz_inv_Kzx_diff[1])
+    predictive_dist = gps[1].posterior.likelihood(latent_dist)
+    pred_mean1 = predictive_dist.mean().reshape(-1,1)
+    pred_std1 = predictive_dist.stddev().reshape(-1,1)
+
+    # Z disturbance
+    #D = Dataset(X=train_x, y=train_y[2])
+    latent_dist = gps[2].predict_with_sigma_inv(test_x, L[2], L_inv[2], Lz[2], Lz_inv[2], Kzz_inv_Kzx_diff[2])
+    predictive_dist = gps[2].posterior.likelihood(latent_dist)
+    pred_mean2 = predictive_dist.mean().reshape(-1,1)
+    pred_std2 = predictive_dist.stddev().reshape(-1,1)
+
+    pred_mu = jnp.concatenate( (pred_mean0.T, pred_mean1.T, pred_mean2.T), axis=0 ) #3x13
+    pred_cov = jnp.concatenate( (pred_std0.T**2, pred_std1.T**2, pred_std2.T**2), axis=0 ) #3x13
+    ################################################
+    ############ bug fix: ########################
+    ############ bug: line 52, incompatible shapes control inputs and pred_mu ############
+    #pred_mu = pred_mu.reshape(3,-1)
+    
+    ################################################
+    next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
+    next_states_vel_mu = states[3:6] + control_inputs * dt + g * dt * jnp.array([ [0], [0], [1] ]) + pred_mu * dt
+    next_states_vel_cov = pred_cov * dt * dt
+
+    next_states_mu = jnp.append( next_states_pos, next_states_vel_mu, axis=0 )
+    next_states_cov = jnp.append( jnp.zeros((3,1)), next_states_vel_cov, axis=0 )
+    return next_states_mu, next_states_cov, pred_mu, pred_cov
+
 def train_gp(likelihood, posterior, parameter_state, train_x, train_y):
     D = Dataset(X=train_x, y=train_y)
     negative_mll = jit(posterior.marginal_log_likelihood(D, negative=True))

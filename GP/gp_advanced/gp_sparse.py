@@ -188,8 +188,7 @@ for j in range(3):
 
     ########################################## GP ##########################################
 
-    # x = x[::50]
-    # y = y[::50]
+
     D = gpx.Dataset(X=x, y=y)
     noise_level = 0.1
     # Construct the prior
@@ -215,20 +214,44 @@ for j in range(3):
     posterior = prior * likelihood
 
 
-    optimiser = ox.adam(learning_rate=1e-2)
-    #optimiser = ox.adam(learning_rate=5e-3) 
-    # Define the marginal log-likelihood
-    negative_mll = jit(gpx.objectives.ConjugateMLL(negative=True))
+    # Sparse part here ###############################################################
+    # n_inducing = 50
+    # z = jnp.linspace(-3.0, 3.0, n_inducing).reshape(-1, 1)
+    # z = x[::10]
+    z = x[::140]
 
-    opt_posterior, history =gpx.fit(
-        model=posterior,
-        objective=negative_mll,
+    q = gpx.variational_families.CollapsedVariationalGaussian(
+        posterior=posterior, inducing_inputs=z
+    )
+    elbo = gpx.objectives.CollapsedELBO(negative=True)
+    elbo = jit(elbo)
+
+    opt_posterior, history = gpx.fit(
+        model=q,
+        objective=elbo,
         train_data=D,
-        optim=optimiser,
+        optim=ox.adamw(learning_rate=1e-2),
         num_iters=2000,
-        safe=True,
         key=key,
     )
+    # latent_dist = opt_posterior(xtest, train_data=D)
+    # predictive_dist = opt_posterior.posterior.likelihood(latent_dist)
+    #####################################################################################
+
+    # optimiser = ox.adam(learning_rate=1e-2)
+    # #optimiser = ox.adam(learning_rate=5e-3) 
+    # # Define the marginal log-likelihood
+    # negative_mll = jit(gpx.objectives.ConjugateMLL(negative=True))
+
+    # opt_posterior, history =gpx.fit(
+    #     model=posterior,
+    #     objective=negative_mll,
+    #     train_data=D,
+    #     optim=optimiser,
+    #     num_iters=2000,
+    #     safe=True,
+    #     key=key,
+    # )
     
     print("after training, predicting")
     # Infer the predictive posterior distribution
@@ -245,19 +268,19 @@ for j in range(3):
     if j ==0:
         gp_model_x = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_x_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_x_norm5_clipped_moredata.pkl'
     if j ==1:
         gp_model_y = opt_posterior
         #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
-        gp_model_file_path = gp_model_file_path + 'gp_model_y_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_y_norm5_clipped_moredata.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'gp_model_z_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_z_norm5_clipped_moredata.pkl'
     with open(dataset_path+gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     ################################################### Predicting #####################################################
     latent_dist = opt_posterior(xtest, D)
-    predictive_dist = opt_posterior.likelihood(latent_dist)
+    predictive_dist = opt_posterior.posterior.likelihood(latent_dist)
     pred_mean = predictive_dist.mean()
     pred_std = predictive_dist.stddev()
     ########################################### Compute Mean Squared Error ##########################################
@@ -309,7 +332,7 @@ for j in range(3):
 fig.tight_layout()
 #fig.text(f"Mean Sqaure Error = {error_x+error_y+error_z}")
 #plt.savefig(f"/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/GP_plots/disturbance_{disturbance_d[j]}.png")
-plt.savefig(plot_path+"GP_fullset_norm5.png")
+plt.savefig(plot_path+"sparseGP_fullset_norm5.png")
 plt.show()
 
 
@@ -347,7 +370,7 @@ for j in range(3):
     plt.xlabel('time index')
     plt.ylabel('Disturbance (m/s^2)')
     plt.legend()
-    plt.savefig(plot_path + f'GP_norm5_{disturbance_d[j]}.png')
+    plt.savefig(plot_path + f'sparseGP_norm5_{disturbance_d[j]}.png')
     plt.show()
 
 num_indices = int(input.shape[0]/4)
@@ -389,7 +412,7 @@ for j in range(3):
     plt.xlabel('time index')
     plt.ylabel('Disturbance (m/s^2)')
     plt.legend()
-    plt.savefig(plot_path+f'GP_fullset_norm5_{disturbance_d[j]}.png')
+    plt.savefig(plot_path+f'sparseGP_fullset_norm5_{disturbance_d[j]}.png')
     plt.show()
 
 # for j in range(3):

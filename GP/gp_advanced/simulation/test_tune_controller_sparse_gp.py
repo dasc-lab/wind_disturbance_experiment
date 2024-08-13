@@ -21,6 +21,7 @@ dynamics_type = 'gp'
 
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
+
 #home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
 # home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 # home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
@@ -33,7 +34,7 @@ model_path = trajectory_path + 'models/'
 disturbance_path = trajectory_path + 'disturbance_new.npy'
 input_path = trajectory_path + 'input_new.npy'
 key = random.PRNGKey(2)
-horizon = 300 #25 #50 #300 #200
+horizon = 300 #50 #300 #200
 dt = 0.05 #0.1 #0.05 #0.01
 
 # custom optimizer
@@ -136,9 +137,10 @@ def setup_predict_states_gp(file_path1, file_path2, file_path3, gp_train_x, gp_t
     D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
     D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
     D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
-    sigma0 = gp0.compute_sigma_inv(train_data=D0)
-    sigma1 = gp1.compute_sigma_inv(train_data=D1)
-    sigma2 = gp2.compute_sigma_inv(train_data=D2)
+
+    L0, L0_inv, Lz0, Lz_inv0, Kzz_inv_Kzx_diff0 = gp0.compute_sigma_inv(train_data=D0)
+    L1, L1_inv, Lz1, Lz_inv1, Kzz_inv_Kzx_diff1 = gp1.compute_sigma_inv(train_data=D1)
+    L2, L2_inv, Lz2, Lz_inv2, Kzz_inv_Kzx_diff2 = gp2.compute_sigma_inv(train_data=D2)
 
     @jit
     def predict_states(X, policy_params, key):
@@ -153,7 +155,7 @@ def setup_predict_states_gp(file_path1, file_path2, file_path3, gp_train_x, gp_t
             states, states_ref, key, control_inputs, disturbance_means, disturbance_covs = inputs
             control_input, pos_ref, vel_ref = policy( t, states[:,[h]], policy_params )         # mean_position = get_mean( states, weights )
             control_inputs = control_inputs.at[:,h].set(control_input[:,0])
-            next_states, next_states_cov, disturbance_mean, disturbance_cov = get_next_states_with_gp_sigma_inv_predict( states[:,[h]], control_input, dt, [gp0, gp1, gp2],[sigma0, sigma1, sigma2], gp_train_x, gp_train_y )
+            next_states, next_states_cov, disturbance_mean, disturbance_cov = get_next_states_with_sparse_gp_sigma_inv_predict( states[:,[h]], control_input, dt, [gp0, gp1, gp2], [L0, L1, L2], [L0_inv, L1_inv, L2_inv], [Lz0, Lz1, Lz2], [Lz_inv0, Lz_inv1, Lz_inv2], [Kzz_inv_Kzx_diff0, Kzz_inv_Kzx_diff1, Kzz_inv_Kzx_diff2])
             disturbance_means = disturbance_means.at[:,h].set( disturbance_mean[:,0] )
             disturbance_covs = disturbance_covs.at[:,h].set( disturbance_cov[:,0] )
             key, subkey = jax.random.split(key)
@@ -180,9 +182,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     D0 = gpx.Dataset(X=x, y=y[0].reshape(-1,1))
     D1 = gpx.Dataset(X=x, y=y[1].reshape(-1,1))
     D2 = gpx.Dataset(X=x, y=y[2].reshape(-1,1))
-    sigma0 = gp0.compute_sigma_inv(train_data=D0)
-    sigma1 = gp1.compute_sigma_inv(train_data=D1)
-    sigma2 = gp2.compute_sigma_inv(train_data=D2)
+    L0, L0_inv, Lz0, Lz_inv0, Kzz_inv_Kzx_diff0 = gp0.compute_sigma_inv(train_data=D0)
+    L1, L1_inv, Lz1, Lz_inv1, Kzz_inv_Kzx_diff1 = gp1.compute_sigma_inv(train_data=D1)
+    L2, L2_inv, Lz2, Lz_inv2, Kzz_inv_Kzx_diff2 = gp2.compute_sigma_inv(train_data=D2)
 
     @jit
     def compute_reward(X, policy_params, gp_train_x, gp_train_y):
@@ -209,7 +211,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
             elif dynamics_type=='noisy':
                 next_states_mean, next_states_cov = get_next_states_noisy( states, control_inputs, dt )
             elif dynamics_type=='gp':
-                next_states_mean, next_states_cov = get_next_states_with_gp_sigma_inv( states, control_inputs, dt, [gp0, gp1, gp2], [sigma0, sigma1, sigma2], gp_train_x, gp_train_y )
+                next_states_mean, next_states_cov = get_next_states_with_sparse_gp_sigma_inv( states, control_inputs, dt, [gp0, gp1, gp2], [L0, L1, L2], [L0_inv, L1_inv, L2_inv],  [Lz0, Lz1, Lz2], [Lz_inv0, Lz_inv1, Lz_inv2], [Kzz_inv_Kzx_diff0, Kzz_inv_Kzx_diff1, Kzz_inv_Kzx_diff2], [D0, D1, D2])
             next_states_expanded, next_weights_expanded = sigma_point_expand_with_mean_cov( next_states_mean, next_states_cov, weights)
             next_states, next_weights = sigma_point_compress( next_states_expanded, next_weights_expanded )
             states = next_states
@@ -221,9 +223,9 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     return compute_reward
 
 print(model_path)
-file_path1 = model_path + "gp_model_x_norm5_clipped.pkl"
-file_path2 = model_path + "gp_model_y_norm5_clipped.pkl"
-file_path3 = model_path + "gp_model_z_norm5_clipped.pkl"
+file_path1 = model_path + "sparsegp_model_x_norm5_clipped_moredata.pkl"
+file_path2 = model_path + "sparsegp_model_y_norm5_clipped_moredata.pkl"
+file_path3 = model_path + "sparsegp_model_z_norm5_clipped_moredata.pkl"
 
 
 gp_train_x = jnp.load(input_path)
@@ -292,8 +294,7 @@ get_future_reward( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
 get_future_reward_grad( state_vector, jnp.array([7.0, 4.0]), gp_train_x, gp_train_y )
 # plot trajectory with initial parameter
 # params_init = jnp.array([14.0, 7.4])
-# params_init = jnp.array([7.0, 4.0])
-params_init = jnp.array([15.0, 8.0])
+params_init = jnp.array([7.0, 4.0])
 key, subkey = jax.random.split(key)
 states, states_ref, control_inputs, disturbance_means, disturbance_covs = predict_states(state_vector, params_init, subkey)
 key, subkey = jax.random.split(key)
@@ -329,31 +330,31 @@ ax_acc[2].set_ylabel('Z')
 # plt. savefig(f'gain_tuning/plots/trajectory_wx{w1}_wv{w2}.png')
 # plt.show()
 
-minimize_func = lambda params: get_future_reward( state_vector, params, gp_train_x, gp_train_y )
-minimize_func_value_and_grad = jit(value_and_grad(minimize_func))
-minimize_func_jac = jit(jacfwd( minimize_func ))
+# minimize_func = lambda params: get_future_reward( state_vector, params, gp_train_x, gp_train_y )
+# minimize_func_value_and_grad = jit(value_and_grad(minimize_func))
+# minimize_func_jac = jit(jacfwd( minimize_func ))
 
-params_policy_grad = minimize_func_jac( params_init )
-params_policy_grad = minimize_func_jac( params_init )
-params_policy_grad = minimize_func_jac( params_init )
-t0 = time.time()
-params_policy_jac = minimize_func_jac( params_init )
-t1 = time.time()
-print(f"time jac: {t1 - t0}")
+# params_policy_grad = minimize_func_jac( params_init )
+# params_policy_grad = minimize_func_jac( params_init )
+# params_policy_grad = minimize_func_jac( params_init )
+# t0 = time.time()
+# params_policy_jac = minimize_func_jac( params_init )
+# t1 = time.time()
+# print(f"time jac: {t1 - t0}")
 
-value, params_policy_grad = minimize_func_value_and_grad( params_init )
-value, params_policy_grad = minimize_func_value_and_grad( params_init )
-value, params_policy_grad = minimize_func_jac( params_init )
-t0 = time.time()
-value, params_policy_grad = minimize_func_value_and_grad( params_init )
-t1 = time.time()
+# value, params_policy_grad = minimize_func_value_and_grad( params_init )
+# value, params_policy_grad = minimize_func_value_and_grad( params_init )
+# value, params_policy_grad = minimize_func_jac( params_init )
+# t0 = time.time()
+# value, params_policy_grad = minimize_func_value_and_grad( params_init )
+# t1 = time.time()
 
-# solver = jaxopt.ScipyMinimize(fun=minimize_func, maxiter=iter_adam)
-# solver.run(params_init)
+# # solver = jaxopt.ScipyMinimize(fun=minimize_func, maxiter=iter_adam)
+# # solver.run(params_init)
 
 
-print(f"time grad: {t1 - t0}, grad: {params_policy_grad}, jac: {params_policy_jac}")
-exit()
+# print(f"time grad: {t1 - t0}, grad: {params_policy_grad}, jac: {params_policy_jac}")
+# exit()
 # params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
 if optimizer=='scipy':
     params_optimized = train_policy_jaxscipy(state_vector, params_init, gp_train_x, gp_train_y)
