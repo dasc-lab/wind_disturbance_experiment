@@ -26,6 +26,7 @@ center_x = 0
 center_y = 0
 
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/recorded_data/'
+# home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/recorded_data/'
 
 ########################################################################
 ######################## Circle Paths ##################################
@@ -198,6 +199,7 @@ png_name = bag_path.split('/')[-1]+'_trajectory'
 typestore = get_typestore(Stores.LATEST)
 
 msg_text = Path('/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/DynamicsData.msg').read_text()
+# msg_text = Path('/home/wind_disturbance_experiment/DynamicsData.msg').read_text()
 
 add_types = {}
 
@@ -306,6 +308,7 @@ ax1.set_ylabel("meters")
 ax1.set_title("z")
 plt.subplots_adjust(hspace=0.5) 
 png_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/trajectory_sinusoid_plots/' + png_name +'.png'
+# png_path = '/home/wind_disturbance_experiment/GP/gp_advanced/trajectory_sinusoid_plots/' + png_name +'.png'
 plt.suptitle(png_name)
 plt.savefig(png_path)
 plt.show()

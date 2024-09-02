@@ -4,3 +4,4 @@ GP/gp_advanced_simple/FORESEE/foresee_env/
 GP/gp_advanced/Dockerfile
 GP/gp_advanced/docker-compose.yaml
 GP/gp_advanced/entrypoint.sh
+GP/gp_advanced_simple/FORESEE/foresee_env/GP/gp_advanced/simulation/__pycache__/*
