@@ -5,3 +5,7 @@
 # [submodule "GP/gp_advanced/FORESEE/GPJax2"]
 # 	path = GP/gp_advanced/FORESEE/GPJax2
 # 	url = git@github.com:hardikparwana/GPJax.git
+[submodule "train_gp/GPJax"]
+	path = train_gp/GPJax
+	url = git@github.com:hardikparwana/GPJax.git
+	branch = custom_sigma_inv
