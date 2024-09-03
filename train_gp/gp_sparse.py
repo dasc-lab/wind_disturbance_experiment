@@ -13,8 +13,11 @@ import optax as ox
 from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Periodic, ProductKernel
 import matplotlib.pyplot as plt
 
-
-
+training_path = 'datasets/training/'
+wind_disturbance_training = np.load(training_path + 'disturbance.npy')
+training_input = np.load(training_path+'input.npy')
+wind_disturbance_x, wind_disturbance_y, wind_disturbance_z = wind_disturbance_training[:,0], wind_disturbance_training[:,1], wind_disturbance_training[:,2]
+n = training_input.shape[0]
 key = jr.key(123)
 
 for j in range(3):
@@ -26,8 +29,8 @@ for j in range(3):
         wind_disturbance_curr = wind_disturbance_z
     else:
         print("shouldn't reach this statement")
-    x = input[training_indices]
-    y = wind_disturbance_curr[training_indices]
+    x = training_input
+    y = wind_disturbance_training
     
 
     ########################################## GP ##########################################
@@ -78,3 +81,17 @@ for j in range(3):
         num_iters=2000,
         key=key,
     )
+    gp_model_file_path = 'models/'
+    if j ==0:
+        gp_model_x = opt_posterior
+        #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_x_norm5_clipped_moredata.pkl'
+    if j ==1:
+        gp_model_y = opt_posterior
+        #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_y_norm5_clipped_moredata.pkl'
+    if j == 2:
+        gp_model_z = opt_posterior
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_z_norm5_clipped_moredata.pkl'
+    with open(gp_model_file_path, 'wb') as file:
+        pickle.dump(opt_posterior, file)
