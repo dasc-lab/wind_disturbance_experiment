@@ -97,7 +97,7 @@ def predict_state_noisy(state, policy_params, key, h):
     return next_state, state_ref, control_input, disturbance_mean, disturbance_cov
 
 # @jit
-def setup_predict_state_gp(file_path1, file_path2, file_path3, gp_train_x, gp_train_y): #, dt):
+def setup_predict_state_gp(file_path1, file_path2, file_path3, x, gp_train_y): #, dt):
 
     gp0 = initialize_gp_prediction( file_path1 ) #, gp_train_x, gp_train_y[:,0].reshape(-1,1) )
     gp1 = initialize_gp_prediction( file_path2 ) #, gp_train_x, gp_train_y[:,1].reshape(-1,1) )
@@ -147,7 +147,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
     L2, L2_inv, Lz2, Lz_inv2, Kzz_inv_Kzx_diff2 = gp2.compute_sigma_inv(train_data=D2)
 
     @jit
-    def compute_reward(X, policy_params):
+    def compute_reward(X, policy_params, init_time):
         '''
         Performs Gradient Descent
         '''
@@ -163,7 +163,8 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
             '''
             Performs UT-EC with 6 states
             '''
-            t = h * optimize_dt
+            t = init_time + h * optimize_dt
+            jax.debug.print("time: {x}", x=t)
             reward, states, weights = inputs
             control_inputs, pos_ref, vel_ref = policy( t, states, policy_params )         # mean_position = get_mean( states, weights )
             if dynamics_type=='ideal':
@@ -194,7 +195,8 @@ gp_train_x = gp_train_x[::140]
 gp_train_y = jnp.load(disturbance_path)
 gp_train_y = gp_train_y[::140].T
 t0 = time.time()
-    
+# import pdb
+# pdb.set_trace()
 # def generate_state_vector(key, n):
 #     return jax.random.normal(key, (n, 1))
 def generate_state_vector(key, n):
@@ -224,8 +226,8 @@ predict_state = setup_predict_states(file_path1, file_path2, file_path3, dynamic
 get_future_reward_grad = jit(grad(get_future_reward, argnums=1))
 get_future_reward_value_and_grad = jit(value_and_grad(get_future_reward, argnums=1))
 
-get_future_reward( state_vector, jnp.array([7.0, 4.0]) )
-get_future_reward_grad( state_vector, jnp.array([7.0, 4.0]) )
+get_future_reward( state_vector, jnp.array([7.0, 4.0]), 0.0 )
+get_future_reward_grad( state_vector, jnp.array([7.0, 4.0]), 0.0 )
 
 params_init = jnp.array([7.0, 4.0])
 key, subkey = jax.random.split(key)
@@ -239,17 +241,16 @@ def train_policy_jaxscipy(init_state, params_policy):
     return params_policy
 
 @jit
-def train_policy_custom(init_state, params_policy):
+def train_policy_custom(init_state, params_policy, init_time):
 
     @jit
     def body(i, inputs):
         params_policy = inputs
-        params_policy_grad = get_future_reward_grad( init_state, params_policy )
+        params_policy_grad = get_future_reward_grad( init_state, params_policy, init_time )
         params_policy_grad = jnp.clip( params_policy_grad, -grad_clip, grad_clip )
         params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
         return params_policy
     params_policy = lax.fori_loop(0, iter_adam_custom, body, params_policy)
-
 
     # for i in range(iter_adam_custom):
     #     params_policy_grad = get_future_reward_grad( init_state, params_policy, gp_train_x, gp_train_y )
@@ -271,7 +272,8 @@ def predict_states(init_state, policy_params, key, run_optimizer=False):
             if optimizer=='scipy':
                 policy_params = train_policy_jaxscipy(next_state, policy_params)
             elif optimizer=='custom_gd':
-                policy_params = train_policy_custom(next_state, policy_params)
+                policy_params = train_policy_custom(next_state, policy_params, h*predict_dt)
+                print(f"params: {policy_params}")
             else:
                 print(f"NOT IMPLEMENTED ERROR")
                 exit()
@@ -282,11 +284,11 @@ def predict_states(init_state, policy_params, key, run_optimizer=False):
 # Unoptimized Parameters
 states, states_ref = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=False)
 key, subkey = jax.random.split(key)
-# states2, states_ref2 = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=False)
+states2, states_ref2 = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=False)
 fig, ax = plt.subplots()
 ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='reference')
 ax.plot(states[0,:], states[1,:], 'g', label='states unoptimized')
-# ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
+ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 # plt.show()
@@ -295,10 +297,10 @@ ax.set_ylabel('Y')
 print(f"Optimizing now!")
 key, subkey = jax.random.split(key)
 states_optimized, states_ref_optimized= predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=True)
-# key, subkey = jax.random.split(key)
-# states_optimized2, states_ref_optimized2 = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=True)
+key, subkey = jax.random.split(key)
+states_optimized2, states_ref_optimized2 = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=True)
 ax.plot(states_optimized[0,:], states_optimized[1,:], 'k', label='states optimized')
-# ax.plot(states_optimized2[0,:], states_optimized2[1,:], 'k--', label='states2 optimized')
+ax.plot(states_optimized2[0,:], states_optimized2[1,:], 'k--', label='states2 optimized')
 
 
 

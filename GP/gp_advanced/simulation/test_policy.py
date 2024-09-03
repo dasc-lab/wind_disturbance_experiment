@@ -3,8 +3,9 @@ from jax import jit, vmap, lax
 import jax
 from jax.experimental import host_callback as hcb
 def state_ref(t):
-    dataset_index = 0
-    pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
+    dataset_index = 1
+    # pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
+    pos, vel, acc = circle_pos_vel_acc( t, cir_radius[dataset_index], cir_angular_vel[dataset_index], cir_origin_x[dataset_index], cir_origin_y[dataset_index] )
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 # policy_params = [14, 7.4]
 policy_params = [7, 4]
