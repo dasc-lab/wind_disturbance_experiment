@@ -25,9 +25,7 @@ def calculate_reward(pos_ref, pos, vel_ref, vel, pos_factor = 1.0, vel_factor = 
     return reward
 
 def plot_trajectory_reward(bag_path, takeoff, land):
-    # x_data = []
-    # y_data = []
-    # z_data = x_ref = y_ref = z_ref = 
+    
     pos_vector = []
     pos_ref_vector = []
     vel_vector = []
@@ -79,14 +77,14 @@ pos_vector_unoptimized = np.array(pos_vector_unoptimized)
 reward_arr_unoptimized = np.array(reward_arr_unoptimized) 
 
 # unoptimized ideal
-pos_vector_unoptimized_ideal, pos_ref_vector_unoptimized_ideal, reward_arr_unoptimized_ideal, total_reward_unoptimized_ideal = plot_trajectory_reward(bag_path_unoptimized_ideal,680,700)
+pos_vector_unoptimized_ideal, pos_ref_vector_unoptimized_ideal, reward_arr_unoptimized_ideal, total_reward_unoptimized_ideal = plot_trajectory_reward(bag_path_unoptimized_ideal,500,1800)
 pos_vector_unoptimized_ideal = np.array(pos_vector_unoptimized_ideal)
 reward_arr_unoptimized_ideal = np.array(reward_arr_unoptimized_ideal)
 
 fig1, ax1  =plt.subplots()
 ax1.plot(reward_arr, 'g', label='Optimized')
 ax1.plot(reward_arr_unoptimized, 'k', label='Default')
-# ax1.plot(reward_arr_unoptimized_ideal, 'm', label='Dafault ideal')
+ax1.plot(reward_arr_unoptimized_ideal, 'm', label='Dafault ideal')
 ax1.legend()
 
 fig2 = plt.figure() #(figsize=plt.figaspect(0.5))
@@ -96,13 +94,13 @@ width = 2
 ax2.plot(pos_vector[1::ns,0],pos_vector[1::ns,1],pos_vector[1::ns,2], c = 'g', linewidth=width, label='Optimized')
 ax2.plot(pos_ref_vector[1::ns,0],pos_ref_vector[1::ns,1],pos_ref_vector[1::ns,2], c='r',linewidth=width, linestyle='dotted', label='Reference')
 ax2.plot(pos_vector_unoptimized[1::ns,0],pos_vector_unoptimized[1::ns,1],pos_vector_unoptimized[1::ns,2], c = 'k',linewidth=width,  label='Default')
-# ax2.plot(pos_vector_unoptimized_ideal[1::ns,0],pos_vector_unoptimized_ideal[1::ns,1],pos_vector_unoptimized_ideal[1::ns,2], c = 'm',linewidth=width,  label='Default ideal')
+ax2.plot(pos_vector_unoptimized_ideal[1::ns,0],pos_vector_unoptimized_ideal[1::ns,1],pos_vector_unoptimized_ideal[1::ns,2], c = 'm',linewidth=width,  label='Default ideal')
 ax2.set_zlim(0,1)
 ax2.legend()
 plt.show()
 
 
-# # plt.figure()
+# plt.figure()
 # plt.plot(reward_arr)
 # plt.show()
 # fig = plt.figure()
