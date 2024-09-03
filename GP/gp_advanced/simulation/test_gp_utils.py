@@ -153,6 +153,12 @@ def get_next_states_with_gp_sigma_inv_predict( states, control_inputs, dt, gps, 
 
     pred_mu = jnp.concatenate( (pred_mean0.T, pred_mean1.T, pred_mean2.T), axis=0 ) #3x13
     pred_cov = jnp.concatenate( (pred_std0.T**2, pred_std1.T**2, pred_std2.T**2), axis=0 ) #3x13
+
+    # multiplying by the normalization factor:
+    # norm_factor = 5
+    # pred_mu = pred_mu * norm_factor
+    # pred_cov = pred_cov * (norm_factor ** 2)
+
     ################################################
     ############ bug fix: ########################
     ############ bug: line 52, incompatible shapes control inputs and pred_mu ############

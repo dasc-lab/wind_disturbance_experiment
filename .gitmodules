@@ -2,6 +2,14 @@
 	path = GP/gp_advanced/FORESEE/GPJax
 	url = git@github.com:hardikparwana/GPJax.git
 
-# [submodule "GP/gp_advanced/FORESEE/GPJax2"]
-# 	path = GP/gp_advanced/FORESEE/GPJax2
-# 	url = git@github.com:hardikparwana/GPJax.git
+[submodule "GP/gp_advanced/FORESEE/GPJax2"]
+ 	path = GP/gp_advanced/FORESEE/GPJax2
+ 	url = git@github.com:hardikparwana/GPJax.git
+[submodule "GP/gp_advanced/FORESEE/GPJax_sigma_inv"]
+        path = GP/gp_advanced/FORESEE/GPJax_sigma_inv
+        url = git@github.com:hardikparwana/GPJax.git
+        branch = custom_sigma_inv
+[submodule "train_gp/GPJax"]
+	path = train_gp/GPJax
+	url = git@github.com:hardikparwana/GPJax.git
+	branch = custom_sigma_inv

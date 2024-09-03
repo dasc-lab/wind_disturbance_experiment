@@ -22,10 +22,10 @@ dynamics_type = 'gp'
 optimizer = 'scipy'
 # optimizer = 'custom_gd'
 
-#home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
-# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+# home_path = '/home/dasc/albus/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
 # home_path = '/home/hardik/Desktop/Research/wind_disturbance_experiment/GP/gp_advanced/'
-home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
+# home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 
 # trajectory_path = home_path + 'circle_figure8_fullset/'
 trajectory_path = home_path + 'gp_final/'

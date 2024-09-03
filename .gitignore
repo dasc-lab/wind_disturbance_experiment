@@ -1,3 +1,10 @@
 GP/gp_advanced/FORESEE/foresee_env/
 GP/gp_advanced/FORESEE/foresee_env/lib/python3.10/site-packages/jaxlib/xla_extension.so
+GP/gp_advanced_simple/FORESEE/foresee_env/
+GP/gp_advanced/Dockerfile
+GP/gp_advanced/docker-compose.yaml
+GP/gp_advanced/entrypoint.sh
 GP/gp_advanced_simple/FORESEE/foresee_env/GP/gp_advanced/simulation/__pycache__/*
+GP/gp_advanced/__pycache__/*
+GP/gp_advanced/simulation/__pycache__/*
+GP/gp_advanced/__pycache__/*

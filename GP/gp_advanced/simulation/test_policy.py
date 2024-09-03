@@ -1,10 +1,16 @@
 import jax.numpy as jnp
 from jax import jit, vmap, lax
 import jax
+from jax.experimental import host_callback as hcb
 def state_ref(t):
+<<<<<<< HEAD
     dataset_index = 1
     # pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
     pos, vel, acc = circle_pos_vel_acc( t, cir_radius[dataset_index], cir_angular_vel[dataset_index], cir_origin_x[dataset_index], cir_origin_y[dataset_index] )
+=======
+    dataset_index = 0
+    pos, vel, acc = figure8_pos_vel_acc( t, figure8_radius[dataset_index], figure8_angular_vel[dataset_index], figure8_origin_x[dataset_index], figure8_origin_y[dataset_index] )
+>>>>>>> 770e97879bfa9906d810ca5e25b0d2de9a8004ba
     return pos.reshape(-1,1), vel.reshape(-1,1), acc.reshape(-1,1)
 # policy_params = [14, 7.4]
 policy_params = [7, 4]
@@ -21,10 +27,13 @@ def policy( t, states, policy_params):
 
     kx = policy_params[0]
     kv = policy_params[1]
-
+    
     pos_ref, vel_ref, acc_ref = state_ref(t)
-
+    
     ex = states[0:3] - pos_ref
+    # jax.debug.print( str(ex))
+    # hcb.id_print(ex)
+    # jax.debug.print( str(pos_ref.shape))
     # ex = lax.cond( jnp.linalg.norm(ex)>2, lambda z: 2.0 * z / jnp.linalg.norm(z), lambda z: z, ex )
     ev = states[3:6] - vel_ref
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )

@@ -6,8 +6,8 @@ import os
 
 from plot_trajectory_ref import cutoff, threshold
 import pickle
-# home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
-home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
+home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/'
+# home_path = '/home/wind_disturbance_experiment/GP/gp_advanced/'
 plotter_path = os.path.join(home_path)
 gpjax_path = os.path.join(home_path+'FORESEE/GPJax')
 sys.path.append(plotter_path)
@@ -87,7 +87,7 @@ pred_mean_x = pred_std_x = pred_mean_y = pred_std_y = pred_mean_z = pred_std_z =
 dim = 6 ## 6 input dims x,y,z,vx,vy,vz
 
 ############## keep one in eight datapoints ##############
-slice = 8
+slice = 20
 
 
 ################################### Data Prep ##########################################
@@ -501,7 +501,7 @@ for j in range(3):
     # plt.show()
 
 # Perform the comparison and update
-compare_and_update(file_path, error_x+error_y+error_z)
+# compare_and_update(file_path, error_x+error_y+error_z)
 
  # fig, axes = plt.subplots(3, 1, figsize=(15, 10))  # Adjust subplot grid as needed
     # axes = axes.flatten()
