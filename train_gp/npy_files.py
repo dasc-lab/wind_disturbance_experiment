@@ -12,7 +12,7 @@ recorded_data_path = 'recorded_data/'
 circle_path = recorded_data_path + 'circle_data/training/'
 
 figure8_path = recorded_data_path +'figure8_data/training/'
-npy_path = 'all_data/'
+npy_path = 'datasets/all_data/'
 
 all_input_data = npy_path + 'input.npy'
 all_disturbance_data = npy_path + 'disturbance.npy'
@@ -26,8 +26,8 @@ for file_name in os.listdir(circle_path):
     if os.path.isdir(file_path):
         print(f"Processing data: {file_name}")
     while (input("Is takeoff and landing data truncated?[y/n]") != 'y'):
-        takeoff = input("Enter takeoff threshold: ")
-        landing = input("Enter landing cutoff: ")
+        takeoff = int(input("Enter takeoff threshold: "))
+        landing = int(input("Enter landing cutoff: "))
         pos_vector, pos_ref_vector, gp_input, disturbance = plot_trajectory(file_path,takeoff,landing)
         pos_vector = np.array(pos_vector)
         plot_helper(pos_vector,pos_ref_vector)
@@ -66,8 +66,8 @@ for file_name in os.listdir(figure8_path):
     if os.path.isdir(file_path):
         print(f"Processing data: {file_name}")
     while (input("Is takeoff and landing data truncated?[y/n]") != 'y'):
-        takeoff = input("Enter takeoff threshold: ")
-        landing = input("Enter landing cutoff: ")
+        takeoff = int(input("Enter takeoff threshold: "))
+        landing = int(input("Enter landing cutoff: "))
         pos_vector, pos_ref_vector, gp_input, disturbance = plot_trajectory(file_path,takeoff,landing)
         pos_vector = np.array(pos_vector)
         plot_helper(pos_vector,pos_ref_vector)

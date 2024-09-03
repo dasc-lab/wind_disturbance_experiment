@@ -64,7 +64,7 @@ jnp.save(testset_path+'test_disturbance_z.npy', test_disturbance_z)
 
 print(f"training on {training_size} datapoints")
 training_input = input[training_indices]
-training_path = npy_path + 'training'
+training_path = npy_path + 'training/'
 training_disturbance_x = wind_disturbance_x[training_indices]
 training_disturbance_y = wind_disturbance_y[training_indices]
 training_disturbance_z = wind_disturbance_z[training_indices]
