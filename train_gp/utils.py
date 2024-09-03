@@ -56,9 +56,12 @@ def plot_trajectory(bag_path, takeoff, land):
     vel_vector = []
     vel_ref_vector = []
     acc_vector = []
-    acc_ref = []
+    acc_ref_vector = []
     kx = 7
     kv = 4
+    m = 0.681
+    acc_cmd_arr = []
+    acc_arr = []
     def initialize_typestore():
         typestore = get_typestore(Stores.LATEST)
         msg_text = Path('../DynamicsData.msg').read_text()
@@ -86,19 +89,25 @@ def plot_trajectory(bag_path, takeoff, land):
                     diff_pos = 2*diff_pos/norm(diff_pos)
                 if norm(diff_vel) > 5:
                     diff_vel = 5*diff_vel/norm(diff_vel)
-                thrust = -kx*diff_pos -kv*diff_vel + m * acc_ref #- g*m 
+                thrust = -kx*diff_pos -kv*diff_vel + m * msg.acc_ref #- g*m 
                 #thrust = thrust  + g * m
                 acc_cmd = thrust/m
-                acc_diff = acc - acc_cmd
-                # disturbance.append(acc_diff)
                 acc_cmd_arr.append(acc_cmd)
-                acc_arr.append(acc)
+                acc_arr.append(msg.acc)
         
         pos_vector = np.array(pos_vector)
         pos_ref_vector = np.array(pos_ref_vector)
-        
-        length = pos_vector.shape[0]
+        vel_vector = np.array(vel_vector)
+        vel_ref_vector = np.array(vel_ref_vector)
 
+        gp_input = np.hstack((pos_vector, vel_vector))
+        # gp_input = np.hstack((pos_vector, vel_vector, acc_cmd_arr))
+        filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=1000)
+        assert filtered_acc.shape == acc_cmd_arr.shape
+        disturbance = filtered_acc - acc_cmd_arr
+
+
+        length = pos_vector.shape[0]
         pos_vector[:,2] = -pos_vector[:,2]
         pos_ref_vector[:,2] = -pos_ref_vector[:,2]
-    return pos_vector[takeoff:length-land,:], pos_ref_vector[takeoff:length-land,:], input[takeoff:length-land,:], disturbance[takeoff:length-land,:]
+    return pos_vector[takeoff:length-land,:], pos_ref_vector[takeoff:length-land,:], gp_input[takeoff:length-land,:], disturbance[takeoff:length-land,:]

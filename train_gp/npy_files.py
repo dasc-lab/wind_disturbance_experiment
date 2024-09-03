@@ -17,6 +17,9 @@ npy_path = 'all_data/'
 all_input_data = npy_path + 'input.npy'
 all_disturbance_data = npy_path + 'disturbance.npy'
 
+
+'''Iterate Through Circle Files'''
+
 for file_name in os.listdir(circle_path):
     file_path = os.path.join(circle_path, file_name)
     
@@ -25,11 +28,11 @@ for file_name in os.listdir(circle_path):
     while (input("Is takeoff and landing data truncated?[y/n]") != 'y'):
         takeoff = input("Enter takeoff threshold: ")
         landing = input("Enter landing cutoff: ")
-        pos_vector, pos_ref_vector= plot_trajectory(file_path,takeoff,landing)
+        pos_vector, pos_ref_vector, gp_input, disturbance = plot_trajectory(file_path,takeoff,landing)
         pos_vector = np.array(pos_vector)
         plot_helper(pos_vector,pos_ref_vector)
     
-
+    
     try:
         curr_input = np.load(all_input_data)
     except FileNotFoundError:
@@ -48,11 +51,13 @@ for file_name in os.listdir(circle_path):
         
         curr_disturbance = np.load(all_disturbance_data)
         assert curr_disturbance.shape == (0,3)
-    gp_input = np.vstack((curr_input, new_input))
-    disturbance = np.vstack((curr_disturbance, new_disturbance))
+    new_input = np.vstack((curr_input, gp_input))
+    new_disturbance = np.vstack((curr_disturbance, disturbance))
+    np.save(all_input_data, new_input)
+    np.save(all_disturbance_data, new_disturbance)
 
 
-
+'''Iterate Through Figure8 Files'''
 
 
 for file_name in os.listdir(figure8_path):
@@ -63,9 +68,11 @@ for file_name in os.listdir(figure8_path):
     while (input("Is takeoff and landing data truncated?[y/n]") != 'y'):
         takeoff = input("Enter takeoff threshold: ")
         landing = input("Enter landing cutoff: ")
-        pos_vector, pos_ref_vector= plot_trajectory(file_path,takeoff,landing)
+        pos_vector, pos_ref_vector, gp_input, disturbance = plot_trajectory(file_path,takeoff,landing)
         pos_vector = np.array(pos_vector)
         plot_helper(pos_vector,pos_ref_vector)
     
-    gp_input = np.vstack((curr_input, new_input))
-    disturbance = np.vstack((curr_disturbance, new_disturbance))
+    new_input = np.vstack((curr_input, gp_input))
+    new_disturbance = np.vstack((curr_disturbance, disturbance))
+    np.save(all_input_data, new_input)
+    np.save(all_disturbance_data, new_disturbance)
