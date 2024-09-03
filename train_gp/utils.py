@@ -20,7 +20,7 @@ def fft_filter(signal, sampling_rate = 1000):
     peak_index = np.argmax(magnitude[0:10])
     peak_frequency = xf[peak_index]
     peak_amplitude = magnitude[peak_index]
-    print("sampling rate = ", sampling_rate)
+    
     def butter_lowpass_filter(data, cutoff_freq, fs, order=1):
         nyq = 0.5 * fs
         normal_cutoff = cutoff_freq / nyq
@@ -28,8 +28,8 @@ def fft_filter(signal, sampling_rate = 1000):
         y = filtfilt(b, a, data)
         return y
 
-    cutoff_freq = peak_frequency+3.0 #Hz
-    print("cutoff_freq = ", cutoff_freq)
+    cutoff_freq = peak_frequency+3.0 
+    
     filtered_signal = filtered_data = butter_lowpass_filter(signal, cutoff_freq, sampling_rate)
     return filtered_signal
 def apply_fft_filter_to_columns(array, sampling_rate=1000):
@@ -43,6 +43,33 @@ def apply_fft_filter_to_columns(array, sampling_rate=1000):
 Helpers for plotter
 '''
 def plot_helper(pos_vector, pos_ref_vector):
+    x = pos_vector[:,0]
+    x_t = pos_ref_vector[:,0]
+    y = pos_vector[:,1]
+    y_t = pos_ref_vector[:,1]
+    z = pos_vector[:,2]
+    z_t = pos_ref_vector[:,2]
+    fig = plt.figure()
+    ax1 = plt.subplot2grid((3,1), (0,0) , rowspan=1)
+    ax1.plot(range(x.size), x , 'r',label='Actual trajectory')
+    ax1.plot(range(x_t.size), x_t.T, 'b',label='Reference trajectory')
+    ax1.legend(loc='upper right')
+    ax1.set_title("x")
+    ax1.set_ylabel("meters")
+    ax1 = plt.subplot2grid((3,1), (1,0) , rowspan=1)
+    ax1.plot(range(y.size), y,'r',label='Actual trajectory')
+    ax1.plot(range(y_t.size), y_t.T, 'b',label='Reference trajectory')
+    ax1.legend(loc='upper right')
+    ax1.set_title("y")
+    ax1.set_ylabel("meters")
+    ax1 = plt.subplot2grid((3,1), (2,0) , rowspan=1)
+    ax1.plot(range(z.size), z,'r',label='Actual trajectory')
+    ax1.plot(range(z_t.size), z_t.T, 'b',label='Reference trajectory')
+    ax1.legend(loc='upper right')
+    ax1.set_ylabel("meters")
+    ax1.set_title("z")
+    plt.subplots_adjust(hspace=0.5) 
+    plt.show()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(pos_vector[:,0],pos_vector[:,1],pos_vector[:,2], c = 'r')
@@ -99,7 +126,8 @@ def plot_trajectory(bag_path, takeoff, land):
         pos_ref_vector = np.array(pos_ref_vector)
         vel_vector = np.array(vel_vector)
         vel_ref_vector = np.array(vel_ref_vector)
-
+        acc_arr = np.array(acc_arr)
+        acc_cmd_arr = np.array(acc_cmd_arr)
         gp_input = np.hstack((pos_vector, vel_vector))
         # gp_input = np.hstack((pos_vector, vel_vector, acc_cmd_arr))
         filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=1000)
@@ -110,4 +138,4 @@ def plot_trajectory(bag_path, takeoff, land):
         length = pos_vector.shape[0]
         pos_vector[:,2] = -pos_vector[:,2]
         pos_ref_vector[:,2] = -pos_ref_vector[:,2]
-    return pos_vector[takeoff:length-land,:], pos_ref_vector[takeoff:length-land,:], gp_input[takeoff:length-land,:], disturbance[takeoff:length-land,:]
+    return pos_vector[takeoff:(length-land),:], pos_ref_vector[takeoff:length-land,:], gp_input[takeoff:length-land,:], disturbance[takeoff:length-land,:]

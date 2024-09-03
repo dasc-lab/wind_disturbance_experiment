@@ -2,6 +2,7 @@ from jax import config
 config.update("jax_enable_x64", True)
 import sys
 import os
+sys.path.append("GPJax")
 import pickle
 import tensorflow_probability.substrates.jax.bijectors as tfb
 import numpy as np
@@ -14,9 +15,11 @@ from gpjax.kernels import SumKernel, White, RBF, Matern32, RationalQuadratic, Pe
 import matplotlib.pyplot as plt
 
 training_path = 'datasets/training/'
-wind_disturbance_training = np.load(training_path + 'disturbance.npy')
-training_input = np.load(training_path+'input.npy')
-wind_disturbance_x, wind_disturbance_y, wind_disturbance_z = wind_disturbance_training[:,0], wind_disturbance_training[:,1], wind_disturbance_training[:,2]
+wind_disturbance_x = np.load(training_path + 'training_disturbance_x.npy')
+wind_disturbance_y = np.load(training_path + 'training_disturbance_y.npy')
+wind_disturbance_z = np.load(training_path + 'training_disturbance_z.npy')
+training_input = np.load(training_path+'training_input.npy')
+# wind_disturbance_x, wind_disturbance_y, wind_disturbance_z = wind_disturbance_training[:,0], wind_disturbance_training[:,1], wind_disturbance_training[:,2]
 n = training_input.shape[0]
 key = jr.key(123)
 
@@ -29,7 +32,7 @@ for j in range(3):
         wind_disturbance_curr = wind_disturbance_z
     
     x = training_input
-    y = wind_disturbance_training
+    y = wind_disturbance_curr
     
 
     ########################################## GP ##########################################
@@ -37,18 +40,17 @@ for j in range(3):
 
     D = gpx.Dataset(X=x, y=y)
     noise_level = 0.1
-    # Construct the prior
+   
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
-    # kernel = SumKernel(kernels=[RBF(), Matern32(), white_kernel])
+    
     rbf_kernel = RBF(active_dims=[0,1,2,3,4,5])
     rational_quadratic_kernel = RationalQuadratic()
     
     periodic_kernel = Periodic()
     composite_kernel = ProductKernel(kernels=[periodic_kernel, rational_quadratic_kernel])
     combined_kernel = SumKernel(kernels=[composite_kernel, rbf_kernel, white_kernel])
-    # composite_kernel = ProductKernel(kernels=[periodic_kernel, rbf_kernel])
-    # combined_kernel = SumKernel(kernels=[composite_kernel, rational_quadratic_kernel, white_kernel])
+  
     kernel = combined_kernel
    
 
@@ -83,11 +85,9 @@ for j in range(3):
     gp_model_file_path = 'gp_models/'
     if j ==0:
         gp_model_x = opt_posterior
-        #gp_model_file_path = home_path + 'gpmodels/gp_model_x_norm3.pkl'
         gp_model_file_path = gp_model_file_path + 'sparsegp_model_x_norm5_clipped_moredata.pkl'
     if j ==1:
         gp_model_y = opt_posterior
-        #gp_model_file_path = home_path + 'gpmodels/gp_model_y_norm3.pkl'
         gp_model_file_path = gp_model_file_path + 'sparsegp_model_y_norm5_clipped_moredata.pkl'
     if j == 2:
         gp_model_z = opt_posterior
