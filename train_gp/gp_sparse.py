@@ -27,8 +27,7 @@ for j in range(3):
         wind_disturbance_curr = wind_disturbance_y
     elif j == 2:
         wind_disturbance_curr = wind_disturbance_z
-    else:
-        print("shouldn't reach this statement")
+    
     x = training_input
     y = wind_disturbance_training
     
