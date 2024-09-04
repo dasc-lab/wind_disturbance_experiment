@@ -70,8 +70,14 @@ latent_dist = gp_x.posterior.predict_with_sigma_inv(training_input, D_x, Sigma_i
 predictive_dist = gp_x.posterior.likelihood(latent_dist)
 pred_mean = predictive_dist.mean().reshape(-1,1)
 pred_std = predictive_dist.stddev().reshape(-1,1)
-
+pred_mean = pred_mean * factor
+pred_std = pred_std * factor
+training_disturbance_x = training_disturbance_x * factor
 # D_y = gpy.
+training_disturbance_x = training_disturbance_x[::20]
+training_disturbance_y = training_disturbance_y[::20]
+pred_mean = pred_mean[::20]
+pred_std = pred_std[::20]
 
 # predictive_dist = gpx.posterior.likelihood(latent_dist_x)
 # pred_mean = predictive_dist.mean()

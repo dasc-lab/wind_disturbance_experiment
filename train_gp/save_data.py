@@ -20,11 +20,12 @@ bag_path = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_0
 input = np.load(all_data_path+'input.npy')
 wind_disturbance = np.load(all_data_path+'disturbance.npy')
 factor = 5
-slice = 20
+slice = 5
 key = jr.key(123)
 
 wind_disturbance = wind_disturbance[::slice]
 input = input[::slice]
+wind_disturbance = wind_disturbance/factor
 
 ##################### Remove Outliers #####################
 outlier_threshold = 5.0/factor
