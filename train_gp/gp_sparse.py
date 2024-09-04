@@ -85,13 +85,13 @@ for j in range(3):
     gp_model_file_path = 'gp_models/'
     if j ==0:
         gp_model_x = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'sparsegp_model_x_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_x_norm5_clipped.pkl'
     if j ==1:
         gp_model_y = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'sparsegp_model_y_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_y_norm5_clipped.pkl'
     if j == 2:
         gp_model_z = opt_posterior
-        gp_model_file_path = gp_model_file_path + 'sparsegp_model_z_norm5_clipped_moredata.pkl'
+        gp_model_file_path = gp_model_file_path + 'sparsegp_model_z_norm5_clipped.pkl'
     with open(gp_model_file_path, 'wb') as file:
         pickle.dump(opt_posterior, file)
     
