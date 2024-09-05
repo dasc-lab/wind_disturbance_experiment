@@ -83,6 +83,7 @@ opt_posterior, history = gpx.fit(
 )
 import time
 latent_dist = opt_posterior.predict(xtest, train_data=D)
+latent_dist = opt_posterior.predict(xtest, train_data=D)
 t0 = time.time()
 latent_dist = opt_posterior.predict(xtest, train_data=D)
 # latent_dist = opt_posterior.predict(xtest, train_data=D)

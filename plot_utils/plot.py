@@ -17,6 +17,10 @@ bag_path = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_0
 bag_path_unoptimized = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
 bag_path_unoptimized_ideal = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanoff_clipped_new'
 
+bag_path = figure8_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_04_9_30_tank_0_31_fanon_clipped_new'
+bag_path_unoptimized = figure8_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanon_clipped_new'
+bag_path_unoptimized_ideal = figure8_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv7_00_4_00_tank_0_31_fanoff_clipped_new'
+
 # def calculate_reward(pos_ref, pos, vel_ref, vel, pos_factor = 1.0, vel_factor = 0.1):
 #     reward = pos_factor * np.sum(np.fromiter((x**2 for x in (pos-pos_ref)),dtype=float)) + vel_factor * np.sum(np.fromiter((v**2 for v in (vel - vel_ref)),dtype =float))
 #     return reward
@@ -91,7 +95,8 @@ fig2 = plt.figure() #(figsize=plt.figaspect(0.5))
 ax2 = fig2.add_subplot(111, projection='3d')
 ns = 10
 width = 2
-ax2.plot(pos_vector[1::ns,0],pos_vector[1::ns,1],pos_vector[1::ns,2], c = 'g', linewidth=width, label='Optimized')
+ax2.plo
+t(pos_vector[1::ns,0],pos_vector[1::ns,1],pos_vector[1::ns,2], c = 'g', linewidth=width, label='Optimized')
 ax2.plot(pos_ref_vector[1::ns,0],pos_ref_vector[1::ns,1],pos_ref_vector[1::ns,2], c='r',linewidth=width, linestyle='dotted', label='Reference')
 ax2.plot(pos_vector_unoptimized[1::ns,0],pos_vector_unoptimized[1::ns,1],pos_vector_unoptimized[1::ns,2], c = 'k',linewidth=width,  label='Default')
 ax2.plot(pos_vector_unoptimized_ideal[1::ns,0],pos_vector_unoptimized_ideal[1::ns,1],pos_vector_unoptimized_ideal[1::ns,2], c = 'm',linewidth=width,  label='Default ideal')
