@@ -18,7 +18,7 @@ from test_policy_with_obstacle import policy
 # dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
 dynamics_type = 'gp'
-obs_center = jnp.array([-0.4,0.1,-0.5]).reshape(-1,1)
+obs_center = jnp.array([-0.4,0.2,-0.5]).reshape(-1,1)
 # optimizer = 'scipy'
 optimizer = 'custom_gd'
 
@@ -39,15 +39,27 @@ disturbance_path = home_path + 'datasets/all_data/disturbance.npy'
 input_path = home_path + 'datasets/all_data/input.npy'
 
 key = random.PRNGKey(2)
-horizon = 60 #100 #60 #50 #300 #200
+horizon = 30 #100 #60 #50 #300 #200
 simT = 300
 predict_dt = 0.05 #0.1 #0.05 #0.01
 optimize_dt = 0.05
 
+
+
 # custom optimizer
-iter_adam_custom = 1 #300
-custom_gd_lr_rate = 0.05
+iter_adam_custom = 3 #300
+custom_gd_lr_rate = 0.2 #0.05
 grad_clip = 2.0
+violation_factor = 2#20000
+custom_gd_lr_rate_reward = custom_gd_lr_rate / 1
+# 1.0: 1/4,                                       # tanh inside parameter vs
+custom_gd_lr_rate_violation = custom_gd_lr_rate * 2
+# 1.0: 2.0, 
+
+# params_init = jnp.array([7.0, 4.0, 4.0, 0.1])
+params_init = jnp.array([7.0, 4.0, 2.0, 1.0])
+W1 = 0 #0.01
+W2 = 0 #0.01
 
 # scipy optimizer
 iter_scipy=1 #4000
@@ -183,8 +195,8 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         states, weights = initialize_sigma_points(X)
         kx = policy_params[0]
         kv = policy_params[1]
-        w1 = 0.5#0.5
-        w2 = 0.5 #0.1
+        w1 = W1 #0.05#0.5
+        w2 = W2 #0.05 #0.1
         # reward = 0 + w1 * (kx-7)**2 + w2 * (kv-4)**2
         reward = 0 + w1 * (kx)**2 + w2 * (kv)**2
         constraint = 0
@@ -263,10 +275,9 @@ predict_state = setup_predict_states(file_path1, file_path2, file_path3, dynamic
 get_future_reward_grad = jit(jacrev(get_future_reward, argnums=(1)))
 get_future_reward_value_and_grad = jit(value_and_grad(get_future_reward, argnums=1))
 
-get_future_reward( state_vector, jnp.array([7.0, 4.0, 1.0]), 0.0 )
-print(get_future_reward_grad( state_vector, jnp.array([7.0, 4.0, 1.0]), 0.0 ))
+get_future_reward( state_vector, jnp.array([7.0, 4.0, 1.0, 0.1]), 0.0 )
+print(get_future_reward_grad( state_vector, jnp.array([7.0, 4.0, 1.0, 0.1]), 0.0 ))
 
-params_init = jnp.array([7.0, 4.0, 2.0])
 key, subkey = jax.random.split(key)
 
 # exit()
@@ -292,31 +303,32 @@ prob = cp.Problem( obj, const )
 # @jit
 def train_policy_custom(init_state, params_policy, init_time):
 
-    reward, const = get_future_reward( init_state, params_policy, init_time )
-    grads = get_future_reward_grad( init_state, params_policy, init_time )
-    print(f"const: {const}")
-    params_policy_grad = grads[0,:]
-    params_policy_grad = jnp.clip( params_policy_grad, -grad_clip, grad_clip )
+    for i in range(iter_adam_custom):
+        reward, const = get_future_reward( init_state, params_policy, init_time )
+        grads = get_future_reward_grad( init_state, params_policy, init_time )
+        print(f"const: {const}")
+        params_policy_grad = grads[0,:]
+        params_policy_grad = jnp.clip( params_policy_grad, -grad_clip, grad_clip )
 
-    violation_grad = grads[1,:]
-    violation_grad = jnp.clip( violation_grad, -grad_clip, grad_clip )
+        violation_grad = grads[1,:]
+        violation_grad = jnp.clip( violation_grad, -grad_clip, grad_clip )
 
-    # cp_xref.value = np.asarray(params_policy_grad).reshape(-1,1)
-    # cp_a.value = max( np.asarray(const), 0.0)
-    # cp_b.value = np.asarray(violation_grad).reshape(1,-1)
-    # prob.solve()
+        # cp_xref.value = np.asarray(params_policy_grad).reshape(-1,1)
+        # cp_a.value = max( np.asarray(const), 0.0)
+        # cp_b.value = np.asarray(violation_grad).reshape(1,-1)
+        # prob.solve()
 
-    # params_policy_grad = jnp.clip( cp_x.value[:,0], -grad_clip, grad_clip )
-    # params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
+        # params_policy_grad = jnp.clip( cp_x.value[:,0], -grad_clip, grad_clip )
+        # params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
 
-    if const>=-0.001: # all safe!
-        params_policy_grad = params_policy_grad
-        params_policy = params_policy - custom_gd_lr_rate * params_policy_grad / 4
-    else:
-        # got unsafe!
-        print(f"violation grad: {violation_grad}")
-        params_policy_grad = jnp.clip( 20000 * violation_grad, -grad_clip, grad_clip )
-        params_policy = params_policy + custom_gd_lr_rate * params_policy_grad * 2
+        if const>=-0.001: # all safe!
+            params_policy_grad = params_policy_grad
+            params_policy = params_policy - custom_gd_lr_rate_reward * params_policy_grad
+        else:
+            # got unsafe!
+            print(f"violation grad: {violation_grad}")
+            params_policy_grad = jnp.clip( violation_factor * violation_grad, -grad_clip, grad_clip )
+            params_policy = params_policy + custom_gd_lr_rate_violation * params_policy_grad * 2
 
 
 
