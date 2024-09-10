@@ -8,7 +8,7 @@ from gpjax import Dataset
 from jax import jit, random
 key = random.PRNGKey(2)
 home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advanced/FORESEE/'
-from test_policy import policy
+# from test_policy import policy
 from jax.scipy.spatial.transform import Rotation
 
 @jit

@@ -316,7 +316,7 @@ def train_policy_custom(init_state, params_policy, init_time):
         # got unsafe!
         print(f"violation grad: {violation_grad}")
         params_policy_grad = jnp.clip( 20000 * violation_grad, -grad_clip, grad_clip )
-        params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
+        params_policy = params_policy + custom_gd_lr_rate * params_policy_grad * 2
 
 
 
