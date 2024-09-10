@@ -16,7 +16,7 @@ npy_path = 'datasets/all_data/'
 
 all_input_data = npy_path + 'input.npy'
 all_disturbance_data = npy_path + 'disturbance.npy'
-
+data_dim = 13
 
 '''Iterate Through Circle Files'''
 
@@ -38,10 +38,10 @@ for file_name in os.listdir(circle_path):
         curr_input = np.load(all_input_data)
     except FileNotFoundError:
         print(f"File not found: {all_input_data}. Creating a new blank file.")
-        empty_data = np.empty((0, 9))
+        empty_data = np.empty((0, data_dim))
         np.save(all_input_data, empty_data)
         curr_input = np.load(all_input_data)
-        assert curr_input.shape == (0,9)
+        assert curr_input.shape == (0,data_dim)
 
     try:
         curr_disturbance = np.load(all_disturbance_data, allow_pickle=True)

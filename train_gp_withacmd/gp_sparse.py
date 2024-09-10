@@ -45,10 +45,10 @@ for j in range(3):
     meanf = gpx.mean_functions.Zero()
     white_kernel = White(variance=noise_level)
     
-    rbf_kernel = RBF(active_dims=[0,1,2,3,4,5,6,7,8])
-    rational_quadratic_kernel = RationalQuadratic(active_dims=[0,1,2,3,4,5,6,7,8])
+    rbf_kernel = RBF(active_dims=[0,1,2,3,4,5,6,7,8,9,10,11,12])
+    rational_quadratic_kernel = RationalQuadratic(active_dims=[0,1,2,3,4,5,6,7,8,9,10,11,12])
     
-    periodic_kernel = Periodic()
+    periodic_kernel = Periodic(active_dims=[0,1,2,3,4,5,6,7,8,9,10,11,12])
     composite_kernel = ProductKernel(kernels=[periodic_kernel, rational_quadratic_kernel])
     combined_kernel = SumKernel(kernels=[composite_kernel, rbf_kernel, white_kernel])
   
@@ -67,7 +67,7 @@ for j in range(3):
     # n_inducing = 50
     # z = jnp.linspace(-3.0, 3.0, n_inducing).reshape(-1, 1)
     # z = x[::10]
-    z = x[::140]
+    z = x[::40] #]  x[::140]
 
     q = gpx.variational_families.CollapsedVariationalGaussian(
         posterior=posterior, inducing_inputs=z

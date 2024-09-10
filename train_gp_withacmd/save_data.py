@@ -12,15 +12,15 @@ npy_path = 'datasets/'
 
 
 all_data_path = npy_path + 'all_data/'
-circle_path = recorded_data_path + 'circle_data/'
+# circle_path = recorded_data_path + 'circle_data/'
 
-figure8_path = recorded_data_path +'figure8_data/'
+# figure8_path = recorded_data_path +'figure8_data/'
 
-bag_path = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_04_9_30_tank_0_31_fanon_clipped_new'
+# bag_path = circle_path + '28_07_2024_take1_cir_traj_r0.4_w1.0_c0.00_h0.5_kxv19_04_9_30_tank_0_31_fanon_clipped_new'
 input = np.load(all_data_path+'input.npy')
 wind_disturbance = np.load(all_data_path+'disturbance.npy')
 factor = 5
-slice = 5
+slice = 2 #5
 key = jr.key(123)
 
 wind_disturbance = wind_disturbance[::slice]
@@ -30,6 +30,9 @@ wind_disturbance = wind_disturbance/factor
 ##################### Remove Outliers #####################
 outlier_threshold = 5.0/factor
 rows_to_remove = jnp.any(wind_disturbance > outlier_threshold, axis=1)
+# import pdb
+# pdb.set_trace()
+print(f"rows to remove: {rows_to_remove.shape}, org shape: {wind_disturbance.shape}")
 wind_disturbance = wind_disturbance[~rows_to_remove]
 input = input[~rows_to_remove]
 print(f"The remaining length is {wind_disturbance.shape}")

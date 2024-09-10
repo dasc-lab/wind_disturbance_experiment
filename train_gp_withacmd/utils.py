@@ -69,7 +69,7 @@ def plot_helper(pos_vector, pos_ref_vector):
     ax1.set_ylabel("meters")
     ax1.set_title("z")
     plt.subplots_adjust(hspace=0.5) 
-    plt.show()
+    # plt.show()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(pos_vector[:,0],pos_vector[:,1],pos_vector[:,2], c = 'r')
@@ -84,6 +84,7 @@ def plot_trajectory(bag_path, takeoff, land):
     vel_ref_vector = []
     acc_vector = []
     acc_ref_vector = []
+    quaternion_vector = []
     kx = 7
     kv = 4
     m = 0.681
@@ -107,6 +108,7 @@ def plot_trajectory(bag_path, takeoff, land):
                 pos_vector.append(msg.pos)
                 vel_vector.append(msg.vel)
                 acc_vector.append(msg.acc)
+                quaternion_vector.append(msg.quaternion)
             
                 pos_ref_vector.append(msg.pos_ref)
                 vel_ref_vector.append(msg.vel_ref)
@@ -128,7 +130,8 @@ def plot_trajectory(bag_path, takeoff, land):
         vel_ref_vector = np.array(vel_ref_vector)
         acc_arr = np.array(acc_arr)
         acc_cmd_arr = np.array(acc_cmd_arr)
-        gp_input = np.hstack((pos_vector, vel_vector, acc_cmd_arr))
+        quaternion_vector = np.array(quaternion_vector)
+        gp_input = np.hstack((pos_vector, vel_vector, acc_cmd_arr, quaternion_vector))
         # gp_input = np.hstack((pos_vector, vel_vector, acc_cmd_arr))
         filtered_acc = apply_fft_filter_to_columns(acc_arr, sampling_rate=1000)
         assert filtered_acc.shape == acc_cmd_arr.shape
@@ -136,6 +139,6 @@ def plot_trajectory(bag_path, takeoff, land):
 
 
         length = pos_vector.shape[0]
-        pos_vector[:,2] = -pos_vector[:,2]
+        pos_vector[:,2] = -pos_vector[:,2] # only for plotting
         pos_ref_vector[:,2] = -pos_ref_vector[:,2]
     return pos_vector[takeoff:(length-land),:], pos_ref_vector[takeoff:length-land,:], gp_input[takeoff:length-land,:], disturbance[takeoff:length-land,:]
