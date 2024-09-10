@@ -18,7 +18,7 @@ from test_policy_with_obstacle import policy
 # dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
 dynamics_type = 'gp'
-
+obs_center = jnp.array([-0.4,0.1,-0.5]).reshape(-1,1)
 # optimizer = 'scipy'
 optimizer = 'custom_gd'
 
@@ -39,15 +39,15 @@ disturbance_path = home_path + 'datasets/all_data/disturbance.npy'
 input_path = home_path + 'datasets/all_data/input.npy'
 
 key = random.PRNGKey(2)
-horizon = 30 #100 #60 #50 #300 #200
-simT = 600 #300
+horizon = 60 #100 #60 #50 #300 #200
+simT = 300
 predict_dt = 0.05 #0.1 #0.05 #0.01
 optimize_dt = 0.05
 
 # custom optimizer
 iter_adam_custom = 1 #300
-custom_gd_lr_rate = 0.1
-grad_clip = 1.0
+custom_gd_lr_rate = 0.05
+grad_clip = 2.0
 
 # scipy optimizer
 iter_scipy=1 #4000
@@ -84,7 +84,8 @@ def constraint_violation(states, weights, circle_center, circle_radius):
 
     dists = jnp.linalg.norm(states[0:2]-circle_center[0:2], axis=0).reshape((1,13)) - circle_radius
     mean_dist, cov_dist = get_mean_cov( dists, weights )
-    risk_dist = mean_dist - 0.01 * cov_dist
+    risk_dist = mean_dist - 2.96 * jnp.sqrt(cov_dist)
+    risk_dist = jnp.clip( risk_dist, None, 0.0 )
     # jax.debug.print("{x}", x=risk_dist)
     # slack = jnp.min( jnp.array([ 0.0, risk_dist[0,0]]) )  # 0 if safe, negative is unsafe
     # return -slack
@@ -176,11 +177,14 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         '''
         Performs Gradient Descent
         '''
+        # obs_center = jnp.array([-0.3,0.1,-0.5]).reshape(-1,1)
+        dist = constraint_violation_predict(X, jnp.ones((1,1)), obs_center, 0.4)
+        jax.debug.print("dist inside: {x}", x=dist)
         states, weights = initialize_sigma_points(X)
         kx = policy_params[0]
         kv = policy_params[1]
-        w1 = 0.5
-        w2 = 0.1
+        w1 = 0.5#0.5
+        w2 = 0.5 #0.1
         # reward = 0 + w1 * (kx-7)**2 + w2 * (kv-4)**2
         reward = 0 + w1 * (kx)**2 + w2 * (kv)**2
         constraint = 0
@@ -204,10 +208,11 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
             states = next_states
             weights = next_weights
             reward = reward + reward_func( states, weights, pos_ref, vel_ref ) # reward is loss
-            circle_center = jnp.array([-0.4,0,-0.5]).reshape(-1,1)
+            # circle_center = jnp.array([-0.4,0,-0.5]).reshape(-1,1)
+            # circle_center = jnp.array([-0.3,0.1,-0.5]).reshape(-1,1)
             # obs_center = np.array([-0.4,0,-0.5]).reshape(-1,1)
             circle_radius = 0.4
-            constraint = constraint + constraint_violation( states, weights, circle_center, circle_radius )
+            constraint = constraint + constraint_violation( states, weights, obs_center, circle_radius )
             return reward, states, weights, constraint
         reward, _, _, constraint =  lax.fori_loop( 0, horizon, body, (reward, states, weights, constraint) )
         # jax.debug.print("{x}", x=risk_dist)
@@ -240,6 +245,7 @@ def generate_state_vector(key, n):
 key = jax.random.PRNGKey(0)  # Initialize the random key
 n = 6  # Size of the state vector
 state_vector = generate_state_vector(key, n)
+state_vector = jnp.array([0.0,0,0,0,0,0]).reshape(-1,1)
 print(state_vector)
 
 def setup_predict_states(file_path1, file_path2, file_path3, dynamics_type='ideal'):
@@ -260,7 +266,7 @@ get_future_reward_value_and_grad = jit(value_and_grad(get_future_reward, argnums
 get_future_reward( state_vector, jnp.array([7.0, 4.0, 1.0]), 0.0 )
 print(get_future_reward_grad( state_vector, jnp.array([7.0, 4.0, 1.0]), 0.0 ))
 
-params_init = jnp.array([7.0, 4.0, 6.0])
+params_init = jnp.array([7.0, 4.0, 2.0])
 key, subkey = jax.random.split(key)
 
 # exit()
@@ -295,13 +301,23 @@ def train_policy_custom(init_state, params_policy, init_time):
     violation_grad = grads[1,:]
     violation_grad = jnp.clip( violation_grad, -grad_clip, grad_clip )
 
-    cp_xref.value = np.asarray(params_policy_grad).reshape(-1,1)
-    cp_a.value = max( np.asarray(const), 0.0)
-    cp_b.value = np.asarray(violation_grad).reshape(1,-1)
-    prob.solve()
+    # cp_xref.value = np.asarray(params_policy_grad).reshape(-1,1)
+    # cp_a.value = max( np.asarray(const), 0.0)
+    # cp_b.value = np.asarray(violation_grad).reshape(1,-1)
+    # prob.solve()
 
-    params_policy_grad = jnp.clip( cp_x.value[:,0], -grad_clip, grad_clip )
-    params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
+    # params_policy_grad = jnp.clip( cp_x.value[:,0], -grad_clip, grad_clip )
+    # params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
+
+    if const>=-0.001: # all safe!
+        params_policy_grad = params_policy_grad
+        params_policy = params_policy - custom_gd_lr_rate * params_policy_grad / 4
+    else:
+        # got unsafe!
+        print(f"violation grad: {violation_grad}")
+        params_policy_grad = jnp.clip( 20000 * violation_grad, -grad_clip, grad_clip )
+        params_policy = params_policy + custom_gd_lr_rate * params_policy_grad
+
 
 
     # @jit
@@ -321,7 +337,8 @@ def train_policy_custom(init_state, params_policy, init_time):
     #     params_policy = params_policy - custom_gd_lr_rate * params_policy_grad
     return params_policy
 
-obs_center = np.array([-0.4,0,-0.5]).reshape(-1,1)
+# obs_center = np.array([-0.4,0,-0.5]).reshape(-1,1)
+# obs_center = np.array([-0.3,0.1,-0.5]).reshape(-1,1)
 def predict_states(init_state, policy_params, key, run_optimizer=False):
     states = init_state
     params_list = jnp.copy(policy_params.reshape(-1,1))
@@ -338,12 +355,12 @@ def predict_states(init_state, policy_params, key, run_optimizer=False):
             if optimizer=='scipy':
                 policy_params = train_policy_jaxscipy(next_state, policy_params, h*predict_dt)
                 params_list = jnp.append(params_list, policy_params.reshape(-1,1), axis=1)
-                print(f"params: {policy_params}")
+                print(f"hello params: {policy_params}")
             elif optimizer=='custom_gd':
                 print(f"distance value: {constraint_violation_predict(next_state, jnp.ones((1,1)), obs_center, 0.4)}")
                 policy_params = train_policy_custom(next_state, policy_params, h*predict_dt)
                 params_list = jnp.append(params_list, policy_params.reshape(-1,1), axis=1)
-                print(f"params: {policy_params}")
+                print(f"bye params: {policy_params}")
             else:
                 print(f"NOT IMPLEMENTED ERROR")
                 exit()
@@ -366,8 +383,9 @@ ax.set_ylabel('Y')
 
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
-obs_center = np.array([-0.4,0,-0.5]).reshape(-1,1)
-circ = plt.Circle((obs_center[0,0],obs_center[1,0]),0.4,linewidth = 1, edgecolor='k',facecolor='k')
+# obs_center = np.array([-0.4,0,-0.5]).reshape(-1,1)
+# obs_center = np.array([-0.3,0.1,-0.5]).reshape(-1,1)
+circ = plt.Circle((obs_center[0,0],obs_center[1,0]),0.4,linewidth = 1, edgecolor='k',facecolor='k', alpha=0.4)
 ax.add_patch(circ)
 # plt.show()
 

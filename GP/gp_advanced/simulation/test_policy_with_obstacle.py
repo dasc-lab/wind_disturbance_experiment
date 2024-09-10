@@ -33,9 +33,11 @@ def policy( t, states, policy_params):
     ev = states[3:6] - vel_ref
     # ev = lax.cond( jnp.linalg.norm(ev)>5, lambda z: 5.0 * z / jnp.linalg.norm(z), lambda z: z, ev )
     # thrust = - kx * ex - kv * ev + m * acc_ref - m * g
-    obs_center = jnp.array([-0.4,0,-0.5]).reshape(-1,1)
+    # obs_center = jnp.array([-0.4,0,-0.5]).reshape(-1,1)
+    obs_center = jnp.array([-0.4,0.1,states[2,0]]).reshape(-1,1)
+    obs_radius = 0.4
     k_repulsion = policy_params[2]**2  #10.3
-    thrust = - kx * ex - kv * ev + m * acc_ref - m * g * jnp.array([ [0], [0], [1] ]) + k_repulsion * ( states[0:3]-obs_center )/jnp.linalg.norm(states[0:3]-obs_center) * jnp.tanh( 1.0 / jnp.max(jnp.array([0.01,jnp.linalg.norm(states[0:3]-obs_center)]) ) )
+    thrust = - kx * ex - kv * ev + m * acc_ref - m * g * jnp.array([ [0], [0], [1] ]) + k_repulsion * ( states[0:3]-obs_center )/jnp.linalg.norm(states[0:3]-obs_center) * jnp.tanh( 1.0 / jnp.max(jnp.array([0.01,jnp.linalg.norm(states[0:3]-obs_center)-obs_radius]) ) )
     tanh_a = 3.8
     tanh_k = 0.286*1.5
 
