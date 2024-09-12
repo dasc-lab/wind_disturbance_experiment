@@ -14,6 +14,7 @@ import gpjax as gpx
 from test_jax_utils import *
 from test_gp_utils_angles import *
 from test_policy_with_obstacle import policy
+plt.rcParams.update({'font.size': 14})
 
 # dynamics_type = 'ideal'
 # dynamics_type = 'noisy'
@@ -191,7 +192,7 @@ def setup_future_reward_func(file_path1, file_path2, file_path3, dynamics_type='
         '''
         # obs_center = jnp.array([-0.3,0.1,-0.5]).reshape(-1,1)
         dist = constraint_violation_predict(X, jnp.ones((1,1)), obs_center, 0.4)
-        jax.debug.print("dist inside: {x}", x=dist)
+        # jax.debug.print("dist inside: {x}", x=dist)
         states, weights = initialize_sigma_points(X)
         kx = policy_params[0]
         kv = policy_params[1]
@@ -306,7 +307,7 @@ def train_policy_custom(init_state, params_policy, init_time):
     for i in range(iter_adam_custom):
         reward, const = get_future_reward( init_state, params_policy, init_time )
         grads = get_future_reward_grad( init_state, params_policy, init_time )
-        print(f"const: {const}")
+        # print(f"const: {const}")
         params_policy_grad = grads[0,:]
         params_policy_grad = jnp.clip( params_policy_grad, -grad_clip, grad_clip )
 
@@ -387,9 +388,9 @@ states, states_ref, params_list, rewards = predict_states(state_vector, jnp.copy
 key, subkey = jax.random.split(key)
 states2, states_ref2, params_list2, rewards2 = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=False)
 
-ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='reference')
-ax.plot(states[0,:], states[1,:], 'g', label='states unoptimized')
-ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
+ax.plot(states_ref[0,:], states_ref[1,:], 'r', label='Reference')
+ax.plot(states[0,:], states[1,:], 'k--', label='Default')
+# ax.plot(states2[0,:], states2[1,:], 'g--', label='states2 unoptimized')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 
@@ -407,12 +408,17 @@ key, subkey = jax.random.split(key)
 states_optimized, states_ref_optimized, params_list_optimized, rewards_optimized = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=True)
 key, subkey = jax.random.split(key)
 # states_optimized2, states_ref_optimized2, params_list2_optimized, rewards2_optimized = predict_states(state_vector, jnp.copy(params_init), subkey, run_optimizer=True)
-ax.plot(states_optimized[0,:], states_optimized[1,:], 'k', label='states optimized')
+ax.plot(states_optimized[0,:], states_optimized[1,:], 'g', label='Optimized')
 # ax.plot(states_optimized2[0,:], states_optimized2[1,:], 'k--', label='states2 optimized')
+ax.set_aspect('equal', adjustable='box')
 
 
 
 ax.legend()
+
+fig.savefig(f"simulation_paths.png")
+fig.savefig(f"simulation_paths.eps")
+
 # ax_acc[0].legend()
 # ax_acc[1].legend()
 # ax_acc[2].legend()
@@ -420,7 +426,7 @@ ax.legend()
 
 fig2, ax2 = plt.subplots()
 ax2.plot(rewards, 'g', label='states unoptimized')
-ax2.plot(rewards2, 'g--', label='states2 unoptimized')
+# ax2.plot(rewards2, 'g--', label='states2 unoptimized')
 ax2.plot(rewards_optimized, 'k', label='states optimized')
 # ax2.plot(rewards2_optimized, 'k--', label='states2 optimized')
 
@@ -428,6 +434,9 @@ ax2.plot(rewards_optimized, 'k', label='states optimized')
 
 plt.show()
 
+
+import pdb
+pdb.set_trace()
 
 
 
