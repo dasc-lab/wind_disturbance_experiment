@@ -179,7 +179,7 @@ ax3.plot(pos_vector_unoptimized[1::ns,0],pos_vector_unoptimized[1::ns,1],c = 'k'
 ax3.set_xlabel('X (m)')
 ax3.set_ylabel('Y (m)')
 
-obs_center = np.array([-0.4,0.1,-0.5]).reshape(-1,1)
+# obs_center = np.array([-0.4,0.1,-0.5]).reshape(-1,1)
 circ = plt.Circle((obs_center[0,0],obs_center[1,0]),0.4,linewidth = 1, edgecolor='k',facecolor='k', alpha=0.2)
 ax3.add_patch(circ)
 ax3.legend()

@@ -11,6 +11,8 @@ home_path = '/Users/albusfang/Coding Projects/gp_ws/Gaussian Process/GP/gp_advan
 # from test_policy import policy
 from jax.scipy.spatial.transform import Rotation
 
+num_particles = 1000
+
 @jit
 def get_next_states_ideal(states, control_inputs, dt):
     # double integertor dynamics
@@ -186,6 +188,81 @@ def compute_quaternions(b1ds, b2ds, b3ds):
         return quaternions
     quaternions = jax.lax.fori_loop( 0, 13, body, quaternions )
     return quaternions 
+
+@jit
+def compute_quaternions_mc(b1ds, b2ds, b3ds):
+    quaternions = jnp.zeros((4,num_particles))
+    def body(i, inputs):
+        quaternions = inputs
+        R = jnp.concatenate( (b1ds[:,[i]], b2ds[:,[i]], b3ds[:,[i]]), axis=1 )
+        quaternions.at[:,i].set( Rotation.as_quat( Rotation.from_matrix(R) ) )
+        return quaternions
+    quaternions = jax.lax.fori_loop( 0, num_particles, body, quaternions )
+    return quaternions 
+
+@jit
+def get_next_states_with_sparse_gp_sigma_inv_mc( states, control_inputs, dt, gps, L, L_inv, Lz, Lz_inv, Kzz_inv_Kzx_diff, D, key ):
+    
+    '''
+    Propogate sigma points through the nonliear GP
+    '''
+    test_x = states.T #jnp.append( states.T, control_inputs.T, axis=0)
+    g = 9.8066
+    size = states.shape[1]
+
+    b3d = control_inputs/jnp.linalg.norm(control_inputs, axis=0)
+    b1_ref = jnp.repeat( jnp.array([1,0,0]).reshape(-1,1), num_particles, axis=1  )
+    b2d = jnp.cross(b3d, b1_ref, axis=0)
+    b1d = jnp.cross(b2d, b3d, axis=0)
+    quaternion = compute_quaternions_mc( b1d, b2d, b3d )
+    # R = jnp.concatenate( (b1d, b2d, b3d), axis=1 )
+    # quaternion = Rotation.to_quat( R )
+
+    test_x = jnp.concatenate( (states, control_inputs, quaternion), axis=0).T
+
+    #################################################
+    ####### Changed: dataset(.reshape) #######
+    # X disturbance
+    #D = Dataset(X=train_x, y=train_y[0])
+    latent_dist = gps[0].predict_with_sigma_inv(test_x, L[0], L_inv[0], Lz[0], Lz_inv[0], Kzz_inv_Kzx_diff[0])
+    # latent_dist = gps[0].predict(test_x, train_data=D[0])
+    predictive_dist = gps[0].posterior.likelihood(latent_dist)
+    pred_mean0 = predictive_dist.mean().reshape(-1,1)
+    pred_std0 = predictive_dist.stddev().reshape(-1,1)
+
+    # Y disturbance
+    #D = Dataset(X=train_x, y=train_y[1])
+    latent_dist = gps[1].predict_with_sigma_inv(test_x, L[1], L_inv[1], Lz[1], Lz_inv[1], Kzz_inv_Kzx_diff[1])
+    # latent_dist = gps[0].predict(test_x, train_data=D[1])
+    predictive_dist = gps[1].posterior.likelihood(latent_dist)
+    pred_mean1 = predictive_dist.mean().reshape(-1,1)
+    pred_std1 = predictive_dist.stddev().reshape(-1,1)
+
+    # Z disturbance
+    #D = Dataset(X=train_x, y=train_y[2])
+    latent_dist = gps[2].predict_with_sigma_inv(test_x, L[2], L_inv[2], Lz[2], Lz_inv[2], Kzz_inv_Kzx_diff[2])
+    # latent_dist = gps[0].predict(test_x, train_data=D[2])
+    predictive_dist = gps[2].posterior.likelihood(latent_dist)
+    pred_mean2 = predictive_dist.mean().reshape(-1,1)
+    pred_std2 = predictive_dist.stddev().reshape(-1,1)
+
+    pred_mu = jnp.concatenate( (pred_mean0.T, pred_mean1.T, pred_mean2.T), axis=0 ) #3x13
+    pred_cov = jnp.concatenate( (pred_std0.T**2, pred_std1.T**2, pred_std2.T**2), axis=0 ) #3x13
+    ################################################
+    ############ bug fix: ########################
+    ############ bug: line 52, incompatible shapes control inputs and pred_mu ############
+    #pred_mu = pred_mu.reshape(3,-1)
+    
+    ################################################
+    next_states_pos = states[0:3] + states[3:6] * dt #+ control_inputs * dt**2/2
+    next_states_vel_mu = states[3:6] + control_inputs * dt + g * dt + pred_mu * dt
+    next_states_vel_cov = pred_cov * dt * dt
+    key, subkey = jax.random.split(key)
+    next_states_vel_random = jnp.sqrt(next_states_vel_cov) * jax.random.normal(subkey, shape=(3,size)) + next_states_vel_mu
+
+    next_states = jnp.append( next_states_pos, next_states_vel_random, axis=0 )
+    # jax.debug.print("state: {z}, pos: {x}, vel: {y}", z = states, x=next_states_pos, y = next_states_vel_random)
+    return next_states, key
 
 @jit
 def get_next_states_with_sparse_gp_sigma_inv( states, control_inputs, dt, gps, L, L_inv, Lz, Lz_inv, Kzz_inv_Kzx_diff, D ):

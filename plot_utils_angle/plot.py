@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 recorded_data_path = 'recorded_data/'
 plot_home = "media/"
-
+plt.rcParams.update({'font.size': 14})
 circle_path = recorded_data_path + 'circle_data/'
 
 figure8_path = recorded_data_path +'figure8_data/'
